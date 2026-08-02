@@ -1,0 +1,25 @@
+{
+  "name": "personalos",
+  "version": "1.0.0",
+  "description": "커리어 학습, 스케줄, 시사·금융 정보, 투자 리서치, SWE 실무 지식을 한 곳에서 관리하는 단일 사용자용 대시보드.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "ical-generator": "^11.1.0",
+    "tsdav": "^2.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "tsx": "^4.23.4",
+    "typescript": "^7.0.2"
+  }
+}
