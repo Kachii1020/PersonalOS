@@ -1,22 +1,23 @@
-Phase 0 — caldav-spike 진행 중
+Phase 0 — 완료. Phase 1 대기 중.
 
-## 준비 완료
+## 완료
 
-- 스펙·하네스 배치 완료 (`SPEC.md`, `CLAUDE.md`, `docs/AGENTS.md`)
-- 서브에이전트 9개 분할 완료 (`.claude/agents/`)
-- `scripts/spike-caldav.ts` 타입 검증 완료 — tsdav 2.3.1 시그니처 일치, `npm run typecheck` 통과
+- 스펙·하네스 배치, 서브에이전트 9개 분할
+- caldav-spike 7단계 전부 통과 → **CalDAV 직결 채택** (판정 근거는 `docs/DECISIONS.md`)
 
-## 남은 것: 사람이 해야 하는 사전 준비
+## Phase 1 시작 전에 필요한 것
 
-스파이크 실행 전에 아래 둘이 필요하다. 지금은 `APPLE_ID`가 비어 있어 1단계 전에 멈춘다.
+AGENTS.md 실행 순서: db-architect → ui-shell → integration-caldav → integration-ingest → ai-pipeline → ui-widgets → verifier(G1)
 
-1. Apple ID 앱 전용 암호 발급 → `.env.local`의 `APPLE_ID`, `APPLE_APP_PASSWORD` 입력
-2. 아이폰 캘린더 앱에서 iCloud 계정 아래에 `Personal OS` 캘린더 생성
+첫 에이전트인 db-architect가 `supabase db reset`을 돌려야 해서 아래가 먼저 있어야 한다.
 
-그 다음:
+1. **Next.js 15 프로젝트 스캐폴드** — 현재 레포에는 `app/`, `lib/`, `components/`가 없다
+2. **Supabase 프로젝트** — `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+3. **`ALLOWED_EMAIL`** — RLS 화이트리스트 1개
 
-```bash
-npx tsx scripts/spike-caldav.ts
-```
+Phase 1에서 추가로 필요한 값 (해당 에이전트 차례에):
 
-판정을 `docs/DECISIONS.md`에 기록하고 Phase 1로 넘어간다.
+- ai-pipeline: `ANTHROPIC_API_KEY`, `AI_MONTHLY_BUDGET_USD=10`
+- integration-ingest: `CRON_SECRET`
+
+Phase 2·3 전용 값(`NOTION_*`, `GITHUB_*`, `FRED_API_KEY`, `ECOS_API_KEY`, `WASEDA_ICS_URL`)은 지금 필요 없다.
