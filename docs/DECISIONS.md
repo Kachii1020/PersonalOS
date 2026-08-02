@@ -26,6 +26,20 @@
 - **이유**: `~` 자체가 커밋 0개짜리 git 저장소로 잡혀 있었다(실수로 만들어진 것으로 보임). 그대로 커밋하면 홈 전체가 추적 대상이 된다.
 - **버린 대안**: 홈 저장소에 그대로 커밋 — 무관한 파일 수백 개가 딸려온다.
 
+## 2026-08-03 — Next.js 15 스캐폴드를 임시 디렉토리에서 병합
+
+- **결정**: `create-next-app@15`를 스크래치패드에 돌린 뒤 `app/` `public/` `next.config.ts` `postcss.config.mjs` `eslint.config.mjs` `tsconfig.json`만 복사하고, package.json은 의존성·스크립트만 병합했다.
+- **이유**: 레포에 이미 `package.json`, `tsconfig.json`, 스펙 문서가 있어서 제자리 실행이 충돌한다. 생성기의 README·.gitignore가 우리 것을 덮어쓰는 것도 막아야 했다.
+- **버린 대안**: 설정 파일을 손으로 작성 — Next 15 + Tailwind v4 표준 구성에서 벗어날 위험이 있다.
+
+결과: Next 15.5.22 / React 19.1.0 / TypeScript 5.9.3 / Tailwind 4.3.3. `typecheck`, `lint`, `build` 전부 통과.
+
+## 2026-08-03 — `"type": "module"` 제거, TypeScript를 5.x로 고정
+
+- **결정**: 앞서 넣었던 `"type": "module"`을 지우고 typescript를 `^7`에서 `^5`로 내렸다. tsconfig는 Next 표준(`module: esnext`, `moduleResolution: bundler`, `jsx: preserve`, `strict: true`)으로 교체했다.
+- **이유**: 둘 다 스파이크 전용 임시 조치였는데, Next 15의 표준 구성이 이를 대체한다. `eslint-config-next` 15는 TS 5 기준이다.
+- **버린 대안**: ESM 유지 — `tsdav`와 `ical-generator` 모두 CJS 진입점을 제공해서 스파이크 실행에 지장이 없다(로드 확인 완료).
+
 ## 2026-08-03 — 홈 디렉토리의 잘못된 git 저장소 삭제
 
 - **결정**: `~/.git`(126GB)을 삭제했다.

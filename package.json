@@ -2,11 +2,11 @@
   "name": "personalos",
   "version": "1.0.0",
   "description": "커리어 학습, 스케줄, 시사·금융 정보, 투자 리서치, SWE 실무 지식을 한 곳에서 관리하는 단일 사용자용 대시보드.",
-  "main": "index.js",
-  "directories": {
-    "doc": "docs"
-  },
   "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],
@@ -15,12 +15,22 @@
   "dependencies": {
     "dotenv": "^17.4.2",
     "ical-generator": "^11.1.0",
+    "next": "15.5.22",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
     "tsdav": "^2.3.1"
   },
   "devDependencies": {
-    "@types/node": "^26.1.2",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.22",
+    "tailwindcss": "^4",
     "tsx": "^4.23.4",
-    "typescript": "^7.0.2"
+    "typescript": "^5"
   },
-  "type": "module"
+  "private": true
 }
