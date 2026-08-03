@@ -39,10 +39,7 @@ export async function listSyncStates(): Promise<SyncState[]> {
     .from("sync_state")
     .select("key, last_run_at, last_status, last_error");
 
-  if (error) {
-    console.error("[sync-state] 조회 실패:", error.message);
-    return [];
-  }
+  if (error) throw new Error(`동기화 상태 조회 실패: ${error.message}`);
   return (data ?? []).map((row) => ({
     key: row.key,
     lastRunAt: row.last_run_at,

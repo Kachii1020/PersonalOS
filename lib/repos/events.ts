@@ -146,10 +146,8 @@ export async function listEventsBetween(fromIso: string, toIso: string): Promise
     .gt("ends_at", fromIso)
     .order("starts_at", { ascending: true });
 
-  if (error) {
-    console.error("[events] 조회 실패:", error.message);
-    return [];
-  }
+  // 실패를 빈 배열로 바꾸면 "일정 없음"과 구분이 안 된다 (CLAUDE.md: 실패는 조용하지 않다).
+  if (error) throw new Error(`이벤트 조회 실패: ${error.message}`);
   return (data ?? []).map((r) => ({
     id: r.id,
     calendarId: r.calendar_id,

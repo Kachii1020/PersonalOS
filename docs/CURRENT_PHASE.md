@@ -1,6 +1,6 @@
 Phase 1 — 진행 중
 
-AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → ~~integration-caldav~~ → ~~integration-ingest~~ → ~~ai-pipeline~~ → **ui-widgets** → verifier(G1)
+AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → ~~integration-caldav~~ → ~~integration-ingest~~ → ~~ai-pipeline~~ → ~~ui-widgets~~ → **verifier(G1)**
 
 ## 완료
 
@@ -45,12 +45,20 @@ AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → ~~integration-cal
 
 **결정 대기 2건**: 브리핑 모델(Opus 5 vs Sonnet 5, `docs/DECISIONS.md`), G1의 섹션 6건 조건(`docs/DEFERRED.md`).
 
-## 다음: ui-widgets
+### ui-widgets
+- 위젯 7개 (`components/widgets/*`) + SPEC 6.1 배치의 대시보드
+- Phase 1 페이지 5개 실제 화면으로 교체: `/`, `/calendar`, `/tasks`, `/briefing`, `/settings`
+- `lib/time.ts`(JST 기준 날짜 계산), `lib/repos/tasks.ts` 추가
+- 완료 검증 5개 통과 — 375px 가로 스크롤 0, 모바일 순서 스펙 일치, 글래스 2곳,
+  외부 SDK import 0건, Tab 포커스 링 확인, axe 위반 0(라이트·다크)
 
-`.claude/agents/ui-widgets.md` 참조. SPEC.md 6.1 레이아웃, 6.4의 12개 규칙.
-Phase 1 위젯 7개만: MonthCalendar / TodaySchedule / WeekDeadlines / DailyBriefing /
-DailyQuiz·MarketSnapshot·GithubHeatmap(자리표시자).
-글래스는 MonthCalendar와 DailyBriefing 2곳만. 데이터는 `lib/repos/*`로만 가져온다.
+## 다음: verifier (G1)
+
+`.claude/agents/verifier.md` 참조. SPEC.md 7절 G1의 8개 조건을 실행하고 증거를 붙인다.
+**verifier는 기능 코드를 고치지 않는다** — 실패하면 담당 에이전트에게 되돌린다.
+
+G1 조건 중 아직 확인 안 된 것: Lighthouse 접근성 90 이상(ui-shell 때 100 확인했지만
+위젯이 붙은 뒤로는 axe만 돌렸다), 대시보드가 iCloud 없이도 500 없이 뜨는지.
 
 ## 크론 배포 시 필요한 GitHub Secrets
 

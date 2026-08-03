@@ -14,7 +14,18 @@ const FIXES: Record<string, { label: string; fix: string }> = {
  * 외부 서비스가 죽어도 앱은 떠야 하므로, 이 컴포넌트가 렌더를 막지 않는다.
  */
 export async function SyncBanner() {
-  const states = await listSyncStates();
+  let states: Awaited<ReturnType<typeof listSyncStates>>;
+  try {
+    states = await listSyncStates();
+  } catch (e) {
+    // 배너가 레이아웃 전체를 무너뜨리면 안 된다. 못 읽었다는 사실만 알린다.
+    return (
+      <div role="alert" className="border-b border-line bg-surface px-4 py-2 text-sm lg:px-6">
+        <span className="font-medium text-text">동기화 상태를 읽지 못했습니다</span>{" "}
+        <span className="text-text-muted">{e instanceof Error ? e.message : "설정에서 로그를 확인하세요."}</span>
+      </div>
+    );
+  }
   const failed = states.filter((s) => s.lastStatus === "failed");
   if (failed.length === 0) return null;
 

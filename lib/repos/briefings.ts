@@ -84,10 +84,8 @@ export async function latestBriefing(): Promise<Briefing | null> {
     .limit(1)
     .maybeSingle();
 
-  if (error) {
-    console.error("[briefings] 조회 실패:", error.message);
-    return null;
-  }
+  // null은 "아직 브리핑이 없음"을 뜻한다. 조회 실패를 null로 바꾸면 둘이 섞인다.
+  if (error) throw new Error(`브리핑 조회 실패: ${error.message}`);
   if (!data) return null;
 
   const sections = [...(data.briefing_sections ?? [])]
@@ -109,4 +107,25 @@ export async function latestBriefing(): Promise<Briefing | null> {
     costUsd: data.cost_usd === null ? null : Number(data.cost_usd),
     sections,
   };
+}
+
+/** 아카이브 목록. 섹션은 싣지 않는다. */
+export async function listBriefings(limit = 30): Promise<
+  Array<{ id: string; briefingDate: string; status: BriefingStatus; sectionCount: number; costUsd: number | null }>
+> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("briefings")
+    .select("id, briefing_date, status, cost_usd, briefing_sections(count)")
+    .order("briefing_date", { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(`브리핑 목록 조회 실패: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    briefingDate: r.briefing_date,
+    status: r.status as BriefingStatus,
+    sectionCount: r.briefing_sections?.[0]?.count ?? 0,
+    costUsd: r.cost_usd === null ? null : Number(r.cost_usd),
+  }));
 }

@@ -70,10 +70,7 @@ export async function listRecentNews(limit = 60): Promise<NewsItem[]> {
     .order("fetched_at", { ascending: false })
     .limit(limit);
 
-  if (error) {
-    console.error("[news] 조회 실패:", error.message);
-    return [];
-  }
+  if (error) throw new Error(`뉴스 조회 실패: ${error.message}`);
   return (data ?? []).map(toNewsItem);
 }
 

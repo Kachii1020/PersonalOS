@@ -1,11 +1,41 @@
-import { EmptyState } from "@/components/ui/empty-state";
+import { Suspense } from "react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { SkeletonLines } from "@/components/ui/skeleton";
+import { MonthCalendar } from "@/components/widgets/month-calendar";
+import { TodaySchedule } from "@/components/widgets/today-schedule";
 
-// ui-shell이 만든 자리표시자. ui-widgets 차례에 실제 화면으로 교체된다.
-export default function Page() {
+export const metadata = { title: "캘린더 · Personal OS" };
+
+export default function CalendarPage() {
   return (
     <>
       <h1 className="mb-4 text-xl font-semibold text-text">캘린더</h1>
-      <EmptyState message="월·주 캘린더와 이벤트 생성은 integration-caldav와 ui-widgets 차례에 붙습니다." />
+      <div className="grid gap-4 lg:grid-cols-3">
+        <Suspense
+          fallback={
+            <Card glass className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>달력</CardTitle>
+              </CardHeader>
+              <SkeletonLines lines={8} />
+            </Card>
+          }
+        >
+          <MonthCalendar className="lg:col-span-2" />
+        </Suspense>
+        <Suspense
+          fallback={
+            <Card>
+              <CardHeader>
+                <CardTitle>오늘 일정</CardTitle>
+              </CardHeader>
+              <SkeletonLines lines={4} />
+            </Card>
+          }
+        >
+          <TodaySchedule />
+        </Suspense>
+      </div>
     </>
   );
 }
