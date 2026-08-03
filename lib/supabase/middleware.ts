@@ -1,8 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 
-/** 로그인 없이 열 수 있는 경로. 나머지는 전부 /login으로 보낸다. */
-const PUBLIC_PATHS = ["/login", "/auth/callback"];
+/**
+ * 세션 검사를 건너뛰는 경로. 나머지는 전부 /login으로 보낸다.
+ *
+ * `/api/jobs`는 크론이 x-cron-secret 헤더로 인증한다. 세션이 없다고 리다이렉트하면
+ * 잡이 로그인 페이지 HTML을 받게 된다.
+ */
+const PUBLIC_PATHS = ["/login", "/auth/callback", "/api/jobs"];
 
 /**
  * 세션 쿠키를 갱신하고, 미인증 요청을 /login으로 돌린다.

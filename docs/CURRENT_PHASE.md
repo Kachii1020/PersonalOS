@@ -1,6 +1,6 @@
 Phase 1 — 진행 중
 
-AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → **integration-caldav** → integration-ingest → ai-pipeline → ui-widgets → verifier(G1)
+AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → ~~integration-caldav~~ → **integration-ingest** → ai-pipeline → ui-widgets → verifier(G1)
 
 ## 완료
 
@@ -25,11 +25,17 @@ AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → **integration-cal
 
 로컬 스택으로 검증: 비허용 이메일 거부 → 허용 이메일 발송 → Mailpit 링크 → `/auth/callback` 307 → 대시보드 → 로그아웃 시 `sb-*` 쿠키 삭제 후 `/login`
 
-## 다음: integration-caldav
+### integration-caldav
+- `lib/integrations/caldav/{client,parse,sync}.ts`, `lib/repos/{events,sync-state}.ts`
+- `app/api/jobs/sync-calendar/route.ts`, `lib/jobs/cron-auth.ts`, `components/shell/sync-banner.tsx`
+- 완료 검증 1~6 통과 (7~9는 ICS라 Phase 2). 캘린더 7개 / 이벤트 69건 미러, 재실행 시 객체 조회 0회
+- `scripts/spike-caldav.ts` 삭제 — 프로덕션 코드로 옮겨졌다
 
-`.claude/agents/integration-caldav.md` 참조. SPEC.md 5.1의 절대 규칙 7개.
-caldav-spike 판정이 "직결"이므로 폴백 경로는 만들지 않는다.
-`lib/integrations/ics/*`는 Phase 2다.
+## 다음: integration-ingest
+
+`.claude/agents/integration-ingest.md` 참조. SPEC.md 5.2~5.4.
+**URL을 지어내지 말 것** — RSS·API 엔드포인트는 WebFetch로 200을 확인하고 넣는다.
+`CRON_SECRET`은 `.env.development.local`에 로컬용으로 넣어뒀다. 프로덕션 값은 `.env.local`에 필요하다.
 
 ## Phase 1에서 아직 필요한 값
 

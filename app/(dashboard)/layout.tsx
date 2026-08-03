@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { MobileNav, Sidebar } from "@/components/shell/sidebar";
+import { SyncBanner } from "@/components/shell/sync-banner";
 import { createClient } from "@/lib/supabase/server";
 import { getSidebarOrder } from "@/lib/repos/user-prefs";
 import { saveSidebarOrder, signOut } from "./actions";
@@ -24,6 +25,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <Sidebar savedOrder={savedOrder} onReorder={saveSidebarOrder} onSignOut={signOut} />
       <div className="flex min-w-0 flex-1 flex-col">
         <MobileNav savedOrder={savedOrder} />
+        <SyncBanner />
         <main className="min-w-0 flex-1 p-4 lg:p-6">{children}</main>
       </div>
     </div>
