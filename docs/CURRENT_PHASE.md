@@ -1,6 +1,6 @@
 Phase 1 — 진행 중
 
-AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → ~~integration-caldav~~ → **integration-ingest** → ai-pipeline → ui-widgets → verifier(G1)
+AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → ~~integration-caldav~~ → ~~integration-ingest~~ → **ai-pipeline** → ui-widgets → verifier(G1)
 
 ## 완료
 
@@ -31,11 +31,23 @@ AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → ~~integration-cal
 - 완료 검증 1~6 통과 (7~9는 ICS라 Phase 2). 캘린더 7개 / 이벤트 69건 미러, 재실행 시 객체 조회 0회
 - `scripts/spike-caldav.ts` 삭제 — 프로덕션 코드로 옮겨졌다
 
-## 다음: integration-ingest
+### integration-ingest (Phase 1 범위 = 뉴스만)
+- `config/news-sources.ts`, `lib/integrations/news/{rss,fetch-news}.ts`, `lib/repos/{news,job-runs}.ts`
+- `app/api/jobs/fetch-news/route.ts`, `.github/workflows/cron.yml`
+- 완료 검증 1·2·6 통과. 3~5(시세·GitHub)는 SPEC 7절상 Phase 3
+- 소스 18개 전부 실제 호출로 200 확인 후 커밋. 수집 270건 (lang 3종 × sector 5종)
 
-`.claude/agents/integration-ingest.md` 참조. SPEC.md 5.2~5.4.
-**URL을 지어내지 말 것** — RSS·API 엔드포인트는 WebFetch로 200을 확인하고 넣는다.
-`CRON_SECRET`은 `.env.development.local`에 로컬용으로 넣어뒀다. 프로덕션 값은 `.env.local`에 필요하다.
+## 다음: ai-pipeline
+
+`.claude/agents/ai-pipeline.md` 참조. SPEC.md 5.5.
+Phase 1에서는 **브리핑 생성 1곳만** 만든다 (퀴즈는 Phase 2, 자료 요약도 Phase 2).
+5개 섹터를 1회 호출로 처리하고, 호출 전 `ai_usage` 월 합계로 예산을 검사한다.
+
+필요한 값: `ANTHROPIC_API_KEY`, `AI_MONTHLY_BUDGET_USD=10` — 아직 `.env.local`에 없다.
+
+## 크론 배포 시 필요한 GitHub Secrets
+
+`APP_URL` (배포 주소), `CRON_SECRET` (`.env.local`과 같은 값)
 
 ## Phase 1에서 아직 필요한 값
 

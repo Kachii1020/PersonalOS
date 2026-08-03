@@ -1,0 +1,51 @@
+name: cron
+
+# Vercel Hobby의 크론 제한을 피해 스케줄러를 GitHub Actions에 둔다 (SPEC.md 9절).
+# 지금은 Phase 1 잡 2개만 등록한다. fetch-prices / fetch-github은 Phase 3에서 추가한다.
+
+on:
+  schedule:
+    # UTC 기준. Asia/Tokyo = UTC+9.
+    - cron: "0 * * * *" # 매시 정각 — 캘린더 동기화
+    - cron: "20 21 * * *" # 06:20 JST — 뉴스 수집 (브리핑 생성 전)
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "수동 실행할 잡"
+        required: true
+        type: choice
+        options: [sync-calendar, fetch-news]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 잡 호출
+        env:
+          APP_URL: ${{ secrets.APP_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            jobs="${{ inputs.job }}"
+          elif [ "${{ github.event.schedule }}" = "20 21 * * *" ]; then
+            jobs="fetch-news"
+          else
+            jobs="sync-calendar"
+          fi
+
+          for job in $jobs; do
+            echo "→ $job"
+            code=$(curl -sS -o /tmp/out.json -w '%{http_code}' \
+              -X POST "$APP_URL/api/jobs/$job" \
+              -H "x-cron-secret: $CRON_SECRET" \
+              --max-time 120)
+            cat /tmp/out.json
+            echo
+            # 잡이 실패를 sync_state에 기록해도, 워크플로도 같이 빨갛게 만든다.
+            if [ "$code" -ge 400 ]; then
+              echo "::error::$job 실패 (HTTP $code)"
+              exit 1
+            fi
+          done

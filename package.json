@@ -17,6 +17,7 @@
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.111.0",
     "dotenv": "^17.4.2",
+    "fast-xml-parser": "^5.10.1",
     "ical-generator": "^11.1.0",
     "ical.js": "^2.2.1",
     "lucide-react": "^1.28.0",

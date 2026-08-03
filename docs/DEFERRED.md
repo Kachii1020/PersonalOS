@@ -7,4 +7,5 @@
 - **반복 일정(RRULE) 전개** — `events.rrule`에 원문만 저장하고 인스턴스를 펼치지 않는다. 달력 화면에서 표시 범위만 전개하는 게 미러를 작게 유지한다. ui-widgets가 MonthCalendar를 만들 때 필요하다.
 - **iCloud 삭제 반영** — 동기화는 upsert만 한다. iCloud에서 지운 이벤트가 미러에 남는다. ctag가 바뀐 캘린더에 한해 조회된 uid 집합에 없는 행을 지우는 처리가 필요하다.
 - **integration-caldav 완료 검증 7~9번(ICS)** — SPEC 5.1b는 Phase 2다. `lib/integrations/ics/*`, `sync-ics` 라우트, 과목 코드 매칭은 그때 만든다.
-- **`.github/workflows/cron.yml`** — 크론 스케줄러는 integration-ingest 담당이다. sync-calendar 엔드포인트는 준비됐다.
+- **시세·환율·GitHub 수집** (integration-ingest 완료 검증 3~5) — SPEC 7절상 Phase 3이다. `yahoo-finance2`, frankfurter, FRED, ECOS, GitHub API와 `fetch-prices`/`fetch-github` 잡은 그때 만든다. `cron.yml`에도 그때 추가한다.
+- **뉴스 보존 기간** — `news_items`가 무한히 쌓인다. 하루 270건이면 한 달에 8천 행. 오래된 행을 지우는 정리 잡이 필요하다.
