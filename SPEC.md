@@ -283,6 +283,14 @@ create table github_daily_commits (
   commit_count  int not null
 );
 
+-- ============ 사용자 설정 ============
+-- 2026-08-03 추가: 6.1의 사이드바 순서 저장을 위해 필요한데 이 절에 없었다.
+create table user_prefs (
+  key           text primary key,     -- 'sidebar_order'
+  value         jsonb not null,
+  updated_at    timestamptz not null default now()
+);
+
 -- ============ 운영 ============
 create table sync_state (
   key           text primary key,     -- 'caldav', 'rss', 'prices', 'github'
@@ -475,7 +483,7 @@ PAT는 `public_repo` 스코프면 충분. 잔디는 GitHub의 contributions 그�
 --glass:         rgba(255,255,255,0.82);  /* 하한 0.80, 절대 낮추지 말 것 */
 --glass-border:  rgba(15,23,42,0.08);
 --text:          #0F172A;
---text-muted:    #64748B;
+--text-muted:    #63738A;   /* 2026-08-03 보정: #64748B는 --bg 위에서 4.48:1로 AA 미달 */
 --accent:        #2F5D8C;   /* 차분한 감청 */
 --accent-soft:   #E4EDF6;
 --positive:      #0E7C66;
@@ -491,6 +499,11 @@ PAT는 `public_repo` 스코프면 충분. 잔디는 GitHub의 contributions 그�
 --text-muted:    #94A3B8;
 --accent:        #7FB0E0;
 --accent-soft:   #1B2A3A;
+/* 2026-08-03 추가: 미정의 상태로 두면 라이트 값을 상속해 --surface 위에서
+   3.40:1 / 2.67:1로 AA에 크게 미달한다. */
+--positive:      #3FBFA0;
+--negative:      #F2857C;
+--line:          rgba(255,255,255,0.10);
 ```
 
 **타이포그래피**

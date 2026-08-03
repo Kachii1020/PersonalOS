@@ -30,6 +30,13 @@ const bootScript = `
     document.documentElement.dataset.theme = "light";
   }
 })();
+`;
+
+/**
+ * 서비스 워커는 프로덕션에서만 등록한다.
+ * 개발 서버의 청크 경로는 해시가 없어서 캐시-우선으로 잡으면 낡은 번들이 계속 살아남는다.
+ */
+const swScript = `
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker.register("/sw.js").catch(function () {});
@@ -42,6 +49,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="ko" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: bootScript }} />
+        {process.env.NODE_ENV === "production" && (
+          <script dangerouslySetInnerHTML={{ __html: swScript }} />
+        )}
       </head>
       <body className={`${pretendard.variable} ${jetbrainsMono.variable} antialiased`}>
         {children}

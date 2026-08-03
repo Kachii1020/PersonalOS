@@ -8,6 +8,12 @@
 
 const CACHE = "personal-os-static-v1";
 const STATIC = /\.(?:woff2?|css|js|svg|png|ico)$/;
+/*
+ * /_next/static 아래 파일만 캐시한다. 이 경로의 파일명에는 빌드 해시가 있어서
+ * 내용이 바뀌면 URL도 바뀐다. 해시 없는 경로를 캐시-우선으로 잡으면
+ * 낡은 번들이 영구히 남는다.
+ */
+const IMMUTABLE_PREFIX = "/_next/static/";
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -28,6 +34,7 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  if (!url.pathname.startsWith(IMMUTABLE_PREFIX)) return;
   if (!STATIC.test(url.pathname)) return;
 
   event.respondWith(

@@ -20,7 +20,10 @@ AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → **integration-cal
 - `app/layout.tsx`(폰트·테마 부트), `app/(dashboard)/layout.tsx`, `components/shell/*`, `components/ui/*` 6종
 - `lib/design/tokens.css`, `public/manifest.json`, `public/sw.js`
 - 완료 검증 5개 전부 통과 — Lighthouse 접근성 100, axe 위반 0, 가로 스크롤 0, 금지 패턴 0건
-- 미완: 드래그 재정렬(user_prefs 없음), 인증(담당 에이전트 없음) → `docs/DEFERRED.md`
+- 사이드바 드래그 재정렬 — `user_prefs` 테이블(마이그레이션 0002) 추가 승인 후 구현. 드래그 + Alt+화살표 키보드 대안
+- 인증 — 매직 링크 로그인, 미들웨어 세션 가드, 로그아웃. 화이트리스트를 발송 전·미들웨어·RLS 세 곳에서 검사
+
+로컬 스택으로 검증: 비허용 이메일 거부 → 허용 이메일 발송 → Mailpit 링크 → `/auth/callback` 307 → 대시보드 → 로그아웃 시 `sb-*` 쿠키 삭제 후 `/login`
 
 ## 다음: integration-caldav
 
