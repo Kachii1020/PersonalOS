@@ -1,5 +1,29 @@
 # 결정 로그
 
+## 2026-08-03 — [승인 대기] SPEC 6.3 토큰 3개 보정
+
+대비 계산 결과 SPEC 6.3 값 그대로는 "모든 텍스트 대비 4.5:1 이상"(ui-shell 완료 검증 2)을 통과하지 못한다. 최소 변경으로 보정하고 적용했다. **승인받으면 SPEC.md 6.3에 반영하고, 반려되면 되돌린다.**
+
+| 토큰 | SPEC 값 | 문제 | 적용값 | 결과 |
+|---|---|---|---|---|
+| 라이트 `--text-muted` | `#64748b` | `--bg` 위에서 4.48:1 (AA에 0.02 부족) | `#63738a` | 4.54:1 |
+| 다크 `--positive` | (미정의, 라이트 상속) | `--surface` 위에서 3.40:1 | `#3fbfa0` | 7.62:1 |
+| 다크 `--negative` | (미정의, 라이트 상속) | `--surface` 위에서 2.67:1 | `#f2857c` | 7.00:1 |
+
+다크 `--line`도 SPEC에 없어서 `rgba(255,255,255,0.10)`을 넣었다. 텍스트가 아니라 대비 기준(4.5:1) 대상은 아니다.
+
+## 2026-08-03 — 셸 컴포넌트를 components/shell/에 둔다
+
+- **결정**: 사이드바·모바일 네비·테마 토글을 `components/shell/`에 뒀다.
+- **이유**: CLAUDE.md의 디렉토리 트리는 `components/ui`(원시 컴포넌트)와 `components/widgets`(대시보드 카드)만 정의한다. 사이드바는 둘 다 아니다. `ui/`에 넣으면 "원시 컴포넌트"의 의미가 흐려진다.
+- **버린 대안**: `components/ui/`에 같이 넣기 — 버튼·카드와 셸 레이아웃이 섞인다.
+
+## 2026-08-03 — Pretendard를 npm 패키지로 로드
+
+- **결정**: `pretendard` npm 패키지를 설치하고 `next/font/local`로 `node_modules`의 woff2를 참조한다.
+- **이유**: 폰트 2MB를 레포에 커밋하지 않으면서 버전이 고정된다. CDN을 쓰지 않으니 외부 의존과 오프라인 문제도 없다.
+- **버린 대안**: CDN `<link>` — 검증되지 않은 외부 URL에 의존하게 된다.
+
 ## 2026-08-03 — RLS 화이트리스트를 app_config 테이블 + 생성 seed.sql로 구현
 
 - **결정**: 허용 이메일을 `app_config` 테이블에 담고, `scripts/gen-seed.ts`가 `.env.local`의 `ALLOWED_EMAIL`로 `supabase/seed.sql`을 만든다. seed.sql은 `.gitignore`에 넣었다. 정책은 `public.is_allowed_user()`(security definer)를 호출한다.

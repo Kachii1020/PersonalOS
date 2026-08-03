@@ -1,0 +1,58 @@
+/* SPEC.md 6.3 디자인 토큰. 여기 없는 색을 새로 만들지 않는다. */
+
+:root,
+[data-theme="light"] {
+  --bg: #f7f8fa; /* 종이 같은 아주 옅은 회청 */
+  --surface: #ffffff; /* 불투명 카드 */
+  --glass: rgba(255, 255, 255, 0.82); /* 하한 0.80, 절대 낮추지 말 것 */
+  --glass-border: rgba(15, 23, 42, 0.08);
+  --text: #0f172a;
+  /*
+   * SPEC 값은 #64748b인데 --bg(#f7f8fa) 위에서 4.48:1로 AA(4.5:1)에 0.02 모자란다.
+   * 한 단계만 어둡게 해서 4.54:1을 만들었다. 승인 대기 — docs/DECISIONS.md 참조.
+   */
+  --text-muted: #63738a;
+  --accent: #2f5d8c; /* 차분한 감청 */
+  --accent-soft: #e4edf6;
+  --positive: #0e7c66;
+  --negative: #b3261e;
+  --line: rgba(15, 23, 42, 0.1);
+}
+
+[data-theme="dark"] {
+  --bg: #0b0f16;
+  --surface: #141a24;
+  --glass: rgba(24, 31, 43, 0.78);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --text: #e8edf4;
+  --text-muted: #94a3b8;
+  --accent: #7fb0e0;
+  --accent-soft: #1b2a3a;
+  /*
+   * SPEC 6.3의 dark 블록은 --positive / --negative / --line을 정의하지 않는다.
+   * 라이트 값을 그대로 상속하면 --surface(#141a24) 위에서 3.40:1 / 2.67:1로
+   * AA에 크게 못 미친다. 아래 값은 각각 7.62:1 / 7.00:1.
+   * 승인 대기 — docs/DECISIONS.md 참조.
+   */
+  --positive: #3fbfa0;
+  --negative: #f2857c;
+  --line: rgba(255, 255, 255, 0.1);
+}
+
+/*
+ * 글래스는 달력 카드와 브리핑 카드에만 쓴다 (SPEC.md 6.4 규칙 1).
+ * 다른 곳에서는 불투명한 --surface를 쓴다. 전부 유리면 계층이 사라진다.
+ * 불투명도 하한 0.80은 --glass 토큰에 이미 반영돼 있다.
+ */
+.glass {
+  background-color: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+}
+
+/* 숫자는 등폭 + 우측 정렬 (SPEC.md 6.4 규칙 9). */
+.num {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}

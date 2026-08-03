@@ -1,6 +1,6 @@
 Phase 1 — 진행 중
 
-AGENTS.md 실행 순서: ~~db-architect~~ → **ui-shell** → integration-caldav → integration-ingest → ai-pipeline → ui-widgets → verifier(G1)
+AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → **integration-caldav** → integration-ingest → ai-pipeline → ui-widgets → verifier(G1)
 
 ## 완료
 
@@ -16,10 +16,17 @@ AGENTS.md 실행 순서: ~~db-architect~~ → **ui-shell** → integration-calda
 
 로컬 스택 포트: API 54421 / DB 54422 / Studio 54423 (circle-connect와 겹치지 않게 이동)
 
-## 다음: ui-shell
+### ui-shell
+- `app/layout.tsx`(폰트·테마 부트), `app/(dashboard)/layout.tsx`, `components/shell/*`, `components/ui/*` 6종
+- `lib/design/tokens.css`, `public/manifest.json`, `public/sw.js`
+- 완료 검증 5개 전부 통과 — Lighthouse 접근성 100, axe 위반 0, 가로 스크롤 0, 금지 패턴 0건
+- 미완: 드래그 재정렬(user_prefs 없음), 인증(담당 에이전트 없음) → `docs/DEFERRED.md`
 
-`.claude/agents/ui-shell.md` 참조. SPEC.md 6.3 토큰, 6.4의 12개 규칙.
-`app/page.tsx`는 아직 create-next-app 기본 페이지다. 여기서 교체한다.
+## 다음: integration-caldav
+
+`.claude/agents/integration-caldav.md` 참조. SPEC.md 5.1의 절대 규칙 7개.
+caldav-spike 판정이 "직결"이므로 폴백 경로는 만들지 않는다.
+`lib/integrations/ics/*`는 Phase 2다.
 
 ## Phase 1에서 아직 필요한 값
 
