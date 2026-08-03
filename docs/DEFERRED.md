@@ -1,6 +1,5 @@
 # 미룬 것들
 
-- **[결정 필요] G1의 "briefing_sections 6건 이상"** — SPEC 7절은 "고정 5 + 회전 1 = 6"이라고 하는데, SPEC 5.2의 섹터는 `finance / ai / semiconductor / it` 4개 + `rotating` 1개 = **5개**다. 현재 구현은 섹터당 1섹션이라 5건이 나온다. 선택지: (a) G1을 5건으로 정정, (b) SPEC 5.2에 고정 섹터 1개 추가, (c) 섹터×언어로 쪼개 최대 15섹션 — (c)는 출력 토큰이 3배가 되어 월 $11+로 예산을 넘긴다.
 - **AI 예산 80% 경고 배너** (SPEC 5.5) — `budgetStatus()`는 만들었지만 화면에 붙이지 않았다. ui-widgets 차례에 `SyncBanner` 옆에 붙인다.
 - **퀴즈 생성 / 강의자료 요약** — SPEC 5.5의 나머지 AI 호출 2곳은 Phase 2다. `callStructured`를 그대로 재사용하면 예산 가드가 자동으로 적용된다.
 

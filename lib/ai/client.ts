@@ -17,7 +17,13 @@ const PRICING: Record<string, { input: number; output: number }> = {
   "claude-haiku-4-5": { input: 1, output: 5 },
 };
 
-const DEFAULT_MODEL = "claude-opus-5";
+/**
+ * 2026-08-03 승인: 브리핑은 sonnet-5로 돈다.
+ * 같은 입력으로 opus-5(medium)와 비교했을 때 출력 품질 차이는 없었고 비용은 45%였다.
+ * 월 30회 기준 $3.65로, SPEC 5.5의 나머지 호출 지점 2곳 몫이 남는다.
+ * `AI_MODEL`로 호출 지점별 재정의 가능.
+ */
+const DEFAULT_MODEL = "claude-sonnet-5";
 
 /** 서버측 거절 폴백(`fallbacks`)을 받아주는 모델. 나머지에 보내면 400이다. */
 const FALLBACK_CAPABLE = new Set(["claude-opus-5", "claude-fable-5"]);
