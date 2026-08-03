@@ -1,5 +1,29 @@
 # 결정 로그
 
+## 2026-08-03 — RLS 화이트리스트를 app_config 테이블 + 생성 seed.sql로 구현
+
+- **결정**: 허용 이메일을 `app_config` 테이블에 담고, `scripts/gen-seed.ts`가 `.env.local`의 `ALLOWED_EMAIL`로 `supabase/seed.sql`을 만든다. seed.sql은 `.gitignore`에 넣었다. 정책은 `public.is_allowed_user()`(security definer)를 호출한다.
+- **이유**: 이메일을 마이그레이션에 하드코딩하면 git에 개인정보가 남는다. `current_setting()` 방식은 `db reset`에서 값이 날아가고, 호스티드 Supabase에서는 `alter database`를 못 쓴다. 값이 없으면 함수가 false를 반환해 전부 막힌다(fail-closed).
+- **버린 대안**: 마이그레이션에 이메일 직접 기입 — 가장 단순하지만 git에 남는다.
+
+## 2026-08-03 — 마이그레이션에서 GRANT를 명시적으로 준다
+
+- **결정**: `0001_phase1_core.sql`에 `service_role`(전체)과 `authenticated`(9개 테이블 CRUD) GRANT를 넣었다. `anon`에는 아무것도 주지 않는다.
+- **이유**: 마이그레이션으로 만든 테이블에는 세 롤 모두 기본 권한이 없다. RLS만 켜면 `42501 permission denied`로 **service_role까지 막혀 잡 엔드포인트가 전부 죽는다.** 검증 중에 실제로 이 상태를 재현했다.
+- **버린 대안**: `alter default privileges`에 의존 — 이 CLI 버전에서 적용되지 않는 걸 확인했다.
+
+## 2026-08-03 — Phase 1 마이그레이션에서 course_id 제외
+
+- **결정**: SPEC.md 4절의 `events.course_id`, `tasks.course_id`를 Phase 1 마이그레이션에서 뺐다. Phase 2에서 `alter table`로 추가한다.
+- **이유**: 둘 다 `courses(id)`를 참조하는데 `courses`는 Phase 2 테이블이다. SPEC의 SQL은 `events`가 `courses`보다 먼저 정의돼 있어 순서대로 실행하면 그대로는 실패한다.
+- **버린 대안**: Phase 2 테이블을 미리 만들기 — 스코프 게이트 위반.
+
+## 2026-08-03 — 로컬 Supabase 포트를 544xx로 이동
+
+- **결정**: `supabase/config.toml`의 api/db/studio/smtp/pooler 포트를 54421/54422/54423/54424/54429로 옮겼다 (shadow 54420).
+- **이유**: circle-connect의 로컬 스택이 기본 포트 54321~54324를 점유한 채 돌고 있다. 두 프로젝트를 동시에 띄우려면 겹치면 안 된다.
+- **버린 대안**: circle-connect 스택 중지 — 남의 작업 환경을 끄는 셈이다.
+
 ## 2026-08-03 — CalDAV 직결 채택 (caldav-spike 판정)
 
 - **결정**: iCloud CalDAV에 직접 읽기/쓰기한다. SPEC.md 5.1의 폴백(읽기 전용 + 로컬 쓰기 / ICS 구독)은 쓰지 않는다.

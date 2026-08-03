@@ -51,3 +51,6 @@ Thumbs.db
 
 # 업로드된 강의자료 로컬 캐시
 /tmp-uploads/
+
+# 생성 파일 (scripts/gen-seed.ts). 허용 이메일이 들어간다.
+supabase/seed.sql
