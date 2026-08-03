@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "db:reset": "tsx scripts/gen-seed.ts && supabase db reset"
+    "db:reset": "tsx scripts/gen-seed.ts && supabase db reset",
+    "test:g1": "node --import tsx --conditions=react-server --test tests/gates/g1.test.ts",
+    "test": "npm run test:g1"
   },
   "keywords": [],
   "author": "",

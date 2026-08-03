@@ -1,6 +1,6 @@
-Phase 1 — 진행 중
+Phase 1 — 완료 (G1 통과). Phase 2 대기 중.
 
-AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → ~~integration-caldav~~ → ~~integration-ingest~~ → ~~ai-pipeline~~ → ~~ui-widgets~~ → **verifier(G1)**
+AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G1-REPORT.md`.**
 
 ## 완료
 
@@ -54,13 +54,15 @@ AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → ~~integration-cal
 - 쓰기 경로: `/calendar` 일정 추가(iCloud PUT), `/tasks` 추가·완료. UI에서 만든 일정이
   재동기화에서 되읽히는 것까지 확인 (G1 조건 3)
 
-## 다음: verifier (G1)
+### verifier (G1)
+- `tests/gates/g1.test.ts` + `npm run test:g1` — 조건 1~7 자동, 조건 8은 Lighthouse·브라우저 측정
+- **8개 조건 전부 통과.** 판정과 증거는 `docs/G1-REPORT.md`
 
-`.claude/agents/verifier.md` 참조. SPEC.md 7절 G1의 8개 조건을 실행하고 증거를 붙인다.
-**verifier는 기능 코드를 고치지 않는다** — 실패하면 담당 에이전트에게 되돌린다.
+## 다음: Phase 2 (게이트 G2)
 
-G1 조건 중 아직 확인 안 된 것: Lighthouse 접근성 90 이상(ui-shell 때 100 확인했지만
-위젯이 붙은 뒤로는 axe만 돌렸다), 대시보드가 iCloud 없이도 500 없이 뜨는지.
+범위: 퀴즈, 오답노트, 위키(Notion 미러), 과목·자료·성적, MyWaseda ICS.
+시작 전에 `docs/CURRENT_PHASE.md`를 "Phase 2"로 바꾸고 db-architect부터 순서대로 진행한다.
+필요한 값: `NOTION_TOKEN`, `NOTION_DB_*` 5종, `WASEDA_ICS_URL`(선택).
 
 ## 크론 배포 시 필요한 GitHub Secrets
 
