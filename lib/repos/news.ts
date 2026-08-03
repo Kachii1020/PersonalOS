@@ -43,7 +43,25 @@ export async function insertNewsItems(items: NewsInsert[]): Promise<number> {
   return data?.length ?? 0;
 }
 
-/** UI·브리핑용 조회. 최근 수집분을 섹터별로 가져온다. */
+/**
+ * 잡 전용 조회. 서비스 롤을 쓴다.
+ *
+ * 세션 클라이언트로 읽으면 크론에는 세션이 없어서 RLS에 막히고, 조회가
+ * "0건"으로 보인다. 잡 경로와 UI 경로는 클라이언트를 분리해야 한다.
+ */
+export async function listRecentNewsForJob(limit = 60): Promise<NewsItem[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("news_items")
+    .select("id, source_key, lang, sector, title, url, published_at, raw_summary, fetched_at")
+    .order("fetched_at", { ascending: false })
+    .limit(limit);
+
+  if (error) throw new Error(`뉴스 조회 실패: ${error.message}`);
+  return (data ?? []).map(toNewsItem);
+}
+
+/** UI용 조회. 세션 클라이언트를 쓰므로 RLS가 적용된다. */
 export async function listRecentNews(limit = 60): Promise<NewsItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -56,15 +74,31 @@ export async function listRecentNews(limit = 60): Promise<NewsItem[]> {
     console.error("[news] 조회 실패:", error.message);
     return [];
   }
-  return (data ?? []).map((r) => ({
-    id: r.id,
-    sourceKey: r.source_key,
-    lang: r.lang as Lang,
-    sector: r.sector as Sector,
-    title: r.title,
-    url: r.url,
-    publishedAt: r.published_at,
-    rawSummary: r.raw_summary,
-    fetchedAt: r.fetched_at,
-  }));
+  return (data ?? []).map(toNewsItem);
+}
+
+type NewsSelect = {
+  id: string;
+  source_key: string;
+  lang: string;
+  sector: string;
+  title: string;
+  url: string;
+  published_at: string | null;
+  raw_summary: string | null;
+  fetched_at: string;
+};
+
+function toNewsItem(row: NewsSelect): NewsItem {
+  return {
+    id: row.id,
+    sourceKey: row.source_key,
+    lang: row.lang as Lang,
+    sector: row.sector as Sector,
+    title: row.title,
+    url: row.url,
+    publishedAt: row.published_at,
+    rawSummary: row.raw_summary,
+    fetchedAt: row.fetched_at,
+  };
 }

@@ -7,14 +7,15 @@ on:
   schedule:
     # UTC 기준. Asia/Tokyo = UTC+9.
     - cron: "0 * * * *" # 매시 정각 — 캘린더 동기화
-    - cron: "20 21 * * *" # 06:20 JST — 뉴스 수집 (브리핑 생성 전)
+    - cron: "20 21 * * *" # 06:20 JST — 뉴스 수집
+    - cron: "40 21 * * *" # 06:40 JST — 브리핑 생성 (뉴스 수집 20분 뒤)
   workflow_dispatch:
     inputs:
       job:
         description: "수동 실행할 잡"
         required: true
         type: choice
-        options: [sync-calendar, fetch-news]
+        options: [sync-calendar, fetch-news, generate-briefing]
 
 jobs:
   run:
@@ -31,6 +32,8 @@ jobs:
             jobs="${{ inputs.job }}"
           elif [ "${{ github.event.schedule }}" = "20 21 * * *" ]; then
             jobs="fetch-news"
+          elif [ "${{ github.event.schedule }}" = "40 21 * * *" ]; then
+            jobs="generate-briefing"
           else
             jobs="sync-calendar"
           fi
@@ -43,6 +46,11 @@ jobs:
               --max-time 120)
             cat /tmp/out.json
             echo
+            # 402는 월 AI 예산 소진이다. 정상적인 차단이므로 실패로 보지 않는다.
+            if [ "$code" = "402" ]; then
+              echo "::warning::$job 건너뜀 — 월 AI 예산 소진"
+              continue
+            fi
             # 잡이 실패를 sync_state에 기록해도, 워크플로도 같이 빨갛게 만든다.
             if [ "$code" -ge 400 ]; then
               echo "::error::$job 실패 (HTTP $code)"

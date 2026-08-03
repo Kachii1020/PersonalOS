@@ -1,5 +1,9 @@
 # 미룬 것들
 
+- **[결정 필요] G1의 "briefing_sections 6건 이상"** — SPEC 7절은 "고정 5 + 회전 1 = 6"이라고 하는데, SPEC 5.2의 섹터는 `finance / ai / semiconductor / it` 4개 + `rotating` 1개 = **5개**다. 현재 구현은 섹터당 1섹션이라 5건이 나온다. 선택지: (a) G1을 5건으로 정정, (b) SPEC 5.2에 고정 섹터 1개 추가, (c) 섹터×언어로 쪼개 최대 15섹션 — (c)는 출력 토큰이 3배가 되어 월 $11+로 예산을 넘긴다.
+- **AI 예산 80% 경고 배너** (SPEC 5.5) — `budgetStatus()`는 만들었지만 화면에 붙이지 않았다. ui-widgets 차례에 `SyncBanner` 옆에 붙인다.
+- **퀴즈 생성 / 강의자료 요약** — SPEC 5.5의 나머지 AI 호출 2곳은 Phase 2다. `callStructured`를 그대로 재사용하면 예산 가드가 자동으로 적용된다.
+
 - `app/(dashboard)/**/page.tsx` 5개는 ui-shell이 만든 자리표시자다. ui-widgets 차례에 실제 화면으로 교체한다.
 - PWA 아이콘이 SVG 하나뿐이다. 홈 화면 설치 품질을 높이려면 192/512 PNG가 필요하다. 접근성 게이트에는 영향 없다.
 - **호스티드 Supabase 반영** — 마이그레이션 2개를 로컬에만 적용했다. `supabase link` + `db push`에 액세스 토큰과 DB 비밀번호가 필요해서 사람이 직접 해야 한다. 그전까지는 `.env.development.local`이 로컬 스택을 가리킨다.

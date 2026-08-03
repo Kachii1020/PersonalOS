@@ -1,6 +1,6 @@
 Phase 1 — 진행 중
 
-AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → ~~integration-caldav~~ → ~~integration-ingest~~ → **ai-pipeline** → ui-widgets → verifier(G1)
+AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → ~~integration-caldav~~ → ~~integration-ingest~~ → ~~ai-pipeline~~ → **ui-widgets** → verifier(G1)
 
 ## 완료
 
@@ -37,13 +37,20 @@ AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → ~~integration-cal
 - 완료 검증 1·2·6 통과. 3~5(시세·GitHub)는 SPEC 7절상 Phase 3
 - 소스 18개 전부 실제 호출로 200 확인 후 커밋. 수집 270건 (lang 3종 × sector 5종)
 
-## 다음: ai-pipeline
+### ai-pipeline (Phase 1 범위 = 브리핑만)
+- `lib/ai/{client,budget}.ts`, `lib/ai/prompts/briefing.ts`, `lib/repos/{ai-usage,briefings}.ts`
+- `app/api/jobs/generate-briefing/route.ts`, `cron.yml`에 06:40 JST 등록
+- 완료 검증 1·2·3·6 통과 (4·5는 퀴즈·자료요약이라 Phase 2)
+- AI 호출 지점은 `lib/ai/client.ts` 하나뿐. 예산 검사 → 호출 → 사용량 기록 순서를 이 파일이 강제한다
 
-`.claude/agents/ai-pipeline.md` 참조. SPEC.md 5.5.
-Phase 1에서는 **브리핑 생성 1곳만** 만든다 (퀴즈는 Phase 2, 자료 요약도 Phase 2).
-5개 섹터를 1회 호출로 처리하고, 호출 전 `ai_usage` 월 합계로 예산을 검사한다.
+**결정 대기 2건**: 브리핑 모델(Opus 5 vs Sonnet 5, `docs/DECISIONS.md`), G1의 섹션 6건 조건(`docs/DEFERRED.md`).
 
-필요한 값: `ANTHROPIC_API_KEY`, `AI_MONTHLY_BUDGET_USD=10` — 아직 `.env.local`에 없다.
+## 다음: ui-widgets
+
+`.claude/agents/ui-widgets.md` 참조. SPEC.md 6.1 레이아웃, 6.4의 12개 규칙.
+Phase 1 위젯 7개만: MonthCalendar / TodaySchedule / WeekDeadlines / DailyBriefing /
+DailyQuiz·MarketSnapshot·GithubHeatmap(자리표시자).
+글래스는 MonthCalendar와 DailyBriefing 2곳만. 데이터는 `lib/repos/*`로만 가져온다.
 
 ## 크론 배포 시 필요한 GitHub Secrets
 
