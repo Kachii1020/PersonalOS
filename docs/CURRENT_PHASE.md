@@ -51,6 +51,8 @@ AGENTS.md 실행 순서: ~~db-architect~~ → ~~ui-shell~~ → ~~integration-cal
 - `lib/time.ts`(JST 기준 날짜 계산), `lib/repos/tasks.ts` 추가
 - 완료 검증 5개 통과 — 375px 가로 스크롤 0, 모바일 순서 스펙 일치, 글래스 2곳,
   외부 SDK import 0건, Tab 포커스 링 확인, axe 위반 0(라이트·다크)
+- 쓰기 경로: `/calendar` 일정 추가(iCloud PUT), `/tasks` 추가·완료. UI에서 만든 일정이
+  재동기화에서 되읽히는 것까지 확인 (G1 조건 3)
 
 ## 다음: verifier (G1)
 

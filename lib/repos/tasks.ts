@@ -52,3 +52,29 @@ export async function listOpenTasks(): Promise<TaskRow[]> {
     category: r.category,
   }));
 }
+
+/** 태스크 생성. 마감은 선택이다 — 마감 없는 할 일도 목록에 남는다. */
+export async function createTask(input: {
+  title: string;
+  dueAt: string | null;
+  category: string | null;
+  notes: string | null;
+}): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("tasks").insert({
+    title: input.title,
+    due_at: input.dueAt,
+    category: input.category,
+    notes: input.notes,
+  });
+  if (error) throw new Error(`태스크 생성 실패: ${error.message}`);
+}
+
+export async function setTaskStatus(id: string, status: TaskRow["status"]): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("tasks")
+    .update({ status, completed_at: status === "done" ? new Date().toISOString() : null })
+    .eq("id", id);
+  if (error) throw new Error(`태스크 상태 변경 실패: ${error.message}`);
+}
