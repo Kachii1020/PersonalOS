@@ -5,6 +5,7 @@ import {
   BRIEFING_SCHEMA,
   BRIEFING_SYSTEM,
   buildBriefingPrompt,
+  resolveSources,
   type BriefingPayload,
 } from "@/lib/ai/prompts/briefing";
 import { listRecentNewsForJob } from "@/lib/repos/news";
@@ -40,16 +41,19 @@ export async function POST(request: NextRequest) {
 
     briefingId = await startBriefing(briefingDate);
 
+    // URL은 프롬프트에 넣지 않고 기사 번호로 보낸다. 응답의 번호를 여기서 URL로 되돌린다.
+    const { prompt, urls } = buildBriefingPrompt(news, startedAt);
+
     const result = await callStructured<BriefingPayload>({
       purpose: "briefing",
       system: BRIEFING_SYSTEM,
-      userMessage: buildBriefingPrompt(news, startedAt),
+      userMessage: prompt,
       schema: BRIEFING_SCHEMA,
       effort: "low",
       retries: 1, // 파싱 실패 시 1회만 (SPEC.md 5.5)
     });
 
-    const sections = result.data.sections ?? [];
+    const sections = (result.data.sections ?? []).map((section) => resolveSources(section, urls));
     if (sections.length === 0) throw new AiParseError("섹션이 비어 있습니다", "");
 
     await completeBriefing(briefingId, sections, {
