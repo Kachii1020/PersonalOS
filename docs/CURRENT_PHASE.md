@@ -61,7 +61,7 @@ AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G
 ## Phase 2 (게이트 G2)
 
 범위: 퀴즈·오답노트, 위키(Notion 미러), 과목·자료·성적, MyWaseda ICS 시간표.
-실행 순서: ~~db-architect~~ → notion-bridge → **ai-pipeline** → ui-widgets → verifier(G2)
+실행 순서: ~~db-architect~~ → notion-bridge(막힘) → ~~ai-pipeline(퀴즈)~~ → **ui-widgets** → verifier(G2)
 
 ### db-architect (Phase 2)
 - `supabase/migrations/0003_phase2_learning.sql` — 퀴즈 3종, 학기·과목·자료 3종
@@ -69,6 +69,13 @@ AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G
 - `answer_index`는 `0 <= answer_index < array_length(choices,1)` 제약으로 강제 (G2 조건)
 - 완료 검증 3개 통과: db reset 성공, 타입 17개 테이블 생성 후 typecheck 통과,
   anon은 6개 테이블 전부 401
+
+### ai-pipeline (Phase 2 — 퀴즈)
+- `lib/ai/prompts/quiz.ts`, `lib/repos/quiz.ts`, `app/api/jobs/generate-quiz/route.ts`
+- `/quiz` 화면 + 서버 채점 (`app/(dashboard)/quiz/actions.ts`, `components/widgets/quiz-card.tsx`)
+- G2 조건 1·2·3 통과: 5문제/도메인 5종(\$0.027), 오답 시 복습 큐 +1/+3/+7일,
+  복습 문항이 오늘의 퀴즈 1번 자리에 편입
+- 복습만으로 5문제가 차면 AI를 부르지 않는다
 
 **막힌 것**: notion-bridge는 `NOTION_TOKEN`과 `NOTION_DB_*` 5종이 있어야 시작한다.
 그전까지 스키마·퀴즈·ICS는 진행할 수 있다.
