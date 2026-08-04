@@ -189,11 +189,97 @@ export type Database = {
         }
         Relationships: []
       }
+      course_materials: {
+        Row: {
+          course_id: string
+          extracted_text: string | null
+          filename: string
+          id: string
+          keywords: string[] | null
+          mime_type: string
+          storage_path: string
+          summary: string | null
+          uploaded_at: string
+        }
+        Insert: {
+          course_id: string
+          extracted_text?: string | null
+          filename: string
+          id?: string
+          keywords?: string[] | null
+          mime_type: string
+          storage_path: string
+          summary?: string | null
+          uploaded_at?: string
+        }
+        Update: {
+          course_id?: string
+          extracted_text?: string | null
+          filename?: string
+          id?: string
+          keywords?: string[] | null
+          mime_type?: string
+          storage_path?: string
+          summary?: string | null
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_materials_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          code: string | null
+          credits: number
+          grade: string | null
+          grade_point: number | null
+          id: string
+          name: string
+          notion_page_id: string | null
+          semester_id: string
+        }
+        Insert: {
+          code?: string | null
+          credits: number
+          grade?: string | null
+          grade_point?: number | null
+          id?: string
+          name: string
+          notion_page_id?: string | null
+          semester_id: string
+        }
+        Update: {
+          code?: string | null
+          credits?: number
+          grade?: string | null
+          grade_point?: number | null
+          id?: string
+          name?: string
+          notion_page_id?: string | null
+          semester_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "courses_semester_id_fkey"
+            columns: ["semester_id"]
+            isOneToOne: false
+            referencedRelation: "semesters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           caldav_href: string
           caldav_uid: string
           calendar_id: string
+          course_id: string | null
           description: string | null
           ends_at: string
           etag: string | null
@@ -210,6 +296,7 @@ export type Database = {
           caldav_href: string
           caldav_uid: string
           calendar_id: string
+          course_id?: string | null
           description?: string | null
           ends_at: string
           etag?: string | null
@@ -226,6 +313,7 @@ export type Database = {
           caldav_href?: string
           caldav_uid?: string
           calendar_id?: string
+          course_id?: string | null
           description?: string | null
           ends_at?: string
           etag?: string | null
@@ -244,6 +332,13 @@ export type Database = {
             columns: ["calendar_id"]
             isOneToOne: false
             referencedRelation: "calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]
@@ -314,6 +409,124 @@ export type Database = {
         }
         Relationships: []
       }
+      quiz_attempts: {
+        Row: {
+          attempted_at: string
+          chosen_index: number
+          id: string
+          is_correct: boolean
+          question_id: string
+        }
+        Insert: {
+          attempted_at?: string
+          chosen_index: number
+          id?: string
+          is_correct: boolean
+          question_id: string
+        }
+        Update: {
+          attempted_at?: string
+          chosen_index?: number
+          id?: string
+          is_correct?: boolean
+          question_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quiz_questions: {
+        Row: {
+          answer_index: number
+          choices: string[]
+          created_at: string
+          difficulty: number
+          domain: string
+          explanation: string
+          id: string
+          question: string
+        }
+        Insert: {
+          answer_index: number
+          choices: string[]
+          created_at?: string
+          difficulty?: number
+          domain: string
+          explanation: string
+          id?: string
+          question: string
+        }
+        Update: {
+          answer_index?: number
+          choices?: string[]
+          created_at?: string
+          difficulty?: number
+          domain?: string
+          explanation?: string
+          id?: string
+          question?: string
+        }
+        Relationships: []
+      }
+      quiz_review_queue: {
+        Row: {
+          due_on: string
+          id: string
+          question_id: string
+          stage: number
+        }
+        Insert: {
+          due_on: string
+          id?: string
+          question_id: string
+          stage: number
+        }
+        Update: {
+          due_on?: string
+          id?: string
+          question_id?: string
+          stage?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_review_queue_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      semesters: {
+        Row: {
+          ends_on: string
+          id: string
+          is_current: boolean
+          label: string
+          starts_on: string
+        }
+        Insert: {
+          ends_on: string
+          id?: string
+          is_current?: boolean
+          label: string
+          starts_on: string
+        }
+        Update: {
+          ends_on?: string
+          id?: string
+          is_current?: boolean
+          label?: string
+          starts_on?: string
+        }
+        Relationships: []
+      }
       sync_state: {
         Row: {
           cursor: Json | null
@@ -342,6 +555,7 @@ export type Database = {
         Row: {
           category: string | null
           completed_at: string | null
+          course_id: string | null
           created_at: string
           due_at: string | null
           id: string
@@ -352,6 +566,7 @@ export type Database = {
         Insert: {
           category?: string | null
           completed_at?: string | null
+          course_id?: string | null
           created_at?: string
           due_at?: string | null
           id?: string
@@ -362,6 +577,7 @@ export type Database = {
         Update: {
           category?: string | null
           completed_at?: string | null
+          course_id?: string | null
           created_at?: string
           due_at?: string | null
           id?: string
@@ -369,7 +585,15 @@ export type Database = {
           status?: string
           title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tasks_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_prefs: {
         Row: {

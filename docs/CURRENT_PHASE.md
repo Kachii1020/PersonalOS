@@ -1,4 +1,4 @@
-Phase 1 — 완료 (G1 통과). Phase 2 대기 중.
+Phase 2 — 진행 중 (Phase 1은 G1 통과로 종료)
 
 AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G1-REPORT.md`.**
 
@@ -58,11 +58,20 @@ AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G
 - `tests/gates/g1.test.ts` + `npm run test:g1` — 조건 1~7 자동, 조건 8은 Lighthouse·브라우저 측정
 - **8개 조건 전부 통과.** 판정과 증거는 `docs/G1-REPORT.md`
 
-## 다음: Phase 2 (게이트 G2)
+## Phase 2 (게이트 G2)
 
-범위: 퀴즈, 오답노트, 위키(Notion 미러), 과목·자료·성적, MyWaseda ICS.
-시작 전에 `docs/CURRENT_PHASE.md`를 "Phase 2"로 바꾸고 db-architect부터 순서대로 진행한다.
-필요한 값: `NOTION_TOKEN`, `NOTION_DB_*` 5종, `WASEDA_ICS_URL`(선택).
+범위: 퀴즈·오답노트, 위키(Notion 미러), 과목·자료·성적, MyWaseda ICS 시간표.
+실행 순서: ~~db-architect~~ → notion-bridge → **ai-pipeline** → ui-widgets → verifier(G2)
+
+### db-architect (Phase 2)
+- `supabase/migrations/0003_phase2_learning.sql` — 퀴즈 3종, 학기·과목·자료 3종
+- 0001에서 미룬 `events.course_id` / `tasks.course_id`를 alter로 추가
+- `answer_index`는 `0 <= answer_index < array_length(choices,1)` 제약으로 강제 (G2 조건)
+- 완료 검증 3개 통과: db reset 성공, 타입 17개 테이블 생성 후 typecheck 통과,
+  anon은 6개 테이블 전부 401
+
+**막힌 것**: notion-bridge는 `NOTION_TOKEN`과 `NOTION_DB_*` 5종이 있어야 시작한다.
+그전까지 스키마·퀴즈·ICS는 진행할 수 있다.
 
 ## 크론 배포 시 필요한 GitHub Secrets
 
