@@ -14,4 +14,8 @@
 - **ICS 라이브 URL 경로 실검증** — `WASEDA_ICS_URL`을 fetch하는 분기는 코드에 있지만 실제 URL로 돌려보지 못했다. MyWaseda가 구독 URL을 주는지 확인되면 그 URL로 한 번 실행하고 `cron.yml`에 스케줄을 추가한다. 지금 정식 경로는 `/settings` 수동 업로드다.
 - **과목 코드 정규식 튜닝** — 실물 MyWaseda ICS를 못 구해서 후보를 넓게 뽑고 `courses.code`와 교집합만 채택하는 방식으로 두었다. 실물을 넣어보고 `job_runs.meta.unmatchedSamples`에 걸리는 제목이 있으면 `extractCourseCodes`를 조인다.
 - **시세·환율·GitHub 수집** (integration-ingest 완료 검증 3~5) — SPEC 7절상 Phase 3이다. `yahoo-finance2`, frankfurter, FRED, ECOS, GitHub API와 `fetch-prices`/`fetch-github` 잡은 그때 만든다. `cron.yml`에도 그때 추가한다.
+- **강의자료 원본 열기·삭제** — 업로드한 파일을 화면에서 다시 열거나 지우는 경로가 없다. 서명 URL을 발급하는 리포지토리 함수와 삭제 버튼이 필요하다. G2 조건에는 없어서 넣지 않았다.
+- **스캔 PDF(이미지)** — 텍스트 레이어가 없는 자료는 0자로 추출되고 업로드가 거부된다. OCR은 넣지 않았다. 거부 메시지가 이유를 말해준다.
+- **PDF의 일본어 장음 부호** — LibreOffice로 만든 검증용 PDF에서 `ー`가 빠져 "コ ポレ ト"로 추출됐다. PPTX는 정상이었다. 픽스처 폰트 문제인지 unpdf 문제인지 실물 강의 PDF로 한 번 확인할 것.
+- **학기 추가 UI** — `semesters`에 행을 넣는 화면이 없다. 지금은 DB에 직접 넣어야 과목을 만들 수 있다.
 - **뉴스 보존 기간** — `news_items`가 무한히 쌓인다. 하루 270건이면 한 달에 8천 행. 오래된 행을 지우는 정리 잡이 필요하다.

@@ -85,6 +85,19 @@ AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G
   `kind='ics'`에 `is_writable=true`는 insert·update 양쪽 다 check 제약으로 거부
 - 크론 스케줄에는 안 넣었다 — 이유는 `docs/DECISIONS.md`
 
+### 강의자료 · 과목 (Phase 2)
+- `supabase/migrations/0004_materials_storage.sql` — 'materials' 버킷(비공개, 50MB, PDF·PPTX만)
+- `lib/integrations/materials/extract.ts` — unpdf(PDF) / fflate+fast-xml-parser(PPTX)
+- `lib/grades.ts` + `tests/grades.test.ts`, `lib/repos/materials.ts`, `lib/ai/prompts/material.ts`
+- `/courses`, `/courses/[id]` + `components/widgets/{course-form,material-panel,grade-select}.tsx`
+- G2 조건 4·5·9·10 통과:
+  - PDF 275자 / PPTX 218자 추출, 업로드 시점 `ai_usage` 증가 0행
+  - 요약 버튼 클릭 후에만 `material_summary` 1행 ($0.0189)
+  - 과목 상세에 다음 수업 `9/7 (월) 10:40 · 11号館 402`
+  - 과목 3개(4학점 A+ / 2학점 B / 4학점 C) → GPA 2.40 (수기 (16+4+4)/10과 일치)
+- 텍스트 추출은 AI를 쓰지 않는다. 업로드만으로 돈이 나가면 안 된다
+- 검증 픽스처는 LibreOffice로 만든 실제 PDF·PPTX를 썼다
+
 **막힌 것**: notion-bridge는 `NOTION_TOKEN`과 `NOTION_DB_*` 5종이 있어야 시작한다.
 그전까지 스키마·퀴즈·ICS는 진행할 수 있다.
 
