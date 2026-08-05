@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { Json } from "@/lib/types/database";
 
-export type SyncKey = "caldav" | "rss" | "prices" | "github";
+export type SyncKey = "caldav" | "waseda" | "rss" | "prices" | "github";
 
 export type SyncState = {
   key: string;

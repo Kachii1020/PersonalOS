@@ -31,6 +31,11 @@ export function parseEvent(icsText: string): ParsedEvent | null {
   }
   if (!vevent) return null;
 
+  return fromVEvent(vevent);
+}
+
+/** VEVENT 하나를 행으로 옮긴다. ICS 피드는 한 파일에 VEVENT가 여러 개라 이 단계만 따로 쓴다. */
+export function fromVEvent(vevent: ICAL.Component): ParsedEvent | null {
   const event = new ICAL.Event(vevent);
   const uid = event.uid;
   if (!uid) return null;

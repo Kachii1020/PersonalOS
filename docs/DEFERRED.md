@@ -11,6 +11,7 @@
 - **사이드바 재정렬의 실제 입력 검증** — 로직·저장·복원은 확인했지만, 실제 마우스 드래그와 Alt+화살표 키 입력은 브라우저 자동화가 이벤트를 포커스된 요소로 전달하지 못해 확인하지 못했다. 수동으로 한 번 확인할 것.
 - **반복 일정(RRULE) 전개** — `events.rrule`에 원문만 저장하고 인스턴스를 펼치지 않는다. 달력 화면에서 표시 범위만 전개하는 게 미러를 작게 유지한다. ui-widgets가 MonthCalendar를 만들 때 필요하다.
 - **iCloud 삭제 반영** — 동기화는 upsert만 한다. iCloud에서 지운 이벤트가 미러에 남는다. ctag가 바뀐 캘린더에 한해 조회된 uid 집합에 없는 행을 지우는 처리가 필요하다.
-- **integration-caldav 완료 검증 7~9번(ICS)** — SPEC 5.1b는 Phase 2다. `lib/integrations/ics/*`, `sync-ics` 라우트, 과목 코드 매칭은 그때 만든다.
+- **ICS 라이브 URL 경로 실검증** — `WASEDA_ICS_URL`을 fetch하는 분기는 코드에 있지만 실제 URL로 돌려보지 못했다. MyWaseda가 구독 URL을 주는지 확인되면 그 URL로 한 번 실행하고 `cron.yml`에 스케줄을 추가한다. 지금 정식 경로는 `/settings` 수동 업로드다.
+- **과목 코드 정규식 튜닝** — 실물 MyWaseda ICS를 못 구해서 후보를 넓게 뽑고 `courses.code`와 교집합만 채택하는 방식으로 두었다. 실물을 넣어보고 `job_runs.meta.unmatchedSamples`에 걸리는 제목이 있으면 `extractCourseCodes`를 조인다.
 - **시세·환율·GitHub 수집** (integration-ingest 완료 검증 3~5) — SPEC 7절상 Phase 3이다. `yahoo-finance2`, frankfurter, FRED, ECOS, GitHub API와 `fetch-prices`/`fetch-github` 잡은 그때 만든다. `cron.yml`에도 그때 추가한다.
 - **뉴스 보존 기간** — `news_items`가 무한히 쌓인다. 하루 270건이면 한 달에 8천 행. 오래된 행을 지우는 정리 잡이 필요하다.

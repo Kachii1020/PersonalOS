@@ -4,6 +4,7 @@ import { listSyncStates } from "@/lib/repos/sync-state";
 /** 잡 이름 → 사람이 읽을 이름과 조치 (SPEC.md 6.4 규칙 11: 사과하지 않고 고치는 법을 쓴다). */
 const FIXES: Record<string, { label: string; fix: string }> = {
   caldav: { label: "iCloud 동기화 실패", fix: "앱 전용 암호(APPLE_APP_PASSWORD)를 확인하세요." },
+  waseda: { label: "시간표 ICS 취입 실패", fix: "설정에서 ICS 파일을 다시 올리세요." },
   rss: { label: "뉴스 수집 실패", fix: "설정에서 소스별 상태를 확인하세요." },
   prices: { label: "시세 갱신 실패", fix: "마지막 스냅샷을 표시 중입니다." },
   github: { label: "GitHub 수집 실패", fix: "GITHUB_TOKEN 만료 여부를 확인하세요." },

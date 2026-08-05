@@ -61,7 +61,7 @@ AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G
 ## Phase 2 (게이트 G2)
 
 범위: 퀴즈·오답노트, 위키(Notion 미러), 과목·자료·성적, MyWaseda ICS 시간표.
-실행 순서: ~~db-architect~~ → notion-bridge(막힘) → ~~ai-pipeline(퀴즈)~~ → **ui-widgets** → verifier(G2)
+실행 순서: ~~db-architect~~ → notion-bridge(막힘) → ~~ai-pipeline(퀴즈)~~ → ~~integration-caldav(ICS)~~ → **강의자료** → ui-widgets → verifier(G2)
 
 ### db-architect (Phase 2)
 - `supabase/migrations/0003_phase2_learning.sql` — 퀴즈 3종, 학기·과목·자료 3종
@@ -76,6 +76,14 @@ AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G
 - G2 조건 1·2·3 통과: 5문제/도메인 5종(\$0.027), 오답 시 복습 큐 +1/+3/+7일,
   복습 문항이 오늘의 퀴즈 1번 자리에 편입
 - 복습만으로 5문제가 차면 AI를 부르지 않는다
+
+### integration-caldav (Phase 2 — MyWaseda ICS)
+- `lib/integrations/ics/{parse,ingest}.ts`, `lib/repos/courses.ts`, `app/api/jobs/sync-ics/route.ts`
+- `/settings` 업로드 폼 (`components/widgets/ics-upload.tsx` + `settings/actions.ts`)
+- G2 조건 6·7·8 통과: 수업 5건 `source='waseda'`, 같은 내용 재실행 시 `skipped: true`,
+  과목 연결 3건 / 미매칭 2건이 `job_runs.meta`에 표본까지 기록.
+  `kind='ics'`에 `is_writable=true`는 insert·update 양쪽 다 check 제약으로 거부
+- 크론 스케줄에는 안 넣었다 — 이유는 `docs/DECISIONS.md`
 
 **막힌 것**: notion-bridge는 `NOTION_TOKEN`과 `NOTION_DB_*` 5종이 있어야 시작한다.
 그전까지 스키마·퀴즈·ICS는 진행할 수 있다.

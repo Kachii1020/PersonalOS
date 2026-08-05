@@ -1,7 +1,11 @@
 name: cron
 
 # Vercel Hobby의 크론 제한을 피해 스케줄러를 GitHub Actions에 둔다 (SPEC.md 9절).
-# 지금은 Phase 1 잡 2개만 등록한다. fetch-prices / fetch-github은 Phase 3에서 추가한다.
+# fetch-prices / fetch-github은 Phase 3에서 추가한다.
+#
+# sync-ics는 일부러 스케줄에 넣지 않았다. MyWaseda가 구독 가능한 라이브 URL을 주는지
+# 확정되지 않았고(SPEC.md 5.1b 미확정 항목), WASEDA_ICS_URL 없이 돌리면 매일 실패한다.
+# 지금은 /settings 수동 업로드가 정식 경로다. URL이 확인되면 스케줄을 추가한다.
 
 on:
   schedule:
@@ -9,13 +13,14 @@ on:
     - cron: "0 * * * *" # 매시 정각 — 캘린더 동기화
     - cron: "20 21 * * *" # 06:20 JST — 뉴스 수집
     - cron: "40 21 * * *" # 06:40 JST — 브리핑 생성 (뉴스 수집 20분 뒤)
+    - cron: "0 22 * * *" # 07:00 JST — 퀴즈 생성
   workflow_dispatch:
     inputs:
       job:
         description: "수동 실행할 잡"
         required: true
         type: choice
-        options: [sync-calendar, fetch-news, generate-briefing]
+        options: [sync-calendar, fetch-news, generate-briefing, generate-quiz, sync-ics]
 
 jobs:
   run:
@@ -34,6 +39,8 @@ jobs:
             jobs="fetch-news"
           elif [ "${{ github.event.schedule }}" = "40 21 * * *" ]; then
             jobs="generate-briefing"
+          elif [ "${{ github.event.schedule }}" = "0 22 * * *" ]; then
+            jobs="generate-quiz"
           else
             jobs="sync-calendar"
           fi

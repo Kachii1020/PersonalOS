@@ -17,8 +17,11 @@ export type CalendarRow = {
   displayName: string;
   isWritable: boolean;
   ctag: string | null;
+  contentHash: string | null;
   lastSyncedAt: string | null;
 };
+
+const CALENDAR_COLS = "id, kind, source_url, display_name, is_writable, ctag, content_hash, last_synced_at";
 
 export type EventRow = {
   id: string;
@@ -52,7 +55,7 @@ export async function upsertCalendars(
       })),
       { onConflict: "source_url" },
     )
-    .select("id, kind, source_url, display_name, is_writable, ctag, last_synced_at");
+    .select(CALENDAR_COLS);
 
   if (error) throw new Error(`캘린더 저장 실패: ${error.message}`);
   return (data ?? []).map(toCalendarRow);
@@ -101,12 +104,78 @@ export async function markCalendarSynced(calendarId: string, ctag: string | null
   if (error) throw new Error(`ctag 갱신 실패: ${error.message}`);
 }
 
+/**
+ * 잡 전용: ICS 소스 캘린더를 등록하거나 가져온다 (SPEC.md 5.1b).
+ * is_writable은 항상 false다 — DB check 제약도 kind='ics'의 쓰기를 막는다.
+ */
+export async function upsertIcsCalendar(sourceUrl: string, displayName: string): Promise<CalendarRow> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("calendars")
+    .upsert(
+      { kind: "ics", source_url: sourceUrl, display_name: displayName, is_writable: false },
+      // content_hash는 여기서 건드리지 않는다. 파싱을 마친 뒤에 전진시켜야
+      // 중간 실패 시 다음 실행이 건너뛰지 않는다.
+      { onConflict: "source_url" },
+    )
+    .select(CALENDAR_COLS)
+    .single();
+
+  if (error) throw new Error(`ICS 캘린더 등록 실패: ${error.message}`);
+  return toCalendarRow(data);
+}
+
+/** 잡 전용: ICS 이벤트를 미러에 반영한다. course_id는 매칭된 건만 채워진다. */
+export async function upsertIcsEvents(
+  calendarId: string,
+  sourceUrl: string,
+  events: Array<ParsedEvent & { courseId: string | null }>,
+): Promise<number> {
+  if (events.length === 0) return 0;
+
+  const supabase = createAdminClient();
+  const { error, count } = await supabase.from("events").upsert(
+    events.map((e) => ({
+      calendar_id: calendarId,
+      caldav_uid: e.uid,
+      // ICS에는 객체별 href가 없다. uid로 합성해 not null 제약을 만족시킨다.
+      caldav_href: `${sourceUrl}#${e.uid}`,
+      etag: null,
+      summary: e.summary,
+      description: e.description,
+      location: e.location,
+      starts_at: e.startsAt,
+      ends_at: e.endsAt,
+      is_all_day: e.isAllDay,
+      rrule: e.rrule,
+      course_id: e.courseId,
+      source: "waseda",
+      updated_at: new Date().toISOString(),
+    })),
+    { onConflict: "calendar_id,caldav_uid", count: "exact" },
+  );
+
+  if (error) throw new Error(`ICS 이벤트 저장 실패: ${error.message}`);
+  return count ?? events.length;
+}
+
+/** 잡 전용: 파싱까지 끝난 뒤에만 content_hash를 전진시킨다. */
+export async function markIcsSynced(calendarId: string, contentHash: string): Promise<void> {
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("calendars")
+    .update({ content_hash: contentHash, last_synced_at: new Date().toISOString() })
+    .eq("id", calendarId);
+
+  if (error) throw new Error(`content_hash 갱신 실패: ${error.message}`);
+}
+
 /** 잡 전용. 쓰기 대상 캘린더는 정확히 하나여야 한다 (SPEC.md 5.1 절대 규칙 3). */
 export async function getWritableCalendar(): Promise<CalendarRow> {
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("calendars")
-    .select("id, kind, source_url, display_name, is_writable, ctag, last_synced_at")
+    .select(CALENDAR_COLS)
     .eq("is_writable", true);
 
   if (error) throw new Error(`쓰기 캘린더 조회 실패: ${error.message}`);
@@ -170,6 +239,7 @@ type CalendarSelect = {
   display_name: string;
   is_writable: boolean;
   ctag: string | null;
+  content_hash: string | null;
   last_synced_at: string | null;
 };
 
@@ -181,6 +251,7 @@ function toCalendarRow(row: CalendarSelect): CalendarRow {
     displayName: row.display_name,
     isWritable: row.is_writable,
     ctag: row.ctag,
+    contentHash: row.content_hash,
     lastSyncedAt: row.last_synced_at,
   };
 }

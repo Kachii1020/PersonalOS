@@ -4,6 +4,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { Badge } from "@/components/ui/badge";
 import { SkeletonLines } from "@/components/ui/skeleton";
+import { IcsUpload } from "@/components/widgets/ics-upload";
 import { listSyncStates } from "@/lib/repos/sync-state";
 import { listRecentJobRuns } from "@/lib/repos/job-runs";
 import { budgetStatus } from "@/lib/ai/budget";
@@ -13,6 +14,7 @@ export const metadata = { title: "설정 · Personal OS" };
 
 const SYNC_LABEL: Record<string, string> = {
   caldav: "iCloud 캘린더",
+  waseda: "시간표 ICS",
   rss: "뉴스 수집",
   prices: "시세",
   github: "GitHub",
@@ -29,6 +31,7 @@ export default function SettingsPage() {
         <Suspense fallback={<LoadingCard title="AI 예산" />}>
           <Budget />
         </Suspense>
+        <IcsUpload className="lg:col-span-2" />
         <Suspense fallback={<LoadingCard title="동기화 로그" />}>
           <JobLog className="lg:col-span-2" />
         </Suspense>
