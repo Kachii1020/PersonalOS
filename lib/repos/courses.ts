@@ -27,6 +27,37 @@ export async function listSemesters(): Promise<SemesterRow[]> {
   return (data ?? []).map((r) => ({ id: r.id, label: r.label, isCurrent: r.is_current }));
 }
 
+/**
+ * 학기 추가. is_current를 켜면 나머지를 끈다 — '이번 학기'가 둘이면 과목 추가 폼의
+ * 기본 선택이 무엇을 고를지 알 수 없다.
+ */
+export async function createSemester(input: {
+  label: string;
+  startsOn: string;
+  endsOn: string;
+  isCurrent: boolean;
+}): Promise<void> {
+  const supabase = await createClient();
+
+  if (input.isCurrent) {
+    const { error } = await supabase.from("semesters").update({ is_current: false }).eq("is_current", true);
+    if (error) throw new Error(`이전 학기 해제 실패: ${error.message}`);
+  }
+
+  const { error } = await supabase.from("semesters").insert({
+    label: input.label,
+    starts_on: input.startsOn,
+    ends_on: input.endsOn,
+    is_current: input.isCurrent,
+  });
+
+  if (error) {
+    // label에 unique 제약이 있다. 메시지를 그대로 흘리면 사용자가 뭘 고칠지 모른다.
+    if (error.code === "23505") throw new Error(`'${input.label}' 학기가 이미 있습니다.`);
+    throw new Error(`학기 추가 실패: ${error.message}`);
+  }
+}
+
 export async function listCourses(): Promise<CourseRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase

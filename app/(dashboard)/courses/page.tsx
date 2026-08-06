@@ -7,6 +7,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { SkeletonLines } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { CourseForm } from "@/components/widgets/course-form";
+import { SemesterForm } from "@/components/widgets/semester-form";
 import { GradeSelect } from "@/components/widgets/grade-select";
 import { listCourses, listSemesters, type CourseRow } from "@/lib/repos/courses";
 import { calculateGpa } from "@/lib/grades";
@@ -41,8 +42,9 @@ function Loading({ title, className }: { title: string; className?: string }) {
 }
 
 async function AddCourse() {
+  let semesters: Awaited<ReturnType<typeof listSemesters>>;
   try {
-    return <CourseForm semesters={await listSemesters()} />;
+    semesters = await listSemesters();
   } catch (e) {
     return (
       <Card>
@@ -53,6 +55,13 @@ async function AddCourse() {
       </Card>
     );
   }
+
+  return (
+    <div className="space-y-4">
+      <CourseForm semesters={semesters} />
+      <SemesterForm hasSemesters={semesters.length > 0} />
+    </div>
+  );
 }
 
 async function CourseList({ className }: { className?: string }) {

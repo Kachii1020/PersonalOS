@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createCourse, setGrade } from "@/lib/repos/courses";
+import { createCourse, createSemester, setGrade } from "@/lib/repos/courses";
 import { createMaterial, getExtractedText, saveSummary } from "@/lib/repos/materials";
 import { extractText, isSupported, PDF_MIME, PPTX_MIME } from "@/lib/integrations/materials/extract";
 import { callStructured, AiParseError, AiRefusalError } from "@/lib/ai/client";
@@ -33,6 +33,26 @@ export async function addCourse(_prev: FormState, formData: FormData): Promise<F
 
   revalidatePath("/courses");
   return { ok: true, message: `'${name}'을 추가했습니다.` };
+}
+
+export async function addSemester(_prev: FormState, formData: FormData): Promise<FormState> {
+  const label = String(formData.get("label") ?? "").trim();
+  const startsOn = String(formData.get("startsOn") ?? "");
+  const endsOn = String(formData.get("endsOn") ?? "");
+  const isCurrent = formData.get("isCurrent") === "on";
+
+  if (!label) return { ok: false, message: "학기 이름을 입력하세요. 예: 2026 Autumn" };
+  if (!startsOn || !endsOn) return { ok: false, message: "시작일과 종료일을 모두 입력하세요." };
+  if (endsOn < startsOn) return { ok: false, message: "종료일이 시작일보다 빠릅니다." };
+
+  try {
+    await createSemester({ label, startsOn, endsOn, isCurrent });
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) };
+  }
+
+  revalidatePath("/courses");
+  return { ok: true, message: `'${label}' 학기를 추가했습니다.` };
 }
 
 export async function updateGrade(formData: FormData): Promise<void> {

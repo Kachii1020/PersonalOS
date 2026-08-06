@@ -10,6 +10,7 @@
     "typecheck": "tsc --noEmit",
     "db:reset": "tsx scripts/gen-seed.ts && supabase db reset",
     "test:g1": "node --import tsx --conditions=react-server --test tests/gates/g1.test.ts",
+    "notion:check": "node --import tsx --conditions=react-server scripts/check-notion.ts",
     "test:unit": "node --import tsx --test tests/*.test.ts",
     "test": "npm run test:unit && npm run test:g1"
   },

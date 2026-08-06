@@ -1,5 +1,7 @@
 # 미룬 것들
 
+- **Notion 클라이언트 실호출 미검증** — `lib/integrations/notion/client.ts`와 `npm run notion:check`를 만들었지만 토큰이 없어 실제 워크스페이스에 붙여보지 못했다. 엔드포인트·헤더·응답 모양은 공식 문서(2026-03-11)로 확인했고, 토큰 없을 때의 실패 경로만 실행해봤다. **토큰이 들어오면 `notion:check`부터 돌려서 확인할 것.** 여기가 통과하기 전에는 notion-bridge의 나머지를 쌓지 않는다.
+
 - **프로덕션 빌드 실검증** — `npm run start`는 `.env.development.local`을 읽지 않아 `.env.local`(호스티드 Supabase)을 쓴다. 거기엔 아직 스키마가 없어서 로그인부터 막힌다. `supabase db push` 이후에 프로덕션 화면을 한 번 확인할 것. `.claude/launch.json`에 `personal-os-prod` 설정을 넣어뒀다.
 
 - **AI 예산 80% 경고 배너** (SPEC 5.5) — `budgetStatus()`는 만들었지만 화면에 붙이지 않았다. ui-widgets 차례에 `SyncBanner` 옆에 붙인다.

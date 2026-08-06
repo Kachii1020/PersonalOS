@@ -1,5 +1,11 @@
 # 결정 로그
 
+## 2026-08-06 — 환경변수는 database ID로 받고 data source ID는 앱이 변환한다
+
+- **결정**: `NOTION_DB_*`에 URL에서 얻는 database ID를 그대로 넣게 하고, `describeDatabase()`가 `GET /v1/databases/{id}`로 data source ID를 얻어 조회에 쓴다.
+- **이유**: Notion API 2025-09-03부터 조회 엔드포인트가 `/v1/data_sources/{id}/query`로 바뀌어 database ID로는 조회가 안 된다. 그런데 사람이 URL에서 바로 복사할 수 있는 값은 database ID뿐이다. 변환을 앱이 떠맡으면 설정 단계가 하나 줄고, SPEC 4절의 환경변수 이름도 그대로 간다.
+- **버린 대안**: data source ID를 직접 넣게 하기 — Notion UI의 `Manage data sources`까지 들어가야 해서 설정 실패 지점이 늘어난다. 클라이언트는 두 값 다 받으므로 원하면 직접 넣어도 된다.
+
 ## 2026-08-05 — 강의자료 요약 프롬프트에 앞 24,000자만 넣는다
 
 - **결정**: `MAX_CHARS = 24_000`으로 자르고, 잘렸다는 사실을 프롬프트에 명시한다.
