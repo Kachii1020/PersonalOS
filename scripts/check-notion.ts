@@ -8,12 +8,16 @@ import { describeDatabase, queryDataSource, NotionError } from "@/lib/integratio
  * DB 5개에 각각 붙어보고 몇 건이 보이는지 찍는다. 실패는 원인을 짚어준다.
  */
 
+/**
+ * Phase 2에 필요한 건 위키뿐이다 (SPEC.md 6.2: /wiki는 Phase 2, /invest·/apply는 Phase 3).
+ * 나머지는 비어 있어도 실패로 세지 않는다 — 안 쓸 DB를 지금 만들게 할 이유가 없다.
+ */
 const DBS = [
-  ["NOTION_DB_RESEARCH", "리서치 노트"],
-  ["NOTION_DB_WIKI", "위키"],
-  ["NOTION_DB_COURSE_NOTES", "과목 노트"],
-  ["NOTION_DB_ALGO", "알고리즘 패턴"],
-  ["NOTION_DB_APPLICATIONS", "지원 파이프라인"],
+  ["NOTION_DB_WIKI", "위키", "required"],
+  ["NOTION_DB_COURSE_NOTES", "과목 노트", "optional"],
+  ["NOTION_DB_RESEARCH", "리서치 노트", "optional"],
+  ["NOTION_DB_ALGO", "알고리즘 패턴", "optional"],
+  ["NOTION_DB_APPLICATIONS", "지원 파이프라인", "optional"],
 ] as const;
 
 async function main(): Promise<void> {
@@ -24,9 +28,13 @@ async function main(): Promise<void> {
 
   let failed = 0;
 
-  for (const [envName, label] of DBS) {
+  for (const [envName, label, need] of DBS) {
     const id = process.env[envName]?.trim();
     if (!id) {
+      if (need === "optional") {
+        console.log(`· ${label} — 아직 없음 (Phase 3에서 필요합니다. 지금은 넘어가도 됩니다)`);
+        continue;
+      }
       console.log(`✖ ${label} (${envName}) — 값이 비어 있습니다`);
       failed++;
       continue;
@@ -45,7 +53,11 @@ async function main(): Promise<void> {
     }
   }
 
-  console.log(failed === 0 ? "\n5개 전부 정상입니다." : `\n${failed}개 실패. 위 메시지를 보고 고치세요.`);
+  console.log(
+    failed === 0
+      ? "\n연결됐습니다. 이제 /wiki를 만들 수 있습니다."
+      : `\n${failed}개 실패. 위 메시지를 보고 고치세요. 자세한 절차는 docs/NOTION-SETUP.md`,
+  );
   process.exit(failed === 0 ? 0 : 1);
 }
 
