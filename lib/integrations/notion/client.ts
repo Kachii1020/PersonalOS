@@ -63,25 +63,63 @@ type DatabaseResponse = { id: string; title?: Array<{ plain_text?: string }>; da
 
 export type DatabaseInfo = { id: string; title: string; dataSourceId: string; dataSourceCount: number };
 
-/**
- * database ID → data source ID.
- *
- * data source가 여러 개면 첫 번째를 쓴다. 이 앱의 DB 5개는 전부 단일 소스다.
- * 개수를 같이 돌려주므로 호출부가 여러 개인 상황을 알아챌 수 있다.
- */
-export async function describeDatabase(databaseId: string): Promise<DatabaseInfo> {
-  const db = await call<DatabaseResponse>(`/databases/${databaseId}`);
-  const first = db.data_sources?.[0];
-  if (!first) {
-    throw new NotionError(`데이터 소스가 없는 DB입니다: ${databaseId}`, 200, "no_data_source");
-  }
+type DataSourceResponse = { id: string; name?: string; title?: Array<{ plain_text?: string }> };
 
-  return {
-    id: db.id,
-    title: db.title?.map((t) => t.plain_text ?? "").join("").trim() || "(제목 없음)",
-    dataSourceId: first.id,
-    dataSourceCount: db.data_sources?.length ?? 1,
-  };
+/**
+ * 설정값 → data source ID.
+ *
+ * database ID(주소창에서 복사)와 data source ID('데이터 소스 ID 복사') 둘 다 받는다.
+ * 사람이 어느 쪽을 복사했는지 알 방법이 없고, 둘 다 32자 UUID라 생김새로도 구분이 안 된다.
+ * 그래서 database로 먼저 물어보고 아니면 data source로 다시 물어본다.
+ *
+ * data source가 여러 개면 첫 번째를 쓴다. 개수를 같이 돌려주므로 호출부가 알아챌 수 있다.
+ */
+export async function describeDatabase(id: string): Promise<DatabaseInfo> {
+  try {
+    const db = await call<DatabaseResponse>(`/databases/${id}`);
+    const first = db.data_sources?.[0];
+    if (!first) throw new NotionError(`데이터 소스가 없는 DB입니다: ${id}`, 200, "no_data_source");
+
+    return {
+      id: db.id,
+      title: plainText(db.title) || "(제목 없음)",
+      dataSourceId: first.id,
+      dataSourceCount: db.data_sources?.length ?? 1,
+    };
+  } catch (e) {
+    // 404는 "database가 아니다"일 수도 있고 "연결 안 됐다"일 수도 있다. data source로 한 번 더 본다.
+    if (!(e instanceof NotionError) || e.status !== 404) throw e;
+
+    const source = await call<DataSourceResponse>(`/data_sources/${id}`).catch(() => {
+      throw e; // data source도 아니면 원래의 404를 그대로 올린다 (연결 누락 힌트가 붙어 있다)
+    });
+
+    return {
+      id: source.id,
+      title: source.name || plainText(source.title) || "(제목 없음)",
+      dataSourceId: source.id,
+      dataSourceCount: 1,
+    };
+  }
+}
+
+function plainText(rich: Array<{ plain_text?: string }> | undefined): string {
+  return (rich ?? []).map((t) => t.plain_text ?? "").join("").trim();
+}
+
+/**
+ * 토큰이 볼 수 있는 data source 전부.
+ *
+ * 설정을 도우려고 만들었다. 사람이 Notion UI에서 ID를 찾아 복사하는 단계가
+ * 설정 실패의 대부분이라, 토큰만 있으면 앱이 직접 찾아 보여주는 편이 낫다.
+ */
+export async function listAccessibleDataSources(): Promise<Array<{ id: string; title: string }>> {
+  const data = await call<{ results: Array<{ id: string; title?: Array<{ plain_text?: string }> }> }>("/search", {
+    method: "POST",
+    body: { filter: { property: "object", value: "data_source" }, page_size: 100 },
+  });
+
+  return data.results.map((r) => ({ id: r.id, title: plainText(r.title) || "(제목 없음)" }));
 }
 
 export type NotionPage = {

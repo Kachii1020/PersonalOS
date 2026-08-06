@@ -1,11 +1,18 @@
 import { config } from "dotenv";
 config({ path: [".env.development.local", ".env.local"] });
 
-import { describeDatabase, queryDataSource, NotionError } from "@/lib/integrations/notion/client";
+import {
+  describeDatabase,
+  listAccessibleDataSources,
+  queryDataSource,
+  NotionError,
+} from "@/lib/integrations/notion/client";
 
 /**
  * Notion 설정 진단 (docs/NOTION-SETUP.md).
- * DB 5개에 각각 붙어보고 몇 건이 보이는지 찍는다. 실패는 원인을 짚어준다.
+ *
+ * 토큰만 있으면 볼 수 있는 표를 ID까지 찍어준다. Notion UI에서 ID를 찾아 복사하는
+ * 단계가 설정 실패의 대부분이라, 사람에게 시키지 않고 여기서 대신 찾는다.
  */
 
 /**
@@ -26,6 +33,23 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  // 토큰이 실제로 무엇을 볼 수 있는지 먼저 보여준다. 여기가 비면 원인은 권한이지 ID가 아니다.
+  let visible: Awaited<ReturnType<typeof listAccessibleDataSources>>;
+  try {
+    visible = await listAccessibleDataSources();
+  } catch (e) {
+    const message = e instanceof NotionError ? `${e.status} ${e.message}` : e instanceof Error ? e.message : String(e);
+    console.error(`토큰으로 Notion에 접근하지 못했습니다 — ${message}`);
+    process.exit(1);
+  }
+
+  console.log(`이 토큰이 볼 수 있는 표: ${visible.length}개`);
+  for (const source of visible) console.log(`   ${source.id}  ${source.title}`);
+  if (visible.length === 0) {
+    console.log("   (없음) 커넥션의 '콘텐츠 사용 권한'에 페이지를 추가하세요.");
+  }
+  console.log("");
+
   let failed = 0;
 
   for (const [envName, label, need] of DBS) {
@@ -36,6 +60,10 @@ async function main(): Promise<void> {
         continue;
       }
       console.log(`✖ ${label} (${envName}) — 값이 비어 있습니다`);
+      if (visible.length > 0) {
+        console.log(`   위 목록에서 쓸 표의 ID를 골라 .env.local에 넣으세요:`);
+        console.log(`   ${envName}=${visible[0]!.id}`);
+      }
       failed++;
       continue;
     }
