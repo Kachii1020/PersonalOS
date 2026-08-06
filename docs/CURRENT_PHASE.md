@@ -1,4 +1,6 @@
-Phase 2 — 진행 중 (Phase 1은 G1 통과로 종료)
+Phase 3 대기 (Phase 1·2는 G1·G2 통과로 종료)
+
+**G2 통과 — 판정은 `docs/G2-REPORT.md`.** 11개 조건 전부 통과 (자동 10 + 수동 1).
 
 AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G1-REPORT.md`.**
 
@@ -61,7 +63,8 @@ AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G
 ## Phase 2 (게이트 G2)
 
 범위: 퀴즈·오답노트, 위키(Notion 미러), 과목·자료·성적, MyWaseda ICS 시간표.
-실행 순서: ~~db-architect~~ → notion-bridge(막힘) → ~~ai-pipeline(퀴즈)~~ → ~~integration-caldav(ICS)~~ → **강의자료** → ui-widgets → verifier(G2)
+실행 순서 전부 완료: ~~db-architect~~ → ~~ai-pipeline(퀴즈)~~ → ~~integration-caldav(ICS)~~ →
+~~강의자료·과목~~ → ~~notion-bridge~~ → ~~ui-widgets~~ → ~~verifier(G2)~~
 
 ### db-architect (Phase 2)
 - `supabase/migrations/0003_phase2_learning.sql` — 퀴즈 3종, 학기·과목·자료 3종
@@ -101,8 +104,15 @@ AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G
 - 텍스트 추출은 AI를 쓰지 않는다. 업로드만으로 돈이 나가면 안 된다
 - 검증 픽스처는 LibreOffice로 만든 실제 PDF·PPTX를 썼다
 
-**막힌 것**: notion-bridge는 `NOTION_TOKEN`과 `NOTION_DB_*` 5종이 있어야 시작한다.
-그전까지 스키마·퀴즈·ICS는 진행할 수 있다.
+### notion-bridge
+- `lib/integrations/notion/{client,properties}.ts`, `lib/repos/wiki.ts`, `/wiki` 화면
+- `scripts/check-notion.ts` + `npm run notion:check`, `docs/NOTION-SETUP.md`
+- SPEC 12절대로 Supabase에 미러하지 않고 6시간 캐시. `revalidateTag("wiki")` 새로고침 버튼
+- 속성은 이름이 아니라 **타입**으로 찾는다. Notion에서 컬럼 이름을 바꿔도 안 깨진다
+- 쓰기 경로 0건 (G2 조건 11)
+
+**Phase 3에서 필요한 값**: `NOTION_DB_{COURSE_NOTES,RESEARCH,ALGO,APPLICATIONS}`.
+지금은 없어도 `notion:check`가 넘어간다.
 
 ## 크론 배포 시 필요한 GitHub Secrets
 

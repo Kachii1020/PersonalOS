@@ -11,8 +11,9 @@
     "db:reset": "tsx scripts/gen-seed.ts && supabase db reset",
     "test:g1": "node --import tsx --conditions=react-server --test tests/gates/g1.test.ts",
     "notion:check": "node --import tsx --conditions=react-server scripts/check-notion.ts",
+    "test:g2": "node --import tsx --conditions=react-server --test tests/gates/g2.test.ts",
     "test:unit": "node --import tsx --test tests/*.test.ts",
-    "test": "npm run test:unit && npm run test:g1"
+    "test": "npm run test:unit && npm run test:g1 && npm run test:g2"
   },
   "keywords": [],
   "author": "",
