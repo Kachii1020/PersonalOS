@@ -2,9 +2,9 @@ import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 
 /**
- * Phase 2·3 위젯의 자리표시자.
+ * Phase 3 위젯의 자리표시자.
  *
- * SPEC.md 6.1의 대시보드 배치는 이 세 칸을 전제로 하므로, 자리를 비워두면
+ * SPEC.md 6.1의 대시보드 배치는 하단 세 칸을 전제로 하므로, 자리를 비워두면
  * 레이아웃이 Phase마다 바뀐다. 기능이 아니라 자리를 잡아두는 카드다.
  */
 export function PhasePlaceholder({
@@ -14,7 +14,7 @@ export function PhasePlaceholder({
   className,
 }: {
   title: string;
-  phase: 2 | 3;
+  phase: 3;
   message: string;
   className?: string;
 }) {
@@ -26,17 +26,6 @@ export function PhasePlaceholder({
       </CardHeader>
       <EmptyState message={message} />
     </Card>
-  );
-}
-
-export function DailyQuiz({ className }: { className?: string }) {
-  return (
-    <PhasePlaceholder
-      title="오늘의 퀴즈"
-      phase={2}
-      message="퀴즈 생성이 붙으면 매일 5문제가 여기에 올라옵니다. 틀린 문제는 1·3·7일 뒤 복습 큐에 들어갑니다."
-      className={className}
-    />
   );
 }
 

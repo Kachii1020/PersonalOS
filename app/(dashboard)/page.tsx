@@ -5,7 +5,8 @@ import { MonthCalendar } from "@/components/widgets/month-calendar";
 import { TodaySchedule } from "@/components/widgets/today-schedule";
 import { WeekDeadlines } from "@/components/widgets/week-deadlines";
 import { DailyBriefing } from "@/components/widgets/daily-briefing";
-import { DailyQuiz, GithubHeatmap, MarketSnapshot } from "@/components/widgets/phase-placeholder";
+import { QuizSummary } from "@/components/widgets/quiz-summary";
+import { GithubHeatmap, MarketSnapshot } from "@/components/widgets/phase-placeholder";
 
 export const metadata = { title: "대시보드 · Personal OS" };
 
@@ -41,7 +42,10 @@ export default function DashboardPage() {
           <DailyBriefing className={FULL_SPAN} />
         </Suspense>
 
-        <DailyQuiz />
+        <Suspense fallback={<WidgetSkeleton title="오늘의 퀴즈" lines={3} />}>
+          <QuizSummary />
+        </Suspense>
+
         <MarketSnapshot />
         <GithubHeatmap />
       </div>

@@ -76,6 +76,9 @@ AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G
 - G2 조건 1·2·3 통과: 5문제/도메인 5종(\$0.027), 오답 시 복습 큐 +1/+3/+7일,
   복습 문항이 오늘의 퀴즈 1번 자리에 편입
 - 복습만으로 5문제가 차면 AI를 부르지 않는다
+- 대시보드 '오늘의 퀴즈' 칸을 실제 위젯으로 교체 (`components/widgets/quiz-summary.tsx`).
+  숫자는 `/quiz`와 같은 `todaysQuiz`를 세므로 두 화면이 어긋나지 않는다.
+  `PhasePlaceholder`에 남은 건 Phase 3 두 칸뿐이다
 
 ### integration-caldav (Phase 2 — MyWaseda ICS)
 - `lib/integrations/ics/{parse,ingest}.ts`, `lib/repos/courses.ts`, `app/api/jobs/sync-ics/route.ts`

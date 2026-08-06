@@ -130,6 +130,41 @@ export async function todaysQuiz(size = 5, now: Date = new Date()): Promise<Quiz
   return review;
 }
 
+export type QuizProgress = { total: number; answered: number; correct: number; review: number };
+
+/**
+ * 대시보드 요약 (SPEC.md 6.1의 '오늘의 퀴즈' 칸).
+ *
+ * 문항 목록을 todaysQuiz로 그대로 받아 세므로 /quiz 화면과 숫자가 어긋나지 않는다.
+ */
+export async function todaysQuizProgress(size = 5, now: Date = new Date()): Promise<QuizProgress> {
+  const questions = await todaysQuiz(size, now);
+  if (questions.length === 0) return { total: 0, answered: 0, correct: 0, review: 0 };
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("quiz_attempts")
+    .select("question_id, is_correct")
+    .in(
+      "question_id",
+      questions.map((q) => q.id),
+    )
+    .gte("attempted_at", todayStart(now).toISOString());
+
+  if (error) throw new Error(`응시 이력 조회 실패: ${error.message}`);
+
+  // 같은 문항을 여러 번 눌렀을 수 있다. 문항 단위로 접어서 센다.
+  const byQuestion = new Map<string, boolean>();
+  for (const row of data ?? []) byQuestion.set(row.question_id, row.is_correct);
+
+  return {
+    total: questions.length,
+    answered: byQuestion.size,
+    correct: [...byQuestion.values()].filter(Boolean).length,
+    review: questions.filter((q) => q.isReview).length,
+  };
+}
+
 /**
  * 응시 기록. 틀리면 복습 큐에 stage 1/2/3을 +1/+3/+7일로 만든다 (SPEC.md 7절 G2).
  * 맞히면 그 문항의 복습 큐를 비운다 — 이미 아는 문제를 계속 돌릴 이유가 없다.
