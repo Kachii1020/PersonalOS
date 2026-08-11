@@ -53,6 +53,21 @@ export function labelOf(properties: Properties, names: string[]): string | null 
   return fallback;
 }
 
+/** 이름 후보에 맞는 rich_text 속성의 plain text. 못 찾으면 null. */
+export function richTextOf(properties: Properties, names: string[]): string | null {
+  const wanted = names.map((n) => n.toLowerCase());
+  let fallback: string | null = null;
+
+  for (const [key, value] of entries(properties)) {
+    if (value.type !== "rich_text") continue;
+    const text = (value.rich_text ?? []).map((t) => t.plain_text ?? "").join("").trim();
+    if (!text) continue;
+    if (wanted.includes(key.toLowerCase())) return text;
+    fallback ??= text;
+  }
+  return fallback;
+}
+
 /** multi_select 태그 전부. 여러 속성에 흩어져 있어도 모은다. */
 export function tagsOf(properties: Properties): string[] {
   const tags: string[] = [];

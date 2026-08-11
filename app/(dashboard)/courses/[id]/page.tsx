@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowLeft, CalendarClock, MapPin } from "lucide-react";
+import { ArrowLeft, CalendarClock, ExternalLink, MapPin } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -11,6 +11,7 @@ import { GradeSelect } from "@/components/widgets/grade-select";
 import { MaterialPanel } from "@/components/widgets/material-panel";
 import { getCourse, nextClass } from "@/lib/repos/courses";
 import { listMaterials } from "@/lib/repos/materials";
+import { listCourseNotes } from "@/lib/repos/course-notes";
 import { hhmm, monthDayWeekday } from "@/lib/time";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
@@ -50,6 +51,9 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
         </Suspense>
         <Suspense fallback={<Loading title="강의자료" className="lg:col-span-2 lg:row-span-2" />}>
           <Materials courseId={course.id} className="lg:col-span-2 lg:row-span-2" />
+        </Suspense>
+        <Suspense fallback={<Loading title="과목 노트" className="lg:col-span-3" />}>
+          <Notes courseName={course.name} />
         </Suspense>
       </div>
     </>
@@ -104,6 +108,53 @@ async function NextClass({ courseId }: { courseId: string }) {
             </p>
           )}
         </div>
+      )}
+    </Card>
+  );
+}
+
+async function Notes({ courseName }: { courseName: string }) {
+  const notes = await listCourseNotes(courseName);
+
+  // NOTION_DB_COURSE_NOTES 미설정이면 섹션 자체를 숨긴다
+  if (notes.length === 0 && !process.env.NOTION_DB_COURSE_NOTES?.trim()) return null;
+
+  return (
+    <Card className="lg:col-span-3">
+      <CardHeader>
+        <CardTitle>과목 노트</CardTitle>
+        <CardHint>Notion 읽기 전용 · {notes.length}건</CardHint>
+      </CardHeader>
+      {notes.length === 0 ? (
+        <EmptyState message="이 과목의 Notion 노트가 아직 없습니다. 과목명과 일치하는 노트를 추가하면 여기에 올라옵니다." />
+      ) : (
+        <ul className="space-y-1">
+          {notes.map((note) => (
+            <li key={note.id}>
+              <a
+                href={note.url}
+                target="_blank"
+                rel="noreferrer"
+                className="group flex flex-wrap items-center gap-x-2 gap-y-1 rounded-lg border border-line px-3 py-2 transition-colors hover:border-accent/40"
+              >
+                <span className="min-w-0 shrink-0 text-sm font-medium text-text transition-colors group-hover:text-accent">
+                  {note.title}
+                </span>
+                {note.week && <Badge>{note.week}</Badge>}
+                {note.content && (
+                  <span className="basis-full text-xs text-text-muted line-clamp-1">{note.content}</span>
+                )}
+                <span className="num ml-auto shrink-0 text-xs text-text-muted">
+                  {monthDayWeekday(note.lastEditedAt)}
+                </span>
+                <ExternalLink
+                  aria-hidden
+                  className="size-3.5 shrink-0 text-text-muted transition-colors group-hover:text-accent"
+                />
+              </a>
+            </li>
+          ))}
+        </ul>
       )}
     </Card>
   );

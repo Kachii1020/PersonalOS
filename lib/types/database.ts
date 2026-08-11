@@ -445,6 +445,36 @@ export type Database = {
         }
         Relationships: []
       }
+      macro_snapshots: {
+        Row: {
+          as_of: string
+          display_name: string
+          id: number
+          series_id: string
+          source: string
+          unit: string | null
+          value: number
+        }
+        Insert: {
+          as_of: string
+          display_name: string
+          id?: number
+          series_id: string
+          source: string
+          unit?: string | null
+          value: number
+        }
+        Update: {
+          as_of?: string
+          display_name?: string
+          id?: number
+          series_id?: string
+          source?: string
+          unit?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
       news_items: {
         Row: {
           fetched_at: string

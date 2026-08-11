@@ -1,5 +1,17 @@
 # 결정 로그
 
+## 2026-08-12 — 매크로 지표는 주 1회 수집
+
+- **결정**: fetch-macro 크론을 주 1회(월요일)로 설정. FRED/ECOS 매크로 지표는 월별/분기별 발표라 매일 돌릴 필요 없다.
+- **이유**: 무료 API 키의 일일 호출 한도를 아끼고, 실질적으로 값이 바뀌는 빈도에 맞춘다.
+- **버린 대안**: 시세 잡과 합쳐서 매일 돌리기 — 거의 같은 값을 반복 upsert하는 낭비.
+
+## 2026-08-12 — Notion 미설정 DB는 빈 배열 (에러 아님)
+
+- **결정**: Research Notes, Course Notes, Algo Patterns 레포는 환경변수 없으면 `[]` 반환. UI는 섹션 자체를 숨긴다.
+- **이유**: Wiki는 에러를 던지지만(핵심 기능), 나머지 3개 DB는 보조 정보라 없어도 페이지가 떠야 한다.
+- **버린 대안**: Wiki처럼 에러 던지기 — 사용자가 Notion에 5개 DB를 전부 만들어야 앱을 쓸 수 있게 되는 건 과하다.
+
 ## 2026-08-06 — 환경변수는 database ID로 받고 data source ID는 앱이 변환한다
 
 - **결정**: `NOTION_DB_*`에 URL에서 얻는 database ID를 그대로 넣게 하고, `describeDatabase()`가 `GET /v1/databases/{id}`로 data source ID를 얻어 조회에 쓴다.

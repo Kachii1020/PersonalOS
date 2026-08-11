@@ -1,4 +1,4 @@
-Phase 3 완료 (Phase 1·2·3은 G1·G2·G3 통과로 종료)
+SPEC 완성 작업 중 (Phase 1·2·3은 G1·G2·G3 통과로 종료, 미구현 항목 해소 중)
 
 **G3 통과 — 판정은 `docs/G3-REPORT.md`.** 5개 조건 전부 통과.
 
@@ -155,6 +155,35 @@ AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G
 
 - ai-pipeline: `ANTHROPIC_API_KEY`, `AI_MONTHLY_BUDGET_USD=10`
 - integration-ingest: `CRON_SECRET`
+
+## SPEC 완성 (Post-Gate)
+
+게이트 3개를 전부 통과한 뒤, SPEC에 있지만 게이트 범위 밖이었던 항목을 해소.
+
+### AI 예산 80% 경고 배너 (SPEC 5.5)
+- `components/shell/budget-banner.tsx` — budgetStatus() 80% 이상이면 대시보드 상단에 배너
+- `app/(dashboard)/layout.tsx`에 SyncBanner 아래 추가
+
+### PWA 아이콘 (SPEC 1)
+- `public/icon-192.png`, `public/icon-512.png` — qlmanage로 SVG에서 변환
+- `public/manifest.json`에 3종 아이콘 등록
+
+### Notion DB 미러 3개 (SPEC 3)
+- `lib/repos/algo-patterns.ts` → `/wiki`에 알고리즘 패턴 섹션 추가
+- `lib/repos/research.ts` → `/invest`에 리서치 노트 섹션 추가
+- `lib/repos/course-notes.ts` → `/courses/[id]`에 과목 노트 섹션 추가
+- `lib/integrations/notion/properties.ts`에 `richTextOf` 헬퍼 추가
+- 모든 Notion DB는 환경변수 미설정 시 빈 배열 반환 (앱 안 깨짐)
+
+### FRED + ECOS API (SPEC 5.3)
+- `supabase/migrations/0006_macro.sql` — macro_snapshots 테이블
+- `config/macro-series.ts` — FRED 4개 + ECOS 2개 시리즈
+- `lib/integrations/finance/{fred,ecos}.ts` — API 클라이언트, 키 없으면 에러 반환
+- `lib/repos/macro.ts` — upsert + 최신 조회
+- `app/api/jobs/fetch-macro/route.ts` — 잡 엔드포인트
+- `/invest`에 매크로 지표 테이블 추가
+- `cron.yml`에 07:50 JST 월요일 추가
+- `sync-banner.tsx`에 macro 키 추가
 
 ## 호스티드 Supabase 반영
 

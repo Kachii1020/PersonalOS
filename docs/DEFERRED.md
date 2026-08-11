@@ -4,7 +4,7 @@
 
 - **프로덕션 빌드 실검증** — `npm run start`는 `.env.development.local`을 읽지 않아 `.env.local`(호스티드 Supabase)을 쓴다. 거기엔 아직 스키마가 없어서 로그인부터 막힌다. `supabase db push` 이후에 프로덕션 화면을 한 번 확인할 것. `.claude/launch.json`에 `personal-os-prod` 설정을 넣어뒀다.
 
-- **AI 예산 80% 경고 배너** (SPEC 5.5) — `budgetStatus()`는 만들었지만 화면에 붙이지 않았다. ui-widgets 차례에 `SyncBanner` 옆에 붙인다.
+- ~~**AI 예산 80% 경고 배너**~~ (SPEC 5.5) — SPEC 완성 작업에서 구현. `components/shell/budget-banner.tsx`.
 - **퀴즈 생성 / 강의자료 요약** — SPEC 5.5의 나머지 AI 호출 2곳은 Phase 2다. `callStructured`를 그대로 재사용하면 예산 가드가 자동으로 적용된다.
 
 - `app/(dashboard)/**/page.tsx` 5개는 ui-shell이 만든 자리표시자다. ui-widgets 차례에 실제 화면으로 교체한다.
