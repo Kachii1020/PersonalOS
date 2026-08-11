@@ -1,4 +1,6 @@
-Phase 3 대기 (Phase 1·2는 G1·G2 통과로 종료)
+Phase 3 완료 (Phase 1·2·3은 G1·G2·G3 통과로 종료)
+
+**G3 통과 — 판정은 `docs/G3-REPORT.md`.** 5개 조건 전부 통과.
 
 **G2 통과 — 판정은 `docs/G2-REPORT.md`.** 11개 조건 전부 통과 (자동 10 + 수동 1).
 
@@ -113,6 +115,37 @@ AGENTS.md Phase 1 실행 순서 전부 완료. **G1 통과 — 판정은 `docs/G
 
 **Phase 3에서 필요한 값**: `NOTION_DB_{COURSE_NOTES,RESEARCH,ALGO,APPLICATIONS}`.
 지금은 없어도 `notion:check`가 넘어간다.
+
+## Phase 3 (게이트 G3)
+
+범위: 티커·시세·환율, GitHub 수집, 지원 파이프라인.
+실행 순서: ~~db-architect~~ → ~~integration-ingest(시세·GitHub)~~ → ~~notion-bridge(지원)~~ →
+~~ui-widgets~~ → ~~verifier(G3)~~
+
+### db-architect (Phase 3)
+- `supabase/migrations/0005_phase3_invest.sql` — tickers, price_snapshots, fx_rates, github_repos, github_daily_commits
+- service_role GRANT를 별도로 추가 (0001의 `GRANT ALL ON ALL TABLES`는 당시 테이블만 커버)
+
+### integration-ingest (Phase 3)
+- `lib/integrations/finance/{prices,fx}.ts` — yahoo-finance2 v4 + frankfurter.app
+- `lib/integrations/github/collect.ts` — repos + PushEvent 일별 집계
+- `app/api/jobs/{fetch-prices,sync-github}/route.ts`
+- `config/tickers.ts` — 기본 20종목 (시드 자동)
+- `cron.yml`에 07:30/07:45 JST 추가
+
+### notion-bridge (Phase 3 — 지원 파이프라인)
+- `lib/repos/applications.ts` — Notion Applications DB 읽기 전용, 6시간 캐시, 단계별 그룹핑
+
+### ui-widgets (Phase 3)
+- 대시보드: `MarketSnapshotWidget` + `GithubHeatmapWidget`으로 PhasePlaceholder 전부 교체
+- `/invest` — 20종목 시세 테이블, USD/KRW 환율, ₩ 환산
+- `/portfolio` — 90일 커밋 잔디 히트맵 + 레포 목록
+- `/apply` — Notion 지원 파이프라인 단계별 그룹핑
+- 사이드바에 투자/포트폴리오/지원 추가
+
+### verifier (G3)
+- `tests/gates/g3.test.ts` + `npm run test:g3` — 5개 조건 전부 통과
+- **판정과 증거는 `docs/G3-REPORT.md`**
 
 ## 크론 배포 시 필요한 GitHub Secrets
 

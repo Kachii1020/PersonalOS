@@ -2,11 +2,14 @@ import {
   BookOpen,
   BrainCircuit,
   CalendarDays,
+  FolderKanban,
+  GitGraph,
   LayoutDashboard,
   Library,
   ListTodo,
   Newspaper,
   Settings,
+  TrendingUp,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -16,11 +19,7 @@ export type NavItem = {
   icon: LucideIcon;
 };
 
-/**
- * SPEC.md 6.2의 경로 중 구현된 것만 넣는다.
- * /invest, /portfolio, /apply (Phase 3)는
- * 해당 화면이 생길 때 추가한다.
- */
+/** SPEC.md 6.2의 전체 경로. */
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "대시보드", icon: LayoutDashboard },
   { href: "/calendar", label: "캘린더", icon: CalendarDays },
@@ -28,6 +27,9 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/quiz", label: "퀴즈", icon: BrainCircuit },
   { href: "/courses", label: "과목", icon: BookOpen },
   { href: "/wiki", label: "위키", icon: Library },
+  { href: "/invest", label: "투자", icon: TrendingUp },
+  { href: "/portfolio", label: "포트폴리오", icon: GitGraph },
+  { href: "/apply", label: "지원", icon: FolderKanban },
   { href: "/briefing", label: "브리핑", icon: Newspaper },
   { href: "/settings", label: "설정", icon: Settings },
 ];

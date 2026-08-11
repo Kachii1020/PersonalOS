@@ -343,6 +343,78 @@ export type Database = {
           },
         ]
       }
+      fx_rates: {
+        Row: {
+          as_of: string
+          base: string
+          id: number
+          quote: string
+          rate: number
+        }
+        Insert: {
+          as_of: string
+          base: string
+          id?: number
+          quote: string
+          rate: number
+        }
+        Update: {
+          as_of?: string
+          base?: string
+          id?: number
+          quote?: string
+          rate?: number
+        }
+        Relationships: []
+      }
+      github_daily_commits: {
+        Row: {
+          as_of: string
+          commit_count: number
+          id: number
+        }
+        Insert: {
+          as_of: string
+          commit_count: number
+          id?: number
+        }
+        Update: {
+          as_of?: string
+          commit_count?: number
+          id?: number
+        }
+        Relationships: []
+      }
+      github_repos: {
+        Row: {
+          description: string | null
+          full_name: string
+          html_url: string
+          id: string
+          language: string | null
+          pushed_at: string | null
+          stars: number
+        }
+        Insert: {
+          description?: string | null
+          full_name: string
+          html_url: string
+          id?: string
+          language?: string | null
+          pushed_at?: string | null
+          stars?: number
+        }
+        Update: {
+          description?: string | null
+          full_name?: string
+          html_url?: string
+          id?: string
+          language?: string | null
+          pushed_at?: string | null
+          stars?: number
+        }
+        Relationships: []
+      }
       job_runs: {
         Row: {
           error: string | null
@@ -408,6 +480,38 @@ export type Database = {
           url?: string
         }
         Relationships: []
+      }
+      price_snapshots: {
+        Row: {
+          as_of: string
+          change_pct: number | null
+          close: number
+          id: number
+          ticker_id: string
+        }
+        Insert: {
+          as_of: string
+          change_pct?: number | null
+          close: number
+          id?: number
+          ticker_id: string
+        }
+        Update: {
+          as_of?: string
+          change_pct?: number | null
+          close?: number
+          id?: number
+          ticker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "price_snapshots_ticker_id_fkey"
+            columns: ["ticker_id"]
+            isOneToOne: false
+            referencedRelation: "tickers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quiz_attempts: {
         Row: {
@@ -594,6 +698,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tickers: {
+        Row: {
+          currency: string
+          display_name: string
+          id: string
+          is_index: boolean
+          notion_page_id: string | null
+          position: number
+          symbol: string
+        }
+        Insert: {
+          currency: string
+          display_name: string
+          id?: string
+          is_index?: boolean
+          notion_page_id?: string | null
+          position?: number
+          symbol: string
+        }
+        Update: {
+          currency?: string
+          display_name?: string
+          id?: string
+          is_index?: boolean
+          notion_page_id?: string | null
+          position?: number
+          symbol?: string
+        }
+        Relationships: []
       }
       user_prefs: {
         Row: {

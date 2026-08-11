@@ -12,8 +12,9 @@
     "test:g1": "node --import tsx --conditions=react-server --test tests/gates/g1.test.ts",
     "notion:check": "node --import tsx --conditions=react-server scripts/check-notion.ts",
     "test:g2": "node --import tsx --conditions=react-server --test tests/gates/g2.test.ts",
+    "test:g3": "node --import tsx --conditions=react-server --test tests/gates/g3.test.ts",
     "test:unit": "node --import tsx --test tests/*.test.ts",
-    "test": "npm run test:unit && npm run test:g1 && npm run test:g2"
+    "test": "npm run test:unit && npm run test:g1 && npm run test:g2 && npm run test:g3"
   },
   "keywords": [],
   "author": "",
@@ -34,7 +35,8 @@
     "react-dom": "19.1.0",
     "server-only": "^0.0.1",
     "tsdav": "^2.3.1",
-    "unpdf": "^1.8.0"
+    "unpdf": "^1.8.0",
+    "yahoo-finance2": "^4.0.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

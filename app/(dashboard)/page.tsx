@@ -6,7 +6,8 @@ import { TodaySchedule } from "@/components/widgets/today-schedule";
 import { WeekDeadlines } from "@/components/widgets/week-deadlines";
 import { DailyBriefing } from "@/components/widgets/daily-briefing";
 import { QuizSummary } from "@/components/widgets/quiz-summary";
-import { GithubHeatmap, MarketSnapshot } from "@/components/widgets/phase-placeholder";
+import { MarketSnapshotWidget } from "@/components/widgets/market-snapshot";
+import { GithubHeatmapWidget } from "@/components/widgets/github-heatmap";
 
 export const metadata = { title: "대시보드 · Personal OS" };
 
@@ -46,8 +47,13 @@ export default function DashboardPage() {
           <QuizSummary />
         </Suspense>
 
-        <MarketSnapshot />
-        <GithubHeatmap />
+        <Suspense fallback={<WidgetSkeleton title="지수·환율" lines={4} />}>
+          <MarketSnapshotWidget />
+        </Suspense>
+
+        <Suspense fallback={<WidgetSkeleton title="GitHub 잔디" lines={4} />}>
+          <GithubHeatmapWidget />
+        </Suspense>
       </div>
     </>
   );
