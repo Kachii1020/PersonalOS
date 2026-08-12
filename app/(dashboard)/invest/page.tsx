@@ -1,8 +1,10 @@
 import { Suspense } from "react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, LineChart, NotebookText } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Badge } from "@/components/ui/badge";
+import { ChangeBadge } from "@/components/ui/change-badge";
+import { CountUp } from "@/components/ui/count-up";
 import { SkeletonLines } from "@/components/ui/skeleton";
 import { listTickers } from "@/lib/repos/tickers";
 import { latestPrices } from "@/lib/repos/prices";
@@ -32,13 +34,13 @@ export default async function InvestPage() {
   return (
     <>
       <header className="mb-4 flex items-baseline justify-between gap-2">
-        <h1 className="text-lg font-semibold text-text">투자</h1>
+        <h1 className="text-xl font-semibold text-text">투자</h1>
         {latestDate && <p className="text-xs text-text-muted">{latestDate} 기준</p>}
       </header>
 
       {fxUsdKrw && (
         <p className="num mb-4 text-sm text-text-muted">
-          USD/KRW {fxUsdKrw.rate.toFixed(2)} ({fxUsdKrw.asOf})
+          USD/KRW <CountUp value={fxUsdKrw.rate} decimals={2} /> ({fxUsdKrw.asOf})
         </p>
       )}
 
@@ -47,7 +49,7 @@ export default async function InvestPage() {
           <CardHeader>
             <CardTitle>티커</CardTitle>
           </CardHeader>
-          <EmptyState message="시세 잡을 한 번 실행하면 기본 20개 티커가 등록됩니다." />
+          <EmptyState icon={LineChart} message="시세 잡을 한 번 실행하면 기본 20개 티커가 등록됩니다." />
         </Card>
       ) : (
         <Card>
@@ -75,7 +77,10 @@ export default async function InvestPage() {
                       : null;
 
                   return (
-                    <tr key={t.id} className="border-b border-line/50 last:border-0">
+                    <tr
+                      key={t.id}
+                      className="border-b border-line/50 transition-colors last:border-0 hover:bg-accent-soft/30"
+                    >
                       <td className="py-2 pr-4">
                         <span className="font-medium text-text">{t.displayName}</span>
                         <span className="ml-1 text-text-muted">{t.symbol}</span>
@@ -91,12 +96,9 @@ export default async function InvestPage() {
                           {krwPrice != null ? `₩${Math.round(krwPrice).toLocaleString("ko-KR")}` : "—"}
                         </td>
                       )}
-                      <td className="num py-2 text-right">
+                      <td className="py-2 text-right">
                         {snap?.changePct != null ? (
-                          <span className={snap.changePct >= 0 ? "text-positive" : "text-negative"}>
-                            {snap.changePct >= 0 ? "+" : ""}
-                            {snap.changePct.toFixed(2)}%
-                          </span>
+                          <ChangeBadge pct={snap.changePct} />
                         ) : (
                           "—"
                         )}
@@ -172,7 +174,10 @@ async function MacroIndicators() {
           </thead>
           <tbody>
             {[...fred, ...ecos].map((s) => (
-              <tr key={`${s.source}:${s.seriesId}`} className="border-b border-line/50 last:border-0">
+              <tr
+                key={`${s.source}:${s.seriesId}`}
+                className="border-b border-line/50 transition-colors last:border-0 hover:bg-accent-soft/30"
+              >
                 <td className="py-2 pr-4">
                   <span className="text-text">{s.displayName}</span>
                   <span className="ml-1 rounded bg-accent-soft px-1 py-0.5 text-[10px] text-accent uppercase">
@@ -205,7 +210,7 @@ async function ResearchNotes() {
       </CardHeader>
 
       {notes.length === 0 ? (
-        <EmptyState message="Notion에서 리서치 노트를 추가하면 여기에 올라옵니다." />
+        <EmptyState icon={NotebookText} message="Notion에서 리서치 노트를 추가하면 여기에 올라옵니다." />
       ) : (
         <ul className="space-y-1">
           {notes.map((note) => (

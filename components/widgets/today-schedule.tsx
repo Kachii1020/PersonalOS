@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CalendarClock } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -43,6 +44,7 @@ export async function TodaySchedule({ className }: { className?: string }) {
 
       {events.length === 0 ? (
         <EmptyState
+          icon={CalendarClock}
           message="오늘은 잡힌 일정이 없습니다. 캘린더에서 새 일정을 추가할 수 있습니다."
           action={
             <Link href="/calendar" className={buttonClass({ size: "sm" })}>

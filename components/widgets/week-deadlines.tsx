@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -37,6 +38,7 @@ export async function WeekDeadlines({ className }: { className?: string }) {
 
       {tasks.length === 0 ? (
         <EmptyState
+          icon={CheckCircle2}
           message="7일 안에 마감인 할 일이 없습니다. 할 일을 추가하면 여기에 마감 순으로 쌓입니다."
           action={
             <Link href="/tasks" className={buttonClass({ size: "sm" })}>

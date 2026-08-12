@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { GitFork } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -34,7 +35,7 @@ export async function GithubHeatmapWidget({ className }: { className?: string })
           <CardTitle>GitHub 잔디</CardTitle>
           <CardHint>최근 90일</CardHint>
         </CardHeader>
-        <EmptyState message="GitHub 수집 잡을 실행하면 커밋 히트맵이 표시됩니다." />
+        <EmptyState icon={GitFork} message="GitHub 수집 잡을 실행하면 커밋 히트맵이 표시됩니다." />
       </Card>
     );
   }

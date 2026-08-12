@@ -1,4 +1,4 @@
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, GitFork } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { listRepos, listDailyCommits, type DailyCommits } from "@/lib/repos/github";
@@ -20,7 +20,7 @@ export default async function PortfolioPage() {
   return (
     <>
       <header className="mb-4">
-        <h1 className="text-lg font-semibold text-text">포트폴리오</h1>
+        <h1 className="text-xl font-semibold text-text">포트폴리오</h1>
       </header>
 
       {/* 잔디 히트맵 */}
@@ -31,7 +31,7 @@ export default async function PortfolioPage() {
         </CardHeader>
 
         {commits.length === 0 ? (
-          <EmptyState message="GitHub 수집 잡을 실행하면 커밋 히트맵이 표시됩니다." />
+          <EmptyState icon={GitFork} message="GitHub 수집 잡을 실행하면 커밋 히트맵이 표시됩니다." />
         ) : (
           <Heatmap commits={commits} />
         )}
@@ -45,7 +45,7 @@ export default async function PortfolioPage() {
         </CardHeader>
 
         {repos.length === 0 ? (
-          <EmptyState message="GitHub 수집 잡을 실행하면 공개 레포가 표시됩니다." />
+          <EmptyState icon={GitFork} message="GitHub 수집 잡을 실행하면 공개 레포가 표시됩니다." />
         ) : (
           <ul className="divide-y divide-line" aria-label="GitHub 레포 목록">
             {repos.map((r) => (

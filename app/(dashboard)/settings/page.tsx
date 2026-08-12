@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { History, RefreshCw } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -72,7 +73,7 @@ async function Integrations() {
         <CardTitle>연동 상태</CardTitle>
       </CardHeader>
       {states.length === 0 ? (
-        <EmptyState message="아직 실행된 동기화가 없습니다. 크론이 돌거나 잡을 수동 실행하면 여기에 상태가 남습니다." />
+        <EmptyState icon={RefreshCw} message="아직 실행된 동기화가 없습니다. 크론이 돌거나 잡을 수동 실행하면 여기에 상태가 남습니다." />
       ) : (
         <ul className="space-y-2">
           {states.map((state) => (
@@ -173,7 +174,7 @@ async function JobLog({ className }: { className?: string }) {
         {runs.length > 0 && <CardHint>최근 {runs.length}건</CardHint>}
       </CardHeader>
       {runs.length === 0 ? (
-        <EmptyState message="실행 이력이 없습니다. 크론이 잡을 호출하면 여기에 한 줄씩 쌓입니다." />
+        <EmptyState icon={History} message="실행 이력이 없습니다. 크론이 잡을 호출하면 여기에 한 줄씩 쌓입니다." />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -186,7 +187,7 @@ async function JobLog({ className }: { className?: string }) {
             </thead>
             <tbody>
               {runs.map((run) => (
-                <tr key={run.id} className="border-b border-line last:border-b-0">
+                <tr key={run.id} className="border-b border-line transition-colors last:border-b-0 hover:bg-accent-soft/30">
                   <td className="py-1.5 text-text">
                     {run.jobName}
                     {run.error && <span className="block text-xs text-negative">{run.error.split("\n")[0]}</span>}

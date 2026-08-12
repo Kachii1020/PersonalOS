@@ -1,4 +1,4 @@
-import { ExternalLink } from "lucide-react";
+import { Briefcase, ExternalLink } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { listApplications, groupByStage } from "@/lib/repos/applications";
@@ -17,13 +17,14 @@ export default async function ApplyPage() {
     const noEnv = !process.env.NOTION_DB_APPLICATIONS?.trim();
     return (
       <>
-        <h1 className="mb-4 text-lg font-semibold text-text">지원 파이프라인</h1>
+        <h1 className="mb-4 text-xl font-semibold text-text">지원 파이프라인</h1>
         <Card>
           <CardHeader>
             <CardTitle>지원 현황</CardTitle>
             <CardHint>Notion 읽기 전용</CardHint>
           </CardHeader>
           <EmptyState
+            icon={Briefcase}
             message={
               noEnv
                 ? "NOTION_DB_APPLICATIONS를 .env.local에 설정하면 Notion 파이프라인이 여기에 표시됩니다. npm run notion:check로 ID를 찾으세요."
@@ -40,7 +41,7 @@ export default async function ApplyPage() {
   return (
     <>
       <header className="mb-4 flex items-baseline justify-between gap-2">
-        <h1 className="text-lg font-semibold text-text">지원 파이프라인</h1>
+        <h1 className="text-xl font-semibold text-text">지원 파이프라인</h1>
         <p className="text-xs text-text-muted">Notion 읽기 전용 · {apps.length}건</p>
       </header>
 

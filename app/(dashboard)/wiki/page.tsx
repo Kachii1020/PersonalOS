@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { ExternalLink, RefreshCw } from "lucide-react";
+import { BookOpen, Code2, ExternalLink, RefreshCw } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -69,7 +69,7 @@ async function AlgoPatterns() {
       </CardHeader>
 
       {patterns.length === 0 ? (
-        <EmptyState message="Notion에서 알고리즘 패턴을 추가하면 여기에 올라옵니다." />
+        <EmptyState icon={Code2} message="Notion에서 알고리즘 패턴을 추가하면 여기에 올라옵니다." />
       ) : (
         <ul className="space-y-1">
           {patterns.map((p) => (
@@ -134,7 +134,7 @@ async function Entries() {
       </CardHeader>
 
       {entries.length === 0 ? (
-        <EmptyState message="Notion 위키가 비어 있습니다. Notion에서 항목을 추가하면 여기에 올라옵니다." />
+        <EmptyState icon={BookOpen} message="Notion 위키가 비어 있습니다. Notion에서 항목을 추가하면 여기에 올라옵니다." />
       ) : (
         <ul className="space-y-1">
           {entries.map((entry) => (

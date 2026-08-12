@@ -12,7 +12,8 @@ export function Card({ glass = false, className, ...props }: CardProps) {
   return (
     <section
       className={cn(
-        "rounded-xl p-4 shadow-sm", // 그림자는 최대 1단계 (규칙 6)
+        // 그림자는 최대 1단계 (규칙 6). 라이트에서만 보이는 미묘한 elevation — 다크에서는 border로 충분하다.
+        "rounded-xl p-4 shadow-[0_1px_3px_rgba(15,23,42,0.08),0_1px_2px_rgba(15,23,42,0.04)] dark:shadow-none",
         glass ? "glass" : "border border-line bg-surface",
         className,
       )}

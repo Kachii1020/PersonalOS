@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Newspaper } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -38,6 +39,7 @@ export async function DailyBriefing({ className }: { className?: string }) {
           <CardTitle>오늘의 브리핑</CardTitle>
         </CardHeader>
         <EmptyState
+          icon={Newspaper}
           message="아직 생성된 브리핑이 없습니다. 뉴스를 수집한 뒤 브리핑 잡이 돌면 여기에 표시됩니다."
           action={
             <Link href="/briefing" className={buttonClass({ size: "sm" })}>

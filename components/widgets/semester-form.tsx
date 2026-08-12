@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { addSemester, type FormState } from "@/app/(dashboard)/courses/actions";
 
 /**
@@ -14,6 +15,11 @@ export function SemesterForm({ hasSemesters, className }: { hasSemesters: boolea
   const [state, action, pending] = useActionState<FormState, FormData>(addSemester, null);
   // 학기가 하나도 없으면 지금 해야 할 일이므로 펼친 채로 시작한다.
   const [open, setOpen] = useState(!hasSemesters);
+  const toast = useToast();
+
+  useEffect(() => {
+    if (state) toast(state.message, state.ok ? "success" : "error");
+  }, [state, toast]);
 
   return (
     <Card className={className}>
@@ -54,12 +60,6 @@ export function SemesterForm({ hasSemesters, className }: { hasSemesters: boolea
           <Button type="submit" variant="primary" disabled={pending} className="w-full">
             {pending ? "추가하는 중" : "학기 추가"}
           </Button>
-
-          {state && (
-            <p role="status" className={state.ok ? "text-sm text-positive" : "text-sm text-negative"}>
-              {state.message}
-            </p>
-          )}
         </form>
       )}
     </Card>

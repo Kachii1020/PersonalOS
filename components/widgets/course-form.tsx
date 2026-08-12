@@ -1,15 +1,21 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, Input, Select } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { addCourse, type FormState } from "@/app/(dashboard)/courses/actions";
 import type { SemesterRow } from "@/lib/repos/courses";
 
 export function CourseForm({ semesters, className }: { semesters: SemesterRow[]; className?: string }) {
   const [state, action, pending] = useActionState<FormState, FormData>(addCourse, null);
   const current = semesters.find((s) => s.isCurrent) ?? semesters[0];
+  const toast = useToast();
+
+  useEffect(() => {
+    if (state) toast(state.message, state.ok ? "success" : "error");
+  }, [state, toast]);
 
   return (
     <Card className={className}>
@@ -50,12 +56,6 @@ export function CourseForm({ semesters, className }: { semesters: SemesterRow[];
           <Button type="submit" variant="primary" disabled={pending} className="w-full">
             {pending ? "추가하는 중" : "과목 추가"}
           </Button>
-
-          {state && (
-            <p role="status" className={state.ok ? "text-sm text-positive" : "text-sm text-negative"}>
-              {state.message}
-            </p>
-          )}
         </form>
       )}
     </Card>

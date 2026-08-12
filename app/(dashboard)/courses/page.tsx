@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { Suspense } from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, GraduationCap } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { SkeletonLines } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
+import { CountUp } from "@/components/ui/count-up";
 import { CourseForm } from "@/components/widgets/course-form";
 import { SemesterForm } from "@/components/widgets/semester-form";
 import { GradeSelect } from "@/components/widgets/grade-select";
@@ -95,7 +96,7 @@ async function CourseList({ className }: { className?: string }) {
         <CardHint>
           {gpa ? (
             <>
-              GPA <span className="num text-text">{gpa.gpa.toFixed(2)}</span> / 4.00 · {gpa.credits}학점
+              GPA <CountUp value={gpa.gpa} decimals={2} className="num text-text" /> / 4.00 · {gpa.credits}학점
             </>
           ) : (
             "성적 입력 전"
@@ -104,7 +105,7 @@ async function CourseList({ className }: { className?: string }) {
       </CardHeader>
 
       {courses.length === 0 ? (
-        <EmptyState message="아직 과목이 없습니다. 오른쪽에서 추가하면 시간표·강의자료가 여기에 묶입니다." />
+        <EmptyState icon={GraduationCap} message="아직 과목이 없습니다. 오른쪽에서 추가하면 시간표·강의자료가 여기에 묶입니다." />
       ) : (
         <div className="space-y-4">
           {[...bySemester].map(([semester, list]) => (

@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { FileText, Presentation } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import { useToast } from "@/components/ui/toast";
 import { uploadMaterial, summarizeMaterial, type FormState } from "@/app/(dashboard)/courses/actions";
 import type { MaterialRow } from "@/lib/repos/materials";
 import { monthDayWeekday } from "@/lib/time";
@@ -21,6 +22,11 @@ export function MaterialPanel({
   className?: string;
 }) {
   const [state, action, pending] = useActionState<FormState, FormData>(uploadMaterial, null);
+  const toast = useToast();
+
+  useEffect(() => {
+    if (state) toast(state.message, state.ok ? "success" : "error");
+  }, [state, toast]);
 
   return (
     <Card className={className}>
@@ -44,15 +50,10 @@ export function MaterialPanel({
         <Button type="submit" disabled={pending} className="w-full">
           {pending ? "읽는 중" : "업로드"}
         </Button>
-        {state && (
-          <p role="status" className={state.ok ? "text-sm text-positive" : "text-sm text-negative"}>
-            {state.message}
-          </p>
-        )}
       </form>
 
       {materials.length === 0 ? (
-        <EmptyState message="아직 올린 자료가 없습니다." />
+        <EmptyState icon={FileText} message="아직 올린 자료가 없습니다." />
       ) : (
         <ul className="space-y-3">
           {materials.map((material) => (
@@ -66,8 +67,13 @@ export function MaterialPanel({
 
 function MaterialItem({ courseId, material }: { courseId: string; material: MaterialRow }) {
   const [state, action, pending] = useActionState<FormState, FormData>(summarizeMaterial, null);
+  const toast = useToast();
   // MIME 상수는 server-only 모듈에 있다. 아이콘은 장식이라 확장자로 고른다.
   const Icon = material.filename.toLowerCase().endsWith(".pptx") ? Presentation : FileText;
+
+  useEffect(() => {
+    if (state?.ok) toast(state.message, "success");
+  }, [state, toast]);
 
   return (
     <li className="rounded-lg border border-line p-3">

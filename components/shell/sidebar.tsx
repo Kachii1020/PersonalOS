@@ -121,7 +121,7 @@ export function MobileNav({ savedOrder }: { savedOrder: string[] | null }) {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "shrink-0 cursor-pointer rounded-lg px-2.5 py-1.5 text-sm transition-colors",
+                "shrink-0 cursor-pointer rounded-lg px-2.5 py-1.5 text-sm transition-[background-color,color,transform] duration-100 active:scale-[0.96]",
                 active ? "bg-accent-soft font-medium text-accent" : "text-text-muted hover:bg-accent-soft",
               )}
             >
@@ -191,7 +191,7 @@ function NavRow({
         title={collapsed ? item.label : undefined}
         aria-current={active ? "page" : undefined}
         className={cn(
-          "flex h-9 flex-1 cursor-pointer items-center gap-2 rounded-lg text-sm transition-colors",
+          "flex h-9 flex-1 cursor-pointer items-center gap-2 rounded-lg text-sm transition-[background-color,color,transform] duration-100 active:scale-[0.97]",
           collapsed ? "justify-center px-0" : "px-2.5",
           active ? "bg-accent-soft font-medium text-accent" : "text-text-muted hover:bg-accent-soft hover:text-accent",
         )}
@@ -221,7 +221,7 @@ function ShellButton({
       aria-label={label}
       className={cn(
         "flex h-9 cursor-pointer items-center gap-2 rounded-lg px-2.5 text-sm text-text-muted",
-        "transition-colors hover:bg-accent-soft hover:text-accent",
+        "transition-[background-color,color,transform] duration-100 hover:bg-accent-soft hover:text-accent active:scale-[0.97]",
         collapsed ? "w-9 justify-center px-0" : "w-full",
       )}
       {...props}

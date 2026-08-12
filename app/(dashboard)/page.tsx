@@ -26,7 +26,7 @@ export default function DashboardPage() {
     <>
       <h1 className="sr-only">대시보드</h1>
 
-      <div className="grid gap-4 lg:grid-cols-3">
+      <div className="widget-grid grid gap-4 lg:grid-cols-3">
         <Suspense fallback={<WidgetSkeleton title="달력" glass lines={8} className={CALENDAR_SPAN} />}>
           <MonthCalendar className={CALENDAR_SPAN} />
         </Suspense>

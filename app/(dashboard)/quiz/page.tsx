@@ -1,3 +1,4 @@
+import { HelpCircle } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -36,7 +37,7 @@ export default async function QuizPage() {
 
       {questions.length === 0 ? (
         <Card>
-          <EmptyState message="아직 생성된 문항이 없습니다. 퀴즈 잡이 하루 한 번 돌면 5문제가 여기에 올라옵니다." />
+          <EmptyState icon={HelpCircle} message="아직 생성된 문항이 없습니다. 퀴즈 잡이 하루 한 번 돌면 5문제가 여기에 올라옵니다." />
         </Card>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">

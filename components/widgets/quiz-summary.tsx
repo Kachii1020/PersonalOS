@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { HelpCircle } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -27,7 +28,7 @@ export async function QuizSummary({ className }: { className?: string }) {
         <CardHeader>
           <CardTitle>오늘의 퀴즈</CardTitle>
         </CardHeader>
-        <EmptyState message="아직 생성된 문항이 없습니다. 퀴즈 잡이 하루 한 번 돌면 5문제가 올라옵니다." />
+        <EmptyState icon={HelpCircle} message="아직 생성된 문항이 없습니다. 퀴즈 잡이 하루 한 번 돌면 5문제가 올라옵니다." />
       </Card>
     );
   }

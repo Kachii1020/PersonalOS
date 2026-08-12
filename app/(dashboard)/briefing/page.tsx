@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { Newspaper } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -66,7 +67,7 @@ async function Archive() {
         {rows.length > 0 && <CardHint>{rows.length}일치</CardHint>}
       </CardHeader>
       {rows.length === 0 ? (
-        <EmptyState message="지난 브리핑이 없습니다. 브리핑 잡이 하루 한 번 돌면 여기에 쌓입니다." />
+        <EmptyState icon={Newspaper} message="지난 브리핑이 없습니다. 브리핑 잡이 하루 한 번 돌면 여기에 쌓입니다." />
       ) : (
         <ul className="space-y-2">
           {rows.map((row) => (

@@ -1,14 +1,20 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect } from "react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/toast";
 import { addEvent, type EventFormState } from "@/app/(dashboard)/calendar/actions";
 
 /** 앱 전용 iCloud 캘린더에 일정을 추가한다. 다른 캘린더에는 쓰지 않는다. */
 export function EventForm({ defaultDate, className }: { defaultDate: string; className?: string }) {
   const [state, action, pending] = useActionState<EventFormState, FormData>(addEvent, null);
+  const toast = useToast();
+
+  useEffect(() => {
+    if (state) toast(state.message, state.ok ? "success" : "error");
+  }, [state, toast]);
 
   return (
     <Card className={className}>
@@ -42,12 +48,6 @@ export function EventForm({ defaultDate, className }: { defaultDate: string; cla
         <Button type="submit" variant="primary" disabled={pending} className="w-full">
           {pending ? "iCloud에 추가하는 중" : "일정 추가"}
         </Button>
-
-        {state && (
-          <p role="status" className={state.ok ? "text-sm text-positive" : "text-sm text-negative"}>
-            {state.message}
-          </p>
-        )}
       </form>
     </Card>
   );

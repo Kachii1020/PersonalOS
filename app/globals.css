@@ -66,3 +66,48 @@
     }
   }
 }
+
+/* 페이지 전환·위젯 진입 모션 (UX 개선 F2·F3). prefers-reduced-motion은 위 규칙이 끈다. */
+@keyframes fade-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fade-slide-in 200ms ease-out both;
+}
+
+/* 그리드 직속 자식을 50ms 간격으로 순차 진입시킨다. 위젯 컴포넌트 각각을 건드리지 않는다. */
+.widget-grid > * {
+  animation: fade-slide-in 300ms ease-out both;
+}
+
+.widget-grid > *:nth-child(1) { animation-delay: 0ms; }
+.widget-grid > *:nth-child(2) { animation-delay: 50ms; }
+.widget-grid > *:nth-child(3) { animation-delay: 100ms; }
+.widget-grid > *:nth-child(4) { animation-delay: 150ms; }
+.widget-grid > *:nth-child(5) { animation-delay: 200ms; }
+.widget-grid > *:nth-child(6) { animation-delay: 250ms; }
+.widget-grid > *:nth-child(7) { animation-delay: 300ms; }
+
+/* 토스트 진입: 아래서 살짝 올라오며 페이드 (UX 개선 F13). */
+@keyframes toast-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast-in {
+  animation: toast-slide-up 200ms ease-out both;
+}

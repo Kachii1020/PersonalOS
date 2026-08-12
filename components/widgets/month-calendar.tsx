@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CalendarDays } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -59,6 +60,7 @@ export async function MonthCalendar({ className }: { className?: string }) {
 
       {events.length === 0 ? (
         <EmptyState
+          icon={CalendarDays}
           message="이번 달 일정이 없습니다. iCloud 캘린더를 동기화하면 여기에 표시됩니다."
           action={
             <Link href="/settings" className={buttonClass({ size: "sm" })}>

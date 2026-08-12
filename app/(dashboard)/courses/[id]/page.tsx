@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { ArrowLeft, CalendarClock, ExternalLink, MapPin } from "lucide-react";
+import { ArrowLeft, CalendarClock, ExternalLink, MapPin, NotebookText } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -93,7 +93,7 @@ async function NextClass({ courseId }: { courseId: string }) {
         <CardHint>시간표 ICS</CardHint>
       </CardHeader>
       {!next ? (
-        <EmptyState message="예정된 수업이 없습니다. 설정에서 시간표 ICS를 올리면 여기에 뜹니다." />
+        <EmptyState icon={CalendarClock} message="예정된 수업이 없습니다. 설정에서 시간표 ICS를 올리면 여기에 뜹니다." />
       ) : (
         <div className="space-y-1.5">
           <p className="text-sm text-text">{next.summary}</p>
@@ -126,7 +126,7 @@ async function Notes({ courseName }: { courseName: string }) {
         <CardHint>Notion 읽기 전용 · {notes.length}건</CardHint>
       </CardHeader>
       {notes.length === 0 ? (
-        <EmptyState message="이 과목의 Notion 노트가 아직 없습니다. 과목명과 일치하는 노트를 추가하면 여기에 올라옵니다." />
+        <EmptyState icon={NotebookText} message="이 과목의 Notion 노트가 아직 없습니다. 과목명과 일치하는 노트를 추가하면 여기에 올라옵니다." />
       ) : (
         <ul className="space-y-1">
           {notes.map((note) => (

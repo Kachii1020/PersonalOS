@@ -1,3 +1,4 @@
+import { CheckCircle2 } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
@@ -55,7 +56,7 @@ export default async function TasksPage() {
         <div className="space-y-4 lg:col-span-2">
           {tasks.length === 0 ? (
             <Card>
-              <EmptyState message="열린 할 일이 없습니다. 오른쪽에서 첫 할 일을 추가해 보세요." />
+              <EmptyState icon={CheckCircle2} message="열린 할 일이 없습니다. 오른쪽에서 첫 할 일을 추가해 보세요." />
             </Card>
           ) : (
             ORDER.filter((key) => groups.has(key)).map((key) => (

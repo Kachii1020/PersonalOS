@@ -23,7 +23,9 @@ export function buttonClass({
   return cn(
     // 클릭 가능 요소에는 cursor-pointer, 전환은 200ms (SPEC.md 6.4 규칙 7·8)
     "inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg font-medium",
-    "transition-colors disabled:cursor-not-allowed disabled:opacity-50",
+    // 눌렀을 때 살짝 줄어드는 press 피드백 (UX 개선 F4)
+    "transition-[background-color,color,transform] duration-100 active:scale-[0.97]",
+    "disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100",
     VARIANTS[variant],
     SIZES[size],
     className,

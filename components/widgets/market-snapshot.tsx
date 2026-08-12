@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { LineChart } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
+import { CountUp } from "@/components/ui/count-up";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { buttonClass } from "@/components/ui/button";
+import { ChangeBadge } from "@/components/ui/change-badge";
 import { listTickers, type Ticker } from "@/lib/repos/tickers";
 import { latestPrices, type PriceSnapshot } from "@/lib/repos/prices";
 import { latestFxRate, type FxRate } from "@/lib/repos/fx";
@@ -40,7 +43,7 @@ export async function MarketSnapshotWidget({ className }: { className?: string }
         <CardHeader>
           <CardTitle>지수·환율</CardTitle>
         </CardHeader>
-        <EmptyState message="시세 잡을 한 번 실행하면 티커가 등록됩니다." />
+        <EmptyState icon={LineChart} message="시세 잡을 한 번 실행하면 티커가 등록됩니다." />
       </Card>
     );
   }
@@ -64,14 +67,9 @@ export async function MarketSnapshotWidget({ className }: { className?: string }
             <li key={t.id} className="flex items-baseline justify-between gap-2">
               <span className="truncate text-text-muted">{t.displayName}</span>
               {snap ? (
-                <span className="num shrink-0 text-text">
-                  {formatPrice(snap.close, t.currency)}
-                  {snap.changePct != null && (
-                    <span className={snap.changePct >= 0 ? "ml-1 text-positive" : "ml-1 text-negative"}>
-                      {snap.changePct >= 0 ? "+" : ""}
-                      {snap.changePct.toFixed(2)}%
-                    </span>
-                  )}
+                <span className="flex shrink-0 items-baseline gap-1.5">
+                  <span className="num text-text">{formatPrice(snap.close, t.currency)}</span>
+                  {snap.changePct != null && <ChangeBadge pct={snap.changePct} />}
                 </span>
               ) : (
                 <span className="text-text-muted">—</span>
@@ -83,7 +81,7 @@ export async function MarketSnapshotWidget({ className }: { className?: string }
 
       {fxUsdKrw && (
         <p className="num mt-3 border-t border-line pt-2 text-xs text-text-muted">
-          USD/KRW {fxUsdKrw.rate.toFixed(2)}
+          USD/KRW <CountUp value={fxUsdKrw.rate} decimals={2} />
         </p>
       )}
 
