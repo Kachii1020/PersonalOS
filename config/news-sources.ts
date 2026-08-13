@@ -56,6 +56,9 @@ function googleNewsUrl(query: string, lang: Lang): string {
 const DIRECT_FEEDS: NewsSource[] = [
   { key: "rss:ko:yna-economy", lang: "ko", sector: "finance", url: "https://www.yna.co.kr/rss/economy.xml" },
   { key: "rss:en:fed-press", lang: "en", sector: "finance", url: "https://www.federalreserve.gov/feeds/press_all.xml" },
+  { key: "rss:en:nyt-business", lang: "en", sector: "finance", url: "https://rss.nytimes.com/services/xml/rss/nyt/Business.xml" },
+  { key: "rss:en:nyt-technology", lang: "en", sector: "it", url: "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml" },
+  { key: "rss:en:nyt-world", lang: "en", sector: "rotating", url: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml" },
   { key: "rss:ja:itmedia-news", lang: "ja", sector: "it", url: "https://rss.itmedia.co.jp/rss/2.0/news_bursts.xml" },
 ];
 

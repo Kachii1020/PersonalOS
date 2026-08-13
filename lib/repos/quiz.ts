@@ -11,6 +11,7 @@ export type QuizQuestion = {
   choices: string[];
   answerIndex: number;
   explanation: string;
+  conceptHint: string | null;
   difficulty: number;
   /** 복습 큐에서 올라온 문항인지. UI가 "복습" 배지를 붙인다. */
   isReview: boolean;
@@ -23,6 +24,7 @@ type QuestionSelect = {
   choices: string[];
   answer_index: number;
   explanation: string;
+  concept_hint: string | null;
   difficulty: number;
 };
 
@@ -34,12 +36,13 @@ function toQuestion(row: QuestionSelect, isReview: boolean): QuizQuestion {
     choices: row.choices,
     answerIndex: row.answer_index,
     explanation: row.explanation,
+    conceptHint: row.concept_hint,
     difficulty: row.difficulty,
     isReview,
   };
 }
 
-const FIELDS = "id, domain, question, choices, answer_index, explanation, difficulty";
+const FIELDS = "id, domain, question, choices, answer_index, explanation, concept_hint, difficulty";
 
 /** 잡 전용. 오늘까지 복습 예정인 문항 id. 중복은 제거한다. */
 export async function dueReviewQuestionIdsForJob(now: Date = new Date()): Promise<string[]> {
@@ -79,6 +82,7 @@ export async function insertQuizQuestions(questions: QuizQuestionRaw[]): Promise
         choices: q.choices,
         answer_index: q.answer_index,
         explanation: q.explanation,
+        concept_hint: q.concept_hint,
         difficulty: q.difficulty,
       })),
     )
@@ -208,4 +212,135 @@ export async function recordAttempt(
   if (error) throw new Error(`복습 큐 생성 실패: ${error.message}`);
 
   return { isCorrect };
+}
+
+// ============ 오답노트 (SPEC.md 6.2) ============
+
+export type WrongAnswer = {
+  id: string;
+  domain: QuizDomain;
+  question: string;
+  choices: string[];
+  answerIndex: number;
+  explanation: string;
+  conceptHint: string | null;
+  chosenIndex: number;
+  attemptedAt: string;
+  difficulty: number;
+};
+
+/** 틀린 문항을 도메인별로 그룹핑해서 반환한다. 같은 문항은 최신 시도만 남긴다. */
+export async function wrongAnswersByDomain(): Promise<Partial<Record<QuizDomain, WrongAnswer[]>>> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("quiz_attempts")
+    .select(`
+      id, chosen_index, attempted_at, is_correct,
+      quiz_questions!inner(${FIELDS})
+    `)
+    .eq("is_correct", false)
+    .order("attempted_at", { ascending: false })
+    .limit(200);
+
+  if (error) throw new Error(`오답 조회 실패: ${error.message}`);
+
+  // 같은 문항은 가장 최근 시도만 남긴다
+  const seen = new Set<string>();
+  const result: Partial<Record<QuizDomain, WrongAnswer[]>> = {};
+
+  for (const row of data ?? []) {
+    const q = row.quiz_questions as unknown as QuestionSelect;
+    if (seen.has(q.id)) continue;
+    seen.add(q.id);
+
+    const domain = q.domain as QuizDomain;
+    const entry: WrongAnswer = {
+      id: q.id,
+      domain,
+      question: q.question,
+      choices: q.choices,
+      answerIndex: q.answer_index,
+      explanation: q.explanation,
+      conceptHint: q.concept_hint,
+      chosenIndex: row.chosen_index,
+      attemptedAt: row.attempted_at,
+      difficulty: q.difficulty,
+    };
+
+    if (!result[domain]) result[domain] = [];
+    result[domain]!.push(entry);
+  }
+
+  return result;
+}
+
+/** 대시보드 요약용 오답 총 수. */
+export async function wrongAnswerCount(): Promise<number> {
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("quiz_attempts")
+    .select("question_id", { count: "exact", head: true })
+    .eq("is_correct", false);
+
+  if (error) return 0;
+  return count ?? 0;
+}
+
+// ============ 도메인 마이크로 레슨 ============
+
+export type DomainLesson = {
+  domain: QuizDomain;
+  title: string;
+  content: string;
+  keyTerms: string[];
+};
+
+/** 생성된 도메인 레슨을 전부 반환한다. */
+export async function allDomainLessons(): Promise<DomainLesson[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("quiz_domain_lessons")
+    .select("domain, title, content, key_terms")
+    .order("domain");
+
+  if (error) throw new Error(`도메인 레슨 조회 실패: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    domain: r.domain as QuizDomain,
+    title: r.title,
+    content: r.content,
+    keyTerms: r.key_terms,
+  }));
+}
+
+/** 특정 도메인의 레슨을 반환한다. */
+export async function getDomainLesson(domain: QuizDomain): Promise<DomainLesson | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("quiz_domain_lessons")
+    .select("domain, title, content, key_terms")
+    .eq("domain", domain)
+    .maybeSingle();
+
+  if (error) throw new Error(`도메인 레슨 조회 실패: ${error.message}`);
+  if (!data) return null;
+  return {
+    domain: data.domain as QuizDomain,
+    title: data.title,
+    content: data.content,
+    keyTerms: data.key_terms,
+  };
+}
+
+/** 잡/서버 액션 전용. 도메인 레슨을 upsert한다. */
+export async function upsertDomainLesson(
+  domain: QuizDomain,
+  lesson: { title: string; content: string; key_terms: string[] },
+): Promise<void> {
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("quiz_domain_lessons")
+    .upsert({ domain, ...lesson }, { onConflict: "domain" });
+
+  if (error) throw new Error(`도메인 레슨 저장 실패: ${error.message}`);
 }

@@ -7,6 +7,7 @@ export type QuizQuestionRaw = {
   choices: string[];
   answer_index: number;
   explanation: string;
+  concept_hint: string;
   difficulty: number;
 };
 
@@ -23,13 +24,14 @@ export const QUIZ_SCHEMA = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["domain", "question", "choices", "answer_index", "explanation", "difficulty"],
+        required: ["domain", "question", "choices", "answer_index", "explanation", "concept_hint", "difficulty"],
         properties: {
           domain: { type: "string", enum: QUIZ_DOMAINS },
           question: { type: "string" },
           choices: { type: "array", items: { type: "string" } },
           answer_index: { type: "integer" },
           explanation: { type: "string" },
+          concept_hint: { type: "string" },
           difficulty: { type: "integer", enum: [1, 2, 3] },
         },
       },
@@ -46,6 +48,7 @@ export const QUIZ_SYSTEM = `당신은 투자은행·퀀트 취업을 준비하�
 - 오답 3개도 그럴듯해야 한다. 명백히 틀린 보기를 채우지 않는다.
 - explanation은 정답인 이유와 대표 오답이 왜 틀렸는지를 한 문단으로 쓴다.
 - difficulty는 1(개념 확인) / 2(적용) / 3(응용·함정) 중 하나다.
+- concept_hint는 이 문제가 다루는 핵심 개념을 2~3문장으로 설명한다. 문제의 정답을 직접 드러내지 않되, 무엇을 알아야 풀 수 있는지를 알려준다. 학생이 힌트를 읽고 개념을 떠올린 뒤 문제를 풀도록 유도한다.
 - 계산 문제는 암산으로 풀 수 있는 수준까지만 낸다. 문제에 필요한 수치는 문제 안에 전부 넣는다.
 - 사실관계가 불확실한 최신 통계나 특정 기업의 실적 수치를 묻지 않는다.`;
 

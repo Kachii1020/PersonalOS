@@ -23,17 +23,24 @@ type Props = {
     choices: string[];
     answerIndex: number;
     explanation: string;
+    conceptHint: string | null;
     difficulty: number;
     isReview: boolean;
   };
+  /** 퀴즈 흐름에서 완료 추적용. */
+  onAnswered?: (questionId: string, isCorrect: boolean) => void;
 };
 
 /**
  * 문항 하나. 답을 고르면 서버가 채점하고 해설을 연다.
  * answerIndex는 채점 뒤에만 쓴다 — 고르기 전에는 화면에 드러나지 않는다.
  */
-export function QuizCard({ index, question }: Props) {
-  const [result, action, pending] = useActionState<AnswerResult, FormData>(submitAnswer, null);
+export function QuizCard({ index, question, onAnswered }: Props) {
+  const [result, action, pending] = useActionState<AnswerResult, FormData>(async (prev, formData) => {
+    const res = await submitAnswer(prev, formData);
+    if (res && onAnswered) onAnswered(res.questionId, res.isCorrect);
+    return res;
+  }, null);
   const answered = result !== null;
 
   return (
@@ -50,6 +57,17 @@ export function QuizCard({ index, question }: Props) {
       </CardHeader>
 
       <p className="mb-3 text-sm text-text">{question.question}</p>
+
+      {question.conceptHint && !answered && (
+        <details className="mb-3">
+          <summary className="cursor-pointer text-xs font-medium text-accent transition-colors hover:text-accent/80">
+            힌트 보기
+          </summary>
+          <p className="mt-1 rounded-lg bg-accent-soft/50 px-3 py-2 text-sm text-text-muted">
+            {question.conceptHint}
+          </p>
+        </details>
+      )}
 
       <form action={action} className="space-y-2">
         <input type="hidden" name="questionId" value={question.id} />

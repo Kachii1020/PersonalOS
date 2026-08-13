@@ -579,6 +579,7 @@ export type Database = {
         Row: {
           answer_index: number
           choices: string[]
+          concept_hint: string | null
           created_at: string
           difficulty: number
           domain: string
@@ -589,6 +590,7 @@ export type Database = {
         Insert: {
           answer_index: number
           choices: string[]
+          concept_hint?: string | null
           created_at?: string
           difficulty?: number
           domain: string
@@ -599,12 +601,37 @@ export type Database = {
         Update: {
           answer_index?: number
           choices?: string[]
+          concept_hint?: string | null
           created_at?: string
           difficulty?: number
           domain?: string
           explanation?: string
           id?: string
           question?: string
+        }
+        Relationships: []
+      }
+      quiz_domain_lessons: {
+        Row: {
+          domain: string
+          title: string
+          content: string
+          key_terms: string[]
+          generated_at: string
+        }
+        Insert: {
+          domain: string
+          title: string
+          content: string
+          key_terms: string[]
+          generated_at?: string
+        }
+        Update: {
+          domain?: string
+          title?: string
+          content?: string
+          key_terms?: string[]
+          generated_at?: string
         }
         Relationships: []
       }

@@ -4,13 +4,14 @@ import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { buttonClass } from "@/components/ui/button";
-import { todaysQuizProgress, type QuizProgress } from "@/lib/repos/quiz";
+import { todaysQuizProgress, wrongAnswerCount, type QuizProgress } from "@/lib/repos/quiz";
 
 /** 대시보드의 '오늘의 퀴즈' 칸 (SPEC.md 6.1). 문제 풀이는 /quiz에서 한다. */
 export async function QuizSummary({ className }: { className?: string }) {
   let progress: QuizProgress;
+  let wrongCount = 0;
   try {
-    progress = await todaysQuizProgress();
+    [progress, wrongCount] = await Promise.all([todaysQuizProgress(), wrongAnswerCount()]);
   } catch {
     return (
       <Card className={className}>
@@ -68,8 +69,17 @@ export async function QuizSummary({ className }: { className?: string }) {
       </p>
 
       <Link href="/quiz" className={buttonClass({ className: "mt-3 w-full" })}>
-        {done ? "다시 보기" : "퀴즈 풀기"}
+        {done ? "다시 보기" : progress.answered === 0 ? "학습 시작" : "퀴즈 풀기"}
       </Link>
+
+      {wrongCount > 0 && (
+        <Link
+          href="/quiz/review"
+          className="mt-2 block text-center text-xs text-text-muted transition-colors hover:text-accent"
+        >
+          오답노트 {wrongCount}문제
+        </Link>
+      )}
     </Card>
   );
 }
