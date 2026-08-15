@@ -43,6 +43,8 @@ const DOMAIN_DESCRIPTION: Record<QuizDomain, string> = {
   ai_ml: "머신러닝 (지도학습, 비지도학습, 딥러닝, 평가지표, 오버피팅, 모델 선택)",
   system_design: "시스템 설계 (확장성, 분산시스템, 데이터베이스, 캐싱, 로드밸런싱, 장애 대응)",
   japanese: "일본어 (비즈니스 일본어: 敬語·メール·会議表現, JLPT N1+: 文法·語彙·漢字·読解)",
+  devops: "DevOps (Docker·컨테이너, GitHub Actions CI/CD, AWS 핵심 서비스(VPC·EC2·S3), Kubernetes 기초, Linux·네트워크, Blue/Green·Canary 배포 전략)",
+  ai_engineering: "AI 엔지니어링 (RAG 아키텍처·Vector DB·임베딩, LangGraph·AI Agent·MCP, LLM 양자화(Quantization)·PEFT·LoRA, vLLM 서빙·MLOps)",
 };
 
 export function buildDomainLessonPrompt(domain: QuizDomain): string {

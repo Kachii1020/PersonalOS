@@ -227,4 +227,6 @@ const DOMAIN_SHORT: Record<string, string> = {
   ai_ml: "ML",
   system_design: "설계",
   japanese: "日本語",
+  devops: "DevOps",
+  ai_engineering: "AI Eng",
 };

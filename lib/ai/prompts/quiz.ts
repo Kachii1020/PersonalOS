@@ -1,4 +1,4 @@
-export const QUIZ_DOMAINS = ["ib", "accounting", "macro", "ai_ml", "system_design", "japanese"] as const;
+export const QUIZ_DOMAINS = ["ib", "accounting", "macro", "ai_ml", "system_design", "japanese", "devops", "ai_engineering"] as const;
 export type QuizDomain = (typeof QUIZ_DOMAINS)[number];
 
 export type QuizQuestionRaw = {
@@ -51,7 +51,9 @@ export const QUIZ_SYSTEM = `당신은 투자은행·퀀트 취업과 일본 취�
 - concept_hint는 이 문제가 다루는 핵심 개념을 2~3문장으로 설명한다. 문제의 정답을 직접 드러내지 않되, 무엇을 알아야 풀 수 있는지를 알려준다. 학생이 힌트를 읽고 개념을 떠올린 뒤 문제를 풀도록 유도한다.
 - 계산 문제는 암산으로 풀 수 있는 수준까지만 낸다. 문제에 필요한 수치는 문제 안에 전부 넣는다.
 - 사실관계가 불확실한 최신 통계나 특정 기업의 실적 수치를 묻지 않는다.
-- japanese 도메인: 문제와 보기에 일본어 원문을 포함한다. 경어(敬語) 구분, JLPT N1 수준 문법·어휘, 비즈니스 관용 표현, 한자 읽기를 출제한다. 설명(explanation)과 concept_hint는 한국어로 쓰되, 일본어 원문을 병기한다.`;
+- japanese 도메인: 문제와 보기에 일본어 원문을 포함한다. 경어(敬語) 구분, JLPT N1 수준 문법·어휘, 비즈니스 관용 표현, 한자 읽기를 출제한다. 설명(explanation)과 concept_hint는 한국어로 쓰되, 일본어 원문을 병기한다.
+- devops 도메인: Docker 컨테이너 격리 원리, Dockerfile 최적화, CI/CD 파이프라인 설계, AWS VPC 네트워크 흐름, Kubernetes 오브젝트(Pod·Service·Deployment) 역할, Blue/Green vs Canary 배포 차이를 출제한다. 클라우드 서비스 고유 명칭(VPC, ALB, HPA 등)은 원어를 그대로 쓴다.
+- ai_engineering 도메인: RAG 파이프라인(임베딩·청킹·검색 전략), RAGAS 평가 지표, LangGraph 상태 머신 기반 Agent 설계, MCP 프로토콜, 양자화 비트별 품질-속도 트레이드오프, vLLM PagedAttention 원리를 출제한다. 기술 용어(RAG, PEFT, LoRA, vLLM 등)는 원어를 그대로 쓴다.`;
 
 /**
  * 보기 순서를 섞는다.
@@ -80,6 +82,8 @@ const DOMAIN_LABEL: Record<QuizDomain, string> = {
   ai_ml: "머신러닝 (모델, 학습, 평가지표)",
   system_design: "시스템 설계 (확장성, 데이터 저장, 장애 대응)",
   japanese: "일본어 (비즈니스 일본어, JLPT N1+, 경어, 한자)",
+  devops: "DevOps (컨테이너, CI/CD, 클라우드 인프라)",
+  ai_engineering: "AI 엔지니어링 (RAG, Agent 시스템, LLM 서빙)",
 };
 
 /**

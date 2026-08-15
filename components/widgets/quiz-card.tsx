@@ -13,6 +13,8 @@ const DOMAIN_LABEL: Record<string, string> = {
   ai_ml: "머신러닝",
   system_design: "시스템 설계",
   japanese: "일본어",
+  devops: "DevOps",
+  ai_engineering: "AI 엔지니어링",
 };
 
 type Props = {
