@@ -49,7 +49,8 @@ async function Archive() {
   let rows: Awaited<ReturnType<typeof listBriefings>>;
   try {
     rows = await listBriefings();
-  } catch {
+  } catch (e) {
+    console.error(e);
     return (
       <Card>
         <CardHeader>

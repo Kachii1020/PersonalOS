@@ -16,7 +16,8 @@ export async function TodaySchedule({ className }: { className?: string }) {
   let events: EventRow[];
   try {
     events = await listEventsBetween(start.toISOString(), end.toISOString());
-  } catch {
+  } catch (e) {
+    console.error(e);
     return (
       <Card className={className}>
         <CardHeader>

@@ -21,7 +21,8 @@ export default async function ReviewPage() {
   let groups: Partial<Record<QuizDomain, WrongAnswer[]>>;
   try {
     groups = await wrongAnswersByDomain();
-  } catch {
+  } catch (e) {
+    console.error(e);
     return (
       <>
         <Header />

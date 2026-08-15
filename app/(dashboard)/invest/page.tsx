@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { ExternalLink, LineChart, NotebookText } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 import { Badge } from "@/components/ui/badge";
 import { ChangeBadge } from "@/components/ui/change-badge";
 import { CountUp } from "@/components/ui/count-up";
@@ -21,11 +22,26 @@ export const metadata = { title: "투자 · Personal OS" };
  * KRW/USD 병기는 fx_rates의 당일 환율 사용 (G3 조건 3).
  */
 export default async function InvestPage() {
-  const [tickers, prices, fxUsdKrw] = await Promise.all([
-    listTickers(),
-    latestPrices(),
-    latestFxRate("USD", "KRW"),
-  ]);
+  let tickers: Awaited<ReturnType<typeof listTickers>>;
+  let prices: Awaited<ReturnType<typeof latestPrices>>;
+  let fxUsdKrw: Awaited<ReturnType<typeof latestFxRate>>;
+  try {
+    [tickers, prices, fxUsdKrw] = await Promise.all([
+      listTickers(),
+      latestPrices(),
+      latestFxRate("USD", "KRW"),
+    ]);
+  } catch (e) {
+    console.error(e);
+    return (
+      <>
+        <h1 className="mb-4 text-xl font-semibold text-text">투자</h1>
+        <Card>
+          <ErrorState what="투자 데이터를 불러오지 못했습니다" fix="설정에서 잡 로그를 확인하세요." />
+        </Card>
+      </>
+    );
+  }
 
   const priceMap = new Map(prices.map((p) => [p.tickerId, p]));
   const latestDate = prices[0]?.asOf;
@@ -145,9 +161,16 @@ async function MacroIndicators() {
   let snapshots: MacroSnapshot[];
   try {
     snapshots = await latestMacroSnapshots();
-  } catch {
-    // 테이블이 아직 없거나 읽기 실패 — 조용히 숨긴다
-    return null;
+  } catch (e) {
+    console.error(e);
+    return (
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>매크로 지표</CardTitle>
+        </CardHeader>
+        <ErrorState what="매크로 지표를 불러오지 못했습니다" fix="설정에서 잡 로그를 확인하세요." />
+      </Card>
+    );
   }
 
   if (snapshots.length === 0) return null;

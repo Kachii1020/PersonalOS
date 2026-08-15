@@ -1,6 +1,7 @@
 import { ExternalLink, GitFork } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 import { listRepos, listDailyCommits, type DailyCommits } from "@/lib/repos/github";
 
 export const metadata = { title: "포트폴리오 · Personal OS" };
@@ -10,10 +11,24 @@ export const metadata = { title: "포트폴리오 · Personal OS" };
  * 90일 커밋 잔디 + 레포 목록.
  */
 export default async function PortfolioPage() {
-  const [repos, commits] = await Promise.all([
-    listRepos(),
-    listDailyCommits(90),
-  ]);
+  let repos: Awaited<ReturnType<typeof listRepos>>;
+  let commits: DailyCommits[];
+  try {
+    [repos, commits] = await Promise.all([
+      listRepos(),
+      listDailyCommits(90),
+    ]);
+  } catch (e) {
+    console.error(e);
+    return (
+      <>
+        <h1 className="mb-4 text-xl font-semibold text-text">포트폴리오</h1>
+        <Card>
+          <ErrorState what="포트폴리오 데이터를 불러오지 못했습니다" fix="설정에서 잡 로그를 확인하세요." />
+        </Card>
+      </>
+    );
+  }
 
   const totalCommits = commits.reduce((s, c) => s + c.commitCount, 0);
 

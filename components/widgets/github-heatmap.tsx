@@ -15,7 +15,8 @@ export async function GithubHeatmapWidget({ className }: { className?: string })
 
   try {
     commits = await listDailyCommits(90);
-  } catch {
+  } catch (e) {
+    console.error(e);
     return (
       <Card className={className}>
         <CardHeader>

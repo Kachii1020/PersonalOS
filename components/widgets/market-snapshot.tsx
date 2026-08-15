@@ -26,7 +26,8 @@ export async function MarketSnapshotWidget({ className }: { className?: string }
       latestPrices(),
       latestFxRate("USD", "KRW"),
     ]);
-  } catch {
+  } catch (e) {
+    console.error(e);
     return (
       <Card className={className}>
         <CardHeader>

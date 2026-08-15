@@ -21,7 +21,8 @@ export async function DailyBriefing({ className }: { className?: string }) {
   let briefing: Briefing | null;
   try {
     briefing = await latestBriefing();
-  } catch {
+  } catch (e) {
+    console.error(e);
     return (
       <Card glass className={className}>
         <CardHeader>

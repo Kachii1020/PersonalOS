@@ -81,7 +81,7 @@ export function QuizFlow({ questions, lessons, reviewCount }: Props) {
               disabled={i > step && !(i === 2 && allAnswered)}
               className={cn(
                 "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all",
-                active && "bg-accent text-white",
+                active && "bg-accent text-bg",
                 done && "bg-accent/10 text-accent",
                 !active && !done && "text-text-muted",
                 "disabled:cursor-default",
@@ -180,7 +180,7 @@ export function QuizFlow({ questions, lessons, reviewCount }: Props) {
             </p>
             <p className="mt-2 text-sm text-text-muted">
               {correctCount === questions.length
-                ? "전부 맞혔습니다! 🎉"
+                ? "전부 맞혔습니다!"
                 : wrongCount === 1
                   ? "1문제 틀렸습니다. 오답노트에서 복습하세요."
                   : `${wrongCount}문제 틀렸습니다. 오답노트에서 복습하세요.`}

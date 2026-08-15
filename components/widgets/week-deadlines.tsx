@@ -18,7 +18,8 @@ export async function WeekDeadlines({ className }: { className?: string }) {
   let tasks: TaskRow[];
   try {
     tasks = await listOpenTasksDueBetween(start.toISOString(), end.toISOString());
-  } catch {
+  } catch (e) {
+    console.error(e);
     return (
       <Card className={className}>
         <CardHeader>

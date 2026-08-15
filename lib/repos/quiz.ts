@@ -283,7 +283,7 @@ export async function wrongAnswerCount(): Promise<number> {
     .select("question_id", { count: "exact", head: true })
     .eq("is_correct", false);
 
-  if (error) return 0;
+  if (error) throw error;
   return count ?? 0;
 }
 

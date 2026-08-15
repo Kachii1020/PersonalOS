@@ -12,7 +12,8 @@ export async function QuizSummary({ className }: { className?: string }) {
   let wrongCount = 0;
   try {
     [progress, wrongCount] = await Promise.all([todaysQuizProgress(), wrongAnswerCount()]);
-  } catch {
+  } catch (e) {
+    console.error(e);
     return (
       <Card className={className}>
         <CardHeader>

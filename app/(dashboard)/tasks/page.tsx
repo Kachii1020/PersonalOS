@@ -29,7 +29,8 @@ export default async function TasksPage() {
   let tasks: TaskRow[];
   try {
     tasks = await listOpenTasks();
-  } catch {
+  } catch (e) {
+    console.error(e);
     return (
       <>
         <h1 className="mb-4 text-xl font-semibold text-text">마감·할 일</h1>

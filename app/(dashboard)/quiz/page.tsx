@@ -12,7 +12,8 @@ export default async function QuizPage() {
   let lessons: DomainLesson[];
   try {
     [questions, lessons] = await Promise.all([todaysQuiz(), allDomainLessons()]);
-  } catch {
+  } catch (e) {
+    console.error(e);
     return (
       <>
         <h1 className="mb-4 text-xl font-semibold text-text">오늘의 퀴즈</h1>

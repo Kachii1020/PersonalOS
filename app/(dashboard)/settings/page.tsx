@@ -56,7 +56,8 @@ async function Integrations() {
   let states: Awaited<ReturnType<typeof listSyncStates>>;
   try {
     states = await listSyncStates();
-  } catch {
+  } catch (e) {
+    console.error(e);
     return (
       <Card>
         <CardHeader>
@@ -156,7 +157,8 @@ async function JobLog({ className }: { className?: string }) {
   let runs: Awaited<ReturnType<typeof listRecentJobRuns>>;
   try {
     runs = await listRecentJobRuns();
-  } catch {
+  } catch (e) {
+    console.error(e);
     return (
       <Card className={className}>
         <CardHeader>

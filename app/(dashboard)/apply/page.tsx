@@ -1,6 +1,7 @@
 import { Briefcase, ExternalLink } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 import { listApplications, groupByStage } from "@/lib/repos/applications";
 
 export const metadata = { title: "지원 파이프라인 · Personal OS" };
@@ -11,7 +12,20 @@ export const metadata = { title: "지원 파이프라인 · Personal OS" };
  * G3 조건 5: 단계별 그룹핑.
  */
 export default async function ApplyPage() {
-  const apps = await listApplications();
+  let apps: Awaited<ReturnType<typeof listApplications>>;
+  try {
+    apps = await listApplications();
+  } catch (e) {
+    console.error(e);
+    return (
+      <>
+        <h1 className="mb-4 text-xl font-semibold text-text">지원 파이프라인</h1>
+        <Card>
+          <ErrorState what="지원 파이프라인을 불러오지 못했습니다" fix="설정에서 잡 로그를 확인하세요." />
+        </Card>
+      </>
+    );
+  }
 
   if (apps.length === 0) {
     const noEnv = !process.env.NOTION_DB_APPLICATIONS?.trim();
