@@ -26,7 +26,7 @@ export const DOMAIN_LESSON_SCHEMA = {
   },
 } as const;
 
-export const DOMAIN_LESSON_SYSTEM = `당신은 투자은행·퀀트 취업을 준비하는 학생의 학습 코치다.
+export const DOMAIN_LESSON_SYSTEM = `당신은 투자은행·퀀트 취업과 일본 취업을 준비하는 학생의 학습 코치다.
 주어진 도메인의 핵심 개념을 정리한 마이크로 레슨을 만든다.
 
 규칙:
@@ -42,6 +42,7 @@ const DOMAIN_DESCRIPTION: Record<QuizDomain, string> = {
   macro: "거시경제 (금리, 환율, 통화정책, 재정정책, GDP, 인플레이션, 중앙은행)",
   ai_ml: "머신러닝 (지도학습, 비지도학습, 딥러닝, 평가지표, 오버피팅, 모델 선택)",
   system_design: "시스템 설계 (확장성, 분산시스템, 데이터베이스, 캐싱, 로드밸런싱, 장애 대응)",
+  japanese: "일본어 (비즈니스 일본어: 敬語·メール·会議表現, JLPT N1+: 文法·語彙·漢字·読解)",
 };
 
 export function buildDomainLessonPrompt(domain: QuizDomain): string {

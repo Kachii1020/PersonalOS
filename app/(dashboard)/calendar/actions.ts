@@ -1,7 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createAppEvent } from "@/lib/integrations/caldav/sync";
+import { createAppEvent, deleteAppEvent } from "@/lib/integrations/caldav/sync";
+import { deleteEventFromMirror, getEventForDelete } from "@/lib/repos/events";
 
 export type EventFormState = { ok: boolean; message: string } | null;
 
@@ -46,4 +47,29 @@ export async function addEvent(_prev: EventFormState, formData: FormData): Promi
   revalidatePath("/calendar");
   revalidatePath("/");
   return { ok: true, message: `'${summary}'를 iCloud에 추가했습니다.` };
+}
+
+/**
+ * 이벤트를 iCloud에서 삭제하고 미러에서도 제거한다.
+ * 쓰기 대상이 앱 전용 캘린더인지는 여기서 직접 확인한다 (SPEC.md 5.1 절대 규칙 3).
+ */
+export async function deleteEvent(eventId: string): Promise<EventFormState> {
+  if (!eventId) return { ok: false, message: "이벤트 ID가 없습니다." };
+
+  try {
+    const event = await getEventForDelete(eventId);
+
+    if (!event.calendar.isWritable || event.calendar.kind !== "caldav") {
+      return { ok: false, message: "읽기 전용 캘린더의 이벤트는 삭제할 수 없습니다." };
+    }
+
+    await deleteAppEvent(event.calendar.sourceUrl, event.caldavHref);
+    await deleteEventFromMirror(event.id);
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) };
+  }
+
+  revalidatePath("/calendar");
+  revalidatePath("/");
+  return { ok: true, message: "이벤트를 삭제했습니다." };
 }

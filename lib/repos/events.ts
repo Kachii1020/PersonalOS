@@ -232,6 +232,76 @@ export async function listEventsBetween(fromIso: string, toIso: string): Promise
   }));
 }
 
+/** UI용: 이벤트에 쓰기 가능 여부를 붙여서 반환. */
+export async function listEventsWithWritableFlag(
+  fromIso: string,
+  toIso: string,
+): Promise<(EventRow & { isDeletable: boolean })[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("events")
+    .select(
+      "id, calendar_id, caldav_uid, summary, description, location, starts_at, ends_at, is_all_day, rrule, source, calendars!inner(is_writable, kind)",
+    )
+    .lt("starts_at", toIso)
+    .gt("ends_at", fromIso)
+    .order("starts_at", { ascending: true });
+
+  if (error) throw new Error(`이벤트 조회 실패: ${error.message}`);
+  return (data ?? []).map((r) => {
+    const cal = r.calendars as unknown as { is_writable: boolean; kind: string };
+    return {
+      id: r.id,
+      calendarId: r.calendar_id,
+      caldavUid: r.caldav_uid,
+      summary: r.summary,
+      description: r.description,
+      location: r.location,
+      startsAt: r.starts_at,
+      endsAt: r.ends_at,
+      isAllDay: r.is_all_day,
+      rrule: r.rrule,
+      source: r.source,
+      isDeletable: cal.is_writable && cal.kind === "caldav",
+    };
+  });
+}
+
+/** 삭제 전 이벤트 조회. caldav_href와 calendar 정보가 필요하므로 별도 쿼리. */
+export async function getEventForDelete(eventId: string): Promise<{
+  id: string;
+  calendarId: string;
+  caldavHref: string;
+  summary: string;
+  source: string;
+  calendar: { sourceUrl: string; isWritable: boolean; kind: string };
+}> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("events")
+    .select("id, calendar_id, caldav_href, summary, source, calendars!inner(source_url, is_writable, kind)")
+    .eq("id", eventId)
+    .single();
+
+  if (error) throw new Error(`이벤트 조회 실패: ${error.message}`);
+  const cal = data.calendars as unknown as { source_url: string; is_writable: boolean; kind: string };
+  return {
+    id: data.id,
+    calendarId: data.calendar_id,
+    caldavHref: data.caldav_href,
+    summary: data.summary,
+    source: data.source,
+    calendar: { sourceUrl: cal.source_url, isWritable: cal.is_writable, kind: cal.kind },
+  };
+}
+
+/** 미러에서 이벤트 삭제. CalDAV DELETE 이후에 호출한다. */
+export async function deleteEventFromMirror(eventId: string): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("events").delete().eq("id", eventId);
+  if (error) throw new Error(`이벤트 삭제 실패: ${error.message}`);
+}
+
 type CalendarSelect = {
   id: string;
   kind: string;

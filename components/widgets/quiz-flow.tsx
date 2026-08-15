@@ -226,4 +226,5 @@ const DOMAIN_SHORT: Record<string, string> = {
   macro: "거시",
   ai_ml: "ML",
   system_design: "설계",
+  japanese: "日本語",
 };

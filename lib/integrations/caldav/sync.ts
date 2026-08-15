@@ -162,3 +162,19 @@ export async function createAppEvent(input: {
 
   return { uid, href };
 }
+
+/**
+ * iCloud에서 이벤트를 삭제하고 미러에서도 제거한다.
+ * 쓰기 가능한 캘린더의 이벤트만 삭제할 수 있다 (SPEC.md 5.1 절대 규칙 3).
+ */
+export async function deleteAppEvent(calendarSourceUrl: string, caldavHref: string): Promise<void> {
+  const client = await createCalDavClient();
+
+  const response = await client.deleteCalendarObject({
+    calendarObject: { url: caldavHref },
+  });
+
+  if (!response.ok) {
+    throw new Error(`iCloud DELETE 실패: ${response.status} ${response.statusText}`);
+  }
+}

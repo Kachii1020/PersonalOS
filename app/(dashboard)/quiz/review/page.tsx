@@ -15,6 +15,7 @@ const DOMAIN_LABEL: Record<string, string> = {
   macro: "거시경제",
   ai_ml: "머신러닝",
   system_design: "시스템 설계",
+  japanese: "일본어",
 };
 
 export default async function ReviewPage() {
