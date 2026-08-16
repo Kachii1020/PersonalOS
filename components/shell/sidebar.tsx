@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { GripVertical, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-react";
@@ -101,37 +101,14 @@ export function Sidebar({ savedOrder, onReorder, onSignOut }: ShellProps) {
   );
 }
 
-/** 모바일(<1024px)은 사이드바 대신 상단 가로 네비게이션을 쓴다. 재정렬은 데스크톱 전용이다. */
+/**
+ * 모바일(<1024px)은 하단 탭 바를 쓴다 (components/shell/bottom-tab-bar.tsx).
+ * 이 컴포넌트는 사용하지 않지만 호환성을 위해 남겨둔다.
+ * @deprecated BottomTabBar로 교체됨
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function MobileNav({ savedOrder }: { savedOrder: string[] | null }) {
-  const pathname = usePathname();
-  const items = useMemo(() => applyOrder(savedOrder), [savedOrder]);
-
-  return (
-    <header className="sticky top-0 z-10 border-b border-line bg-surface lg:hidden">
-      <div className="flex h-12 items-center justify-between px-4">
-        <span className="text-sm font-semibold text-text">Personal OS</span>
-        <ThemeToggle collapsed />
-      </div>
-      <nav aria-label="주요 메뉴" className="flex gap-1 overflow-x-auto px-2 pb-2">
-        {items.map((item) => {
-          const active = isActive(pathname, item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={active ? "page" : undefined}
-              className={cn(
-                "shrink-0 cursor-pointer rounded-lg px-2.5 py-1.5 text-sm transition-[background-color,color,transform] duration-100 active:scale-[0.96]",
-                active ? "bg-accent-soft font-medium text-accent" : "text-text-muted hover:bg-accent-soft",
-              )}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-    </header>
-  );
+  return null;
 }
 
 function NavRow({

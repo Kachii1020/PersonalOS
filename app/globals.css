@@ -47,6 +47,25 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /*
+   * iPhone PWA 네이티브 느낌.
+   * - 탭 하이라이트 제거 (iOS 기본 파란색 깜빡임)
+   * - 텍스트 선택 방지 (네비게이션 요소에만 — 콘텐츠는 선택 가능)
+   * - 더블탭 줌 방지 (touch-action: manipulation)
+   * - 오버스크롤 바운스 제거 (standalone에서 앱처럼)
+   */
+  html {
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior: none;
+  }
+
+  /* standalone PWA일 때 safe area 상단 패딩. 투명 상태바 아래 콘텐츠가 가려지지 않게. */
+  @media (display-mode: standalone) {
+    body {
+      padding-top: env(safe-area-inset-top);
+    }
+  }
+
   /* 보이는 키보드 포커스 링 (SPEC.md 6.4 규칙 8). */
   :focus-visible {
     outline: 2px solid var(--accent);
