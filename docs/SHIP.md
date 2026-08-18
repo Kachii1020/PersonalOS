@@ -8,16 +8,20 @@
 
 ## 1. VAPID 키
 
-Phase 4 브랜치 루트에서 `npm install` 한 뒤 (로컬, 로그가 안 남는 터미널):
+`git pull origin …`만으로는 브랜치가 바뀌지 않는다. 체크아웃한 뒤, **npm install 없이**:
 
 ```bash
-npm run vapid:generate
+git fetch origin
+git checkout cursor/phase4-implement-3145
+node scripts/gen-vapid.cjs
 ```
 
-`Missing script` 이면 이 브랜치가 아니다. 스크립트 없이 만들 때:
+또는 같은 파일: `npm run vapid:generate`. Node 내장 crypto만 쓴다.
+
+`Missing script` / 파일이 없으면 브랜치가 아니다. 그때는 아무 디렉터리에서:
 
 ```bash
-npx web-push generate-vapid-keys
+npx --yes web-push generate-vapid-keys
 ```
 
 나온 두 값을 `.env.local`의 `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY`에 붙인다.
