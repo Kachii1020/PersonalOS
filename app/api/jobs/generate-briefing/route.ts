@@ -12,6 +12,7 @@ import { listRecentNewsForJob } from "@/lib/repos/news";
 import { completeBriefing, failBriefing, startBriefing } from "@/lib/repos/briefings";
 import { recordJobRun } from "@/lib/repos/job-runs";
 import { rejectUnauthorizedCron } from "@/lib/jobs/cron-auth";
+import { sendPush } from "@/lib/integrations/push/send";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -62,6 +63,12 @@ export async function POST(request: NextRequest) {
       costUsd: result.costUsd,
     });
 
+    const push = await sendPush({
+      title: "오늘의 브리핑",
+      body: `섹션 ${sections.length}개가 준비됐습니다.`,
+      url: "/briefing",
+    });
+
     await recordJobRun({
       jobName: "generate-briefing",
       startedAt,
@@ -72,6 +79,7 @@ export async function POST(request: NextRequest) {
         newsItems: news.length,
         costUsd: result.costUsd,
         attempts: result.attempts,
+        push,
       },
     });
 

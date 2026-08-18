@@ -1,18 +1,11 @@
 /*
- * 최소 서비스 워커.
- *
- * 해시가 붙은 정적 자산만 캐시-우선으로 처리한다.
- * HTML과 API 응답은 캐시하지 않는다 — 캘린더·브리핑 미러가 오래된 값을 보여주면
- * 동기화 상태를 신뢰할 수 없게 된다.
+ * 정적 자산은 캐시-우선.
+ * 내비게이션 HTML은 network-first — 온라인이면 캐시가 응답하지 않는다 (SPEC.md 5.7).
  */
 
-const CACHE = "personal-os-static-v1";
+const STATIC_CACHE = "personal-os-static-v2";
+const PAGE_CACHE = "personal-os-pages-v1";
 const STATIC = /\.(?:woff2?|css|js|svg|png|ico)$/;
-/*
- * /_next/static 아래 파일만 캐시한다. 이 경로의 파일명에는 빌드 해시가 있어서
- * 내용이 바뀌면 URL도 바뀐다. 해시 없는 경로를 캐시-우선으로 잡으면
- * 낡은 번들이 영구히 남는다.
- */
 const IMMUTABLE_PREFIX = "/_next/static/";
 
 self.addEventListener("install", () => {
@@ -20,10 +13,11 @@ self.addEventListener("install", () => {
 });
 
 self.addEventListener("activate", (event) => {
+  const keep = new Set([STATIC_CACHE, PAGE_CACHE]);
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => !keep.has(k)).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -34,17 +28,68 @@ self.addEventListener("fetch", (event) => {
 
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/auth/")) return;
+
+  if (request.mode === "navigate") {
+    event.respondWith(networkFirstPage(request));
+    return;
+  }
+
   if (!url.pathname.startsWith(IMMUTABLE_PREFIX)) return;
   if (!STATIC.test(url.pathname)) return;
 
   event.respondWith(
-    caches.open(CACHE).then(async (cache) => {
+    caches.open(STATIC_CACHE).then(async (cache) => {
       const hit = await cache.match(request);
       if (hit) return hit;
-
       const response = await fetch(request);
       if (response.ok) cache.put(request, response.clone());
       return response;
+    }),
+  );
+});
+
+async function networkFirstPage(request) {
+  const cache = await caches.open(PAGE_CACHE);
+  try {
+    const response = await fetch(request);
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  } catch {
+    const hit = (await cache.match(request)) ?? (await cache.match("/"));
+    if (hit) return hit;
+    throw new Error("offline and no cached page");
+  }
+}
+
+self.addEventListener("push", (event) => {
+  let data = { title: "Personal OS", body: "", url: "/" };
+  try {
+    data = { ...data, ...(event.data ? event.data.json() : {}) };
+  } catch {
+    const text = event.data ? event.data.text() : "";
+    if (text) data.body = text;
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      data: { url: data.url || "/" },
+    }),
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const target = event.notification.data?.url || "/";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+      for (const client of windows) {
+        if ("focus" in client) {
+          client.navigate?.(target);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(target);
     }),
   );
 });

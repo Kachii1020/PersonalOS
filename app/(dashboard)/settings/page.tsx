@@ -6,6 +6,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { Badge } from "@/components/ui/badge";
 import { SkeletonLines } from "@/components/ui/skeleton";
 import { IcsUpload } from "@/components/widgets/ics-upload";
+import { PushSettings } from "@/components/widgets/push-settings";
 import { listSyncStates } from "@/lib/repos/sync-state";
 import { listRecentJobRuns } from "@/lib/repos/job-runs";
 import { budgetStatus } from "@/lib/ai/budget";
@@ -32,6 +33,13 @@ export default function SettingsPage() {
         <Suspense fallback={<LoadingCard title="AI 예산" />}>
           <Budget />
         </Suspense>
+        <Card>
+          <CardHeader>
+            <CardTitle>푸시 알림</CardTitle>
+            <CardHint>홈 화면 앱에서만</CardHint>
+          </CardHeader>
+          <PushSettings vapidPublicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim() || null} />
+        </Card>
         <IcsUpload className="lg:col-span-2" />
         <Suspense fallback={<LoadingCard title="동기화 로그" />}>
           <JobLog className="lg:col-span-2" />

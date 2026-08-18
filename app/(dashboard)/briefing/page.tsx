@@ -6,6 +6,7 @@ import { ErrorState } from "@/components/ui/error-state";
 import { Badge } from "@/components/ui/badge";
 import { SkeletonLines } from "@/components/ui/skeleton";
 import { DailyBriefing } from "@/components/widgets/daily-briefing";
+import { WeeklyReview } from "@/components/widgets/weekly-review";
 import { listBriefings } from "@/lib/repos/briefings";
 
 export const metadata = { title: "브리핑 · Personal OS" };
@@ -26,6 +27,19 @@ export default function BriefingPage() {
           }
         >
           <DailyBriefing />
+        </Suspense>
+
+        <Suspense
+          fallback={
+            <Card>
+              <CardHeader>
+                <CardTitle>주간 리뷰</CardTitle>
+              </CardHeader>
+              <SkeletonLines lines={4} />
+            </Card>
+          }
+        >
+          <WeeklyReview />
         </Suspense>
 
         <Suspense

@@ -40,7 +40,7 @@ async function main() {
 
     console.log(`→ generating lesson for ${domain}...`);
     const result = await callStructured<DomainLessonPayload>({
-      purpose: "quiz",
+      purpose: "domain_lesson",
       system: DOMAIN_LESSON_SYSTEM,
       userMessage: buildDomainLessonPrompt(domain),
       schema: DOMAIN_LESSON_SCHEMA,
