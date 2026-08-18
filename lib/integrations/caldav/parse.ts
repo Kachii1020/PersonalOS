@@ -9,13 +9,35 @@ export type ParsedEvent = {
   endsAt: string;
   isAllDay: boolean;
   rrule: string | null;
+  exdates: string[];
 };
+
+/**
+ * CalDAV 객체에서 UID만 뽑는다. 파싱이 실패해도 UID 줄은 남아 있는 경우가 많다.
+ * 삭제 reconcile은 파싱 성공 집합이 아니라 이 UID 집합을 기준으로 한다.
+ */
+export function extractUid(icsText: string): string | null {
+  try {
+    const root = new ICAL.Component(ICAL.parse(icsText));
+    const candidates = root.getAllSubcomponents("vevent");
+    const vevent = candidates.find((c) => !c.getFirstPropertyValue("recurrence-id")) ?? candidates[0];
+    const uid = vevent?.getFirstPropertyValue("uid");
+    if (typeof uid === "string" && uid.trim()) return uid.trim();
+  } catch {
+    // 아래 정규식 폴백.
+  }
+
+  const unfolded = icsText.replace(/\r?\n[ \t]/g, "");
+  const match = unfolded.match(/^\s*UID\s*:\s*(.+)$/im);
+  const uid = match?.[1]?.trim();
+  return uid || null;
+}
 
 /**
  * CalDAV 객체 하나(VCALENDAR)에서 마스터 VEVENT를 뽑는다.
  *
- * 반복 일정은 여기서 전개하지 않는다. RRULE 문자열을 그대로 보관하고,
- * 화면에 필요한 범위만 조회 시점에 전개하는 편이 미러 테이블을 작게 유지한다.
+ * 반복 일정은 여기서 전개하지 않는다. RRULE·EXDATE를 그대로 보관하고,
+ * 화면에 필요한 범위만 조회 시점에 전개한다 (`rrule.ts`).
  * RECURRENCE-ID가 붙은 예외 인스턴스는 마스터와 uid가 같아 무시한다.
  *
  * 파싱할 수 없으면 null. 이벤트 하나 때문에 동기화 전체가 멈추면 안 된다.
@@ -56,7 +78,20 @@ export function fromVEvent(vevent: ICAL.Component): ParsedEvent | null {
     endsAt: end.toJSDate().toISOString(),
     isAllDay,
     rrule: vevent.getFirstPropertyValue("rrule")?.toString() ?? null,
+    exdates: exdatesOf(vevent),
   };
+}
+
+function exdatesOf(vevent: ICAL.Component): string[] {
+  const out: string[] = [];
+  for (const prop of vevent.getAllProperties("exdate")) {
+    for (const value of prop.getValues()) {
+      if (value && typeof value === "object" && "toJSDate" in value) {
+        out.push((value as ICAL.Time).toJSDate().toISOString());
+      }
+    }
+  }
+  return out;
 }
 
 function addOneDay(time: ICAL.Time): ICAL.Time {

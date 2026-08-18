@@ -283,6 +283,7 @@ export type Database = {
           description: string | null
           ends_at: string
           etag: string | null
+          exdates: string[]
           id: string
           is_all_day: boolean
           location: string | null
@@ -300,6 +301,7 @@ export type Database = {
           description?: string | null
           ends_at: string
           etag?: string | null
+          exdates?: string[]
           id?: string
           is_all_day?: boolean
           location?: string | null
@@ -317,6 +319,7 @@ export type Database = {
           description?: string | null
           ends_at?: string
           etag?: string | null
+          exdates?: string[]
           id?: string
           is_all_day?: boolean
           location?: string | null
