@@ -8,11 +8,19 @@
 
 ## 1. VAPID 키
 
-프로젝트 루트에서 (로컬, 로그가 안 남는 터미널):
+Phase 4 브랜치 루트에서 `npm install` 한 뒤 (로컬, 로그가 안 남는 터미널):
 
 ```bash
 npm run vapid:generate
 ```
+
+`Missing script` 이면 이 브랜치가 아니다. 스크립트 없이 만들 때:
+
+```bash
+npx web-push generate-vapid-keys
+```
+
+나온 두 값을 `.env.local`의 `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY`에 붙인다.
 
 `.env.local`에 `NEXT_PUBLIC_VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY`가 생긴다.
 **같은 두 값**을 Vercel(또는 동급) 환경변수에 넣고 **재배포**한다. 키를 바꾸면 기존 구독은 전부 죽는다.

@@ -11,7 +11,7 @@
     "db:reset": "tsx scripts/gen-seed.ts && supabase db reset",
     "test:g1": "node --import tsx --conditions=react-server --test tests/gates/g1.test.ts",
     "notion:check": "node --import tsx --conditions=react-server scripts/check-notion.ts",
-    "vapid:generate": "node --import tsx scripts/gen-vapid.ts",
+    "vapid:generate": "tsx scripts/gen-vapid.ts",
     "test:g2": "node --import tsx --conditions=react-server --test tests/gates/g2.test.ts",
     "test:g3": "node --import tsx --conditions=react-server --test tests/gates/g3.test.ts",
     "test:g4": "node --import tsx --conditions=react-server --test tests/gates/g4.test.ts",
