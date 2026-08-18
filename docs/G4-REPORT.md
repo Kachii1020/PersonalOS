@@ -21,3 +21,10 @@ npm run lint       → 0 errors
 npm run test:unit  → 10/10
 npm run test:g4    → 5 pass / 3 skip / 0 fail
 ```
+
+## 다음 단계 (실행 순서: `docs/SHIP.md`)
+
+1. [사람] 로컬에서 `npm run vapid:generate` → Vercel에 같은 두 키. 클라우드 에이전트가 만든 키는 쓰지 않는다 (로그에 남음).
+2. [사람] 호스티드 `supabase db push`. 이 브랜치 미적용분은 `0001`–`0007` + `0009`. Trust(#3)를 먼저 머지하면 `0008`도. 이 VM에는 `SUPABASE_ACCESS_TOKEN`이 없어 push 불가.
+3. [사람] iPhone 홈 화면 앱에서 구독 + 오프라인 (조건 1, 4, 5). `/settings` 푸시 카드에 진단 행이 있다.
+4. 통과 후 이 파일의 1·4·5를 수동 통과로 고친다.
