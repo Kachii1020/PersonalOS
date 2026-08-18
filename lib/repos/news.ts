@@ -61,6 +61,19 @@ export async function listRecentNewsForJob(limit = 60): Promise<NewsItem[]> {
   return (data ?? []).map(toNewsItem);
 }
 
+/** 잡 전용. fetched_at이 cutoff보다 이른 행을 지우고 삭제 건수를 돌려준다. */
+export async function pruneNewsFetchedBefore(cutoff: Date): Promise<number> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("news_items")
+    .delete()
+    .lt("fetched_at", cutoff.toISOString())
+    .select("id");
+
+  if (error) throw new Error(`뉴스 정리 실패: ${error.message}`);
+  return data?.length ?? 0;
+}
+
 /** UI용 조회. 세션 클라이언트를 쓰므로 RLS가 적용된다. */
 export async function listRecentNews(limit = 60): Promise<NewsItem[]> {
   const supabase = await createClient();

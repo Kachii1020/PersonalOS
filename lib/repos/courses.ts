@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
+import { expandOccurrences } from "@/lib/integrations/caldav/rrule";
 import { gradePoint, isGrade } from "@/lib/grades";
 
 /** 과목·학기 데이터 접근 레이어 (SPEC.md 4절, 5.1b). */
@@ -137,21 +138,41 @@ export async function setGrade(id: string, grade: string | null): Promise<void> 
   if (error) throw new Error(`성적 저장 실패: ${error.message}`);
 }
 
-/** 과목 상세의 '다음 수업'. ICS로 들어온 이벤트 중 아직 안 지난 첫 건 (G2 조건). */
+/** 과목 상세의 '다음 수업'. 반복 수업은 조회 범위 안에서 전개한 뒤 아직 안 지난 첫 건. */
 export async function nextClass(courseId: string): Promise<{ summary: string; startsAt: string; location: string | null } | null> {
+  const now = new Date();
+  const horizon = new Date(now.getTime() + 180 * 86_400_000);
+
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("events")
-    .select("summary, starts_at, location")
-    .eq("course_id", courseId)
-    .gte("starts_at", new Date().toISOString())
-    .order("starts_at", { ascending: true })
-    .limit(1)
-    .maybeSingle();
+    .select("summary, starts_at, ends_at, is_all_day, rrule, exdates, location")
+    .eq("course_id", courseId);
 
   if (error) throw new Error(`다음 수업 조회 실패: ${error.message}`);
-  if (!data) return null;
-  return { summary: data.summary, startsAt: data.starts_at, location: data.location };
+
+  const upcoming: { summary: string; startsAt: string; location: string | null }[] = [];
+  for (const row of data ?? []) {
+    const occurrences = expandOccurrences(
+      {
+        startsAt: row.starts_at,
+        endsAt: row.ends_at,
+        isAllDay: row.is_all_day,
+        rrule: row.rrule,
+        exdates: row.exdates ?? [],
+      },
+      now,
+      horizon,
+    );
+    for (const occ of occurrences) {
+      if (new Date(occ.startsAt) >= now) {
+        upcoming.push({ summary: row.summary, startsAt: occ.startsAt, location: row.location });
+      }
+    }
+  }
+
+  upcoming.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+  return upcoming[0] ?? null;
 }
 
 /** 잡 전용: code가 있는 과목의 code → id 맵. 코드는 대문자로 정규화한다. */
