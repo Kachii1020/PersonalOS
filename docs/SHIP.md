@@ -42,13 +42,15 @@ npx supabase link --project-ref leitsqwmtxqsgnsvzdfc
 npx supabase db push
 ```
 
-운영자가 `0001`–`0007` + `0009`는 이미 push했다. 이 wrap 브랜치를 머지한 뒤 **남은 건 `0008`뿐**:
+운영자가 `0001`–`0007` + `0009`는 이미 push했다. `0008`을 그 사이에 넣으면 히스토리가 깨진다. EXDATE는 **`0010_event_exdates.sql`** 이다.
 
 | 파일 | 내용 | 상태 |
 |---|---|---|
 | `0001`–`0007` | Phase 1–3 + 퀴즈 | 적용됨 |
-| `0008_event_exdates.sql` | Trust — `events.exdates` | **이 머지 후 push** |
 | `0009_phase4_push_review.sql` | `push_subscriptions`, `weekly_reviews` | 적용됨 |
+| `0010_event_exdates.sql` | Trust — `events.exdates` | **이 파일만 push** |
+
+`0001`–`0007`을 `repair --status reverted` 하거나 `db pull` 하지 말 것. 테이블이 있는데 히스토리만 지워진다.
 
 시드는 별도. SQL Editor:
 
@@ -95,7 +97,7 @@ on conflict (key) do update set value = excluded.value;
 ## 4. 남은 사람 단계 (wrap 후)
 
 1. 이 PR을 `main`에 머지하고 Vercel이 `main`을 배포하게 한다.
-2. `npx supabase db push` — `0008_event_exdates`만 올라가야 정상.
+2. `git pull origin main` 후 `npx supabase db push` — **`0010_event_exdates`만** 올라가야 정상. `0001`–`0007` revert / `db pull` 하지 말 것.
 3. GitHub repo Secrets: `APP_URL`, `CRON_SECRET` (Vercel과 같은 값).
 4. Actions → `cron` → Run workflow:
 

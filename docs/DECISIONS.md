@@ -1,9 +1,15 @@
 # 결정 로그
 
+## 2026-08-19 — EXDATE는 0008이 아니라 0010
+
+- **결정**: `events.exdates` 마이그레이션을 `0010_event_exdates.sql`로 둔다. `0008` 파일은 지운다. `add column if not exists`.
+- **이유**: 호스티드가 `0009`를 먼저 적용했다. `0008`을 끼우면 히스토리가 과거로 삽입되어 `db push`가 거부한다. CLI가 시키는 `0001`–`0007` revert + `db pull`은 테이블을 남기고 기록만 지운다.
+- **버린 대안**: `migration repair --status applied 0008` — 컬럼이 아직 없으면 거짓말 기록이 된다. `db pull` — 스키마 전체가 새 파일로 쏟아진다.
+
 ## 2026-08-19 — wrap은 PWA → Trust → Phase 4 한 브랜치
 
 - **결정**: `main`에 #2 → #3 → #5를 쌓아 `cursor/wrap-stack-3145` 하나 만든다. `layout.tsx`는 탭 바와 OfflineBanner를 모두 둔다.
-- **이유**: 세 PR을 따로 머지하면 같은 layout 충돌을 사람이 세 번 본다. 0008/0009는 번호가 안 겹친다.
+- **이유**: 세 PR을 따로 머지하면 같은 layout 충돌을 사람이 세 번 본다. 0009와 EXDATE(0010)는 번호가 안 겹친다.
 - **버린 대안**: Phase 4만 머지 — 탭 바와 RRULE이 `main`에 안 남는다.
 
 ## 2026-08-18 — AI 호출 지점 5개 정식화
