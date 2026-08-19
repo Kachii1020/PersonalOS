@@ -11,8 +11,9 @@
 - PWA 아이콘이 SVG 하나뿐이다. 홈 화면 설치 품질을 높이려면 192/512 PNG가 필요하다. 접근성 게이트에는 영향 없다.
 - **호스티드 Supabase 반영** — 마이그레이션 2개를 로컬에만 적용했다. `supabase link` + `db push`에 액세스 토큰과 DB 비밀번호가 필요해서 사람이 직접 해야 한다. 그전까지는 `.env.development.local`이 로컬 스택을 가리킨다.
 - **사이드바 재정렬의 실제 입력 검증** — 로직·저장·복원은 확인했지만, 실제 마우스 드래그와 Alt+화살표 키 입력은 브라우저 자동화가 이벤트를 포커스된 요소로 전달하지 못해 확인하지 못했다. 수동으로 한 번 확인할 것.
-- **반복 일정(RRULE) 전개** — `events.rrule`에 원문만 저장하고 인스턴스를 펼치지 않는다. 달력 화면에서 표시 범위만 전개하는 게 미러를 작게 유지한다. ui-widgets가 MonthCalendar를 만들 때 필요하다.
-- **iCloud 삭제 반영** — 동기화는 upsert만 한다. iCloud에서 지운 이벤트가 미러에 남는다. ctag가 바뀐 캘린더에 한해 조회된 uid 집합에 없는 행을 지우는 처리가 필요하다.
+- ~~**반복 일정(RRULE) 전개**~~ — `listEventsBetween` / `listEventsWithWritableFlag` / `nextClass`가 표시 범위만 전개한다.
+- **RECURRENCE-ID 예외 인스턴스** — 수정된 반복 회차는 파서가 무시하고 마스터만 남긴다. 예외 회차를 쓰려면 uid+recurrence-id 복합 키가 필요하다.
+- ~~**iCloud 삭제 반영**~~ — ctag가 바뀌어 객체를 가져온 캘린더에서, fetch된 UID 집합에 없는 행을 지운다. UID를 못 읽은 객체가 있으면 삭제하지 않고 ctag도 전진시키지 않는다.
 - **ICS 라이브 URL 경로 실검증** — `WASEDA_ICS_URL`을 fetch하는 분기는 코드에 있지만 실제 URL로 돌려보지 못했다. MyWaseda가 구독 URL을 주는지 확인되면 그 URL로 한 번 실행하고 `cron.yml`에 스케줄을 추가한다. 지금 정식 경로는 `/settings` 수동 업로드다.
 - **과목 코드 정규식 튜닝** — 실물 MyWaseda ICS를 못 구해서 후보를 넓게 뽑고 `courses.code`와 교집합만 채택하는 방식으로 두었다. 실물을 넣어보고 `job_runs.meta.unmatchedSamples`에 걸리는 제목이 있으면 `extractCourseCodes`를 조인다.
 - ~~**시세·환율·GitHub 수집**~~ — Phase 3에서 구현 완료. G3 통과.
@@ -20,4 +21,4 @@
 - **스캔 PDF(이미지)** — 텍스트 레이어가 없는 자료는 0자로 추출되고 업로드가 거부된다. OCR은 넣지 않았다. 거부 메시지가 이유를 말해준다.
 - **PDF의 일본어 장음 부호** — LibreOffice로 만든 검증용 PDF에서 `ー`가 빠져 "コ ポレ ト"로 추출됐다. PPTX는 정상이었다. 픽스처 폰트 문제인지 unpdf 문제인지 실물 강의 PDF로 한 번 확인할 것.
 - **학기 추가 UI** — `semesters`에 행을 넣는 화면이 없다. 지금은 DB에 직접 넣어야 과목을 만들 수 있다.
-- **뉴스 보존 기간** — `news_items`가 무한히 쌓인다. 하루 270건이면 한 달에 8천 행. 오래된 행을 지우는 정리 잡이 필요하다.
+- ~~**뉴스 보존 기간**~~ — `fetch-news` 말미에 `fetched_at` 30일 초과 행을 지우고 `job_runs.meta.pruned`에 건수를 남긴다. `briefing_sections`는 URL 배열이라 FK 없음.

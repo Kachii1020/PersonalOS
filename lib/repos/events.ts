@@ -2,6 +2,7 @@ import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import type { ParsedEvent } from "@/lib/integrations/caldav/parse";
+import { expandOccurrences } from "@/lib/integrations/caldav/rrule";
 
 /**
  * 캘린더·이벤트 데이터 접근 레이어.
@@ -83,6 +84,7 @@ export async function upsertEvents(
       ends_at: e.endsAt,
       is_all_day: e.isAllDay,
       rrule: e.rrule,
+      exdates: e.exdates ?? [],
       source,
       updated_at: new Date().toISOString(),
     })),
@@ -148,6 +150,7 @@ export async function upsertIcsEvents(
       ends_at: e.endsAt,
       is_all_day: e.isAllDay,
       rrule: e.rrule,
+      exdates: e.exdates ?? [],
       course_id: e.courseId,
       source: "waseda",
       updated_at: new Date().toISOString(),
@@ -205,31 +208,13 @@ export function assertWritable(calendar: Pick<CalendarRow, "displayName" | "isWr
   }
 }
 
-/** UI용 조회. 기간이 겹치는 이벤트를 시작 시각 순으로 돌려준다. */
-export async function listEventsBetween(fromIso: string, toIso: string): Promise<EventRow[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("events")
-    .select("id, calendar_id, caldav_uid, summary, description, location, starts_at, ends_at, is_all_day, rrule, source")
-    .lt("starts_at", toIso)
-    .gt("ends_at", fromIso)
-    .order("starts_at", { ascending: true });
+const EVENT_COLS =
+  "id, calendar_id, caldav_uid, summary, description, location, starts_at, ends_at, is_all_day, rrule, exdates, source";
 
-  // 실패를 빈 배열로 바꾸면 "일정 없음"과 구분이 안 된다 (CLAUDE.md: 실패는 조용하지 않다).
-  if (error) throw new Error(`이벤트 조회 실패: ${error.message}`);
-  return (data ?? []).map((r) => ({
-    id: r.id,
-    calendarId: r.calendar_id,
-    caldavUid: r.caldav_uid,
-    summary: r.summary,
-    description: r.description,
-    location: r.location,
-    startsAt: r.starts_at,
-    endsAt: r.ends_at,
-    isAllDay: r.is_all_day,
-    rrule: r.rrule,
-    source: r.source,
-  }));
+/** UI용 조회. 기간이 겹치는 이벤트(반복은 범위 안 인스턴스)를 시작 시각 순으로 돌려준다. */
+export async function listEventsBetween(fromIso: string, toIso: string): Promise<EventRow[]> {
+  const rows = await loadEventCandidates(fromIso, toIso, EVENT_COLS);
+  return expandEventRows(rows, fromIso, toIso);
 }
 
 /** UI용: 이벤트에 쓰기 가능 여부를 붙여서 반환. */
@@ -237,34 +222,65 @@ export async function listEventsWithWritableFlag(
   fromIso: string,
   toIso: string,
 ): Promise<(EventRow & { isDeletable: boolean })[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("events")
-    .select(
-      "id, calendar_id, caldav_uid, summary, description, location, starts_at, ends_at, is_all_day, rrule, source, calendars!inner(is_writable, kind)",
-    )
-    .lt("starts_at", toIso)
-    .gt("ends_at", fromIso)
-    .order("starts_at", { ascending: true });
+  const select = `${EVENT_COLS}, calendars!inner(is_writable, kind)`;
+  const rows = await loadEventCandidates(fromIso, toIso, select);
+  const expanded = expandEventRows(rows, fromIso, toIso);
+  const flags = new Map<string, boolean>();
+  for (const r of rows) {
+    const cal = r.calendars as unknown as { is_writable: boolean; kind: string } | undefined;
+    flags.set(r.id, Boolean(cal?.is_writable && cal.kind === "caldav"));
+  }
+  return expanded.map((e) => ({ ...e, isDeletable: flags.get(e.id) ?? false }));
+}
 
-  if (error) throw new Error(`이벤트 조회 실패: ${error.message}`);
-  return (data ?? []).map((r) => {
-    const cal = r.calendars as unknown as { is_writable: boolean; kind: string };
-    return {
-      id: r.id,
-      calendarId: r.calendar_id,
-      caldavUid: r.caldav_uid,
-      summary: r.summary,
-      description: r.description,
-      location: r.location,
-      startsAt: r.starts_at,
-      endsAt: r.ends_at,
-      isAllDay: r.is_all_day,
-      rrule: r.rrule,
-      source: r.source,
-      isDeletable: cal.is_writable && cal.kind === "caldav",
-    };
-  });
+/**
+ * 범위와 겹치는 일반 일정 + 시작이 범위 끝 이전인 반복 일정.
+ * 과거 마스터를 가진 반복 일정이 `.gt(ends_at, from)`에 걸리지 않게 두 번째로 가져온다.
+ */
+async function loadEventCandidates(
+  fromIso: string,
+  toIso: string,
+  select: string,
+): Promise<EventSelect[]> {
+  const supabase = await createClient();
+  const overlapping = supabase.from("events").select(select).lt("starts_at", toIso).gt("ends_at", fromIso);
+  const recurring = supabase.from("events").select(select).not("rrule", "is", null).lt("starts_at", toIso);
+  const [a, b] = await Promise.all([overlapping, recurring]);
+
+  if (a.error) throw new Error(`이벤트 조회 실패: ${a.error.message}`);
+  if (b.error) throw new Error(`이벤트 조회 실패: ${b.error.message}`);
+
+  const byId = new Map<string, EventSelect>();
+  for (const row of [...(a.data ?? []), ...(b.data ?? [])]) {
+    const typed = row as unknown as EventSelect;
+    byId.set(typed.id, typed);
+  }
+  return [...byId.values()];
+}
+
+function expandEventRows(rows: EventSelect[], fromIso: string, toIso: string): EventRow[] {
+  const from = new Date(fromIso);
+  const to = new Date(toIso);
+  const out: EventRow[] = [];
+  for (const r of rows) {
+    const base = toEventRow(r);
+    const occurrences = expandOccurrences(
+      {
+        startsAt: r.starts_at,
+        endsAt: r.ends_at,
+        isAllDay: r.is_all_day,
+        rrule: r.rrule,
+        exdates: r.exdates ?? [],
+      },
+      from,
+      to,
+    );
+    for (const occ of occurrences) {
+      out.push({ ...base, startsAt: occ.startsAt, endsAt: occ.endsAt });
+    }
+  }
+  out.sort((a, b) => a.startsAt.localeCompare(b.startsAt));
+  return out;
 }
 
 /** 삭제 전 이벤트 조회. caldav_href와 calendar 정보가 필요하므로 별도 쿼리. */
@@ -300,6 +316,60 @@ export async function deleteEventFromMirror(eventId: string): Promise<void> {
   const supabase = await createClient();
   const { error } = await supabase.from("events").delete().eq("id", eventId);
   if (error) throw new Error(`이벤트 삭제 실패: ${error.message}`);
+}
+
+/**
+ * 잡 전용: 이 캘린더에서 keepUids에 없는 행을 지운다.
+ * keepUids가 비면 캘린더가 비었다는 뜻이라 전부 지운다.
+ */
+export async function deleteEventsMissingFrom(calendarId: string, keepUids: string[]): Promise<number> {
+  const supabase = createAdminClient();
+  const { data: existing, error: readError } = await supabase
+    .from("events")
+    .select("id, caldav_uid")
+    .eq("calendar_id", calendarId);
+
+  if (readError) throw new Error(`이벤트 삭제 대상 조회 실패: ${readError.message}`);
+
+  const keep = new Set(keepUids);
+  const toDelete = (existing ?? []).filter((r) => !keep.has(r.caldav_uid)).map((r) => r.id);
+  if (toDelete.length === 0) return 0;
+
+  const { error } = await supabase.from("events").delete().in("id", toDelete);
+  if (error) throw new Error(`원격 삭제 반영 실패: ${error.message}`);
+  return toDelete.length;
+}
+
+type EventSelect = {
+  id: string;
+  calendar_id: string;
+  caldav_uid: string;
+  summary: string;
+  description: string | null;
+  location: string | null;
+  starts_at: string;
+  ends_at: string;
+  is_all_day: boolean;
+  rrule: string | null;
+  exdates: string[] | null;
+  source: string;
+  calendars?: unknown;
+};
+
+function toEventRow(row: EventSelect): EventRow {
+  return {
+    id: row.id,
+    calendarId: row.calendar_id,
+    caldavUid: row.caldav_uid,
+    summary: row.summary,
+    description: row.description,
+    location: row.location,
+    startsAt: row.starts_at,
+    endsAt: row.ends_at,
+    isAllDay: row.is_all_day,
+    rrule: row.rrule,
+    source: row.source,
+  };
 }
 
 type CalendarSelect = {

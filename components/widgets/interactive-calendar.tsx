@@ -113,7 +113,7 @@ export function InteractiveCalendar({ year, month, cells, totalEvents, className
               {cell.events.length > 0 && (
                 <div className="flex flex-wrap gap-0.5 sm:hidden" aria-hidden="true">
                   {cell.events.slice(0, 3).map((event) => (
-                    <span key={event.id} className="size-1.5 rounded-full bg-accent" />
+                    <span key={`${event.id}:${event.startsAt}`} className="size-1.5 rounded-full bg-accent" />
                   ))}
                 </div>
               )}
@@ -121,7 +121,7 @@ export function InteractiveCalendar({ year, month, cells, totalEvents, className
 
               <ul className="hidden space-y-0.5 sm:block">
                 {cell.events.slice(0, 2).map((event) => (
-                  <li key={event.id} title={event.summary} className="truncate rounded bg-accent-soft px-1 text-xs text-accent">
+                  <li key={`${event.id}:${event.startsAt}`} title={event.summary} className="truncate rounded bg-accent-soft px-1 text-xs text-accent">
                     {event.summary}
                   </li>
                 ))}
@@ -165,7 +165,7 @@ export function InteractiveCalendar({ year, month, cells, totalEvents, className
           ) : (
             <ul className="space-y-2">
               {selectedEvents.map((event) => (
-                <li key={event.id} className="rounded-lg border border-line p-3">
+                <li key={`${event.id}:${event.startsAt}`} className="rounded-lg border border-line p-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-text">{event.summary}</p>

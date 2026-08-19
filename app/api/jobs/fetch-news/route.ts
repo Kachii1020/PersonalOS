@@ -33,7 +33,12 @@ export async function POST(request: NextRequest) {
       startedAt,
       status,
       error,
-      meta: { sources: result.sources, inserted: result.inserted, failed: result.failures.length },
+      meta: {
+        sources: result.sources,
+        inserted: result.inserted,
+        pruned: result.pruned,
+        failed: result.failures.length,
+      },
     });
     await recordSync("rss", { status, error, cursor: { inserted: result.inserted } });
 

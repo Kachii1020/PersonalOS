@@ -1,7 +1,8 @@
 import "server-only";
 import { newsSourcesFor, type NewsSource } from "@/config/news-sources";
 import { parseFeed } from "./rss";
-import { insertNewsItems, type NewsInsert } from "@/lib/repos/news";
+import { newsPruneCutoff } from "./retention";
+import { insertNewsItems, pruneNewsFetchedBefore, type NewsInsert } from "@/lib/repos/news";
 
 /** 소스 하나에서 가져올 최대 기사 수. Google News는 100건까지 주는데 전부 넣을 이유가 없다. */
 const PER_SOURCE_LIMIT = 15;
@@ -17,6 +18,7 @@ export type SourceResult = {
 export type FetchNewsResult = {
   sources: number;
   inserted: number;
+  pruned: number;
   failures: SourceResult[];
   results: SourceResult[];
 };
@@ -35,10 +37,12 @@ export async function fetchNews(now: Date = new Date()): Promise<FetchNewsResult
   const items = settled.flatMap((s) => s.items);
   const results = settled.map((s) => s.result);
   const inserted = await insertNewsItems(items);
+  const pruned = await pruneNewsFetchedBefore(newsPruneCutoff(now));
 
   return {
     sources: sources.length,
     inserted,
+    pruned,
     failures: results.filter((r) => !r.ok),
     results,
   };
