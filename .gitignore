@@ -55,4 +55,5 @@ Thumbs.db
 # 생성 파일 (scripts/gen-seed.ts). 허용 이메일이 들어간다.
 supabase/seed.sql
 .env*
+!.env.example
 .claude/worktrees/

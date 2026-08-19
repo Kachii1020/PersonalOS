@@ -6,6 +6,8 @@ import { ErrorState } from "@/components/ui/error-state";
 import { Badge } from "@/components/ui/badge";
 import { SkeletonLines } from "@/components/ui/skeleton";
 import { IcsUpload } from "@/components/widgets/ics-upload";
+import { PushSettings } from "@/components/widgets/push-settings";
+import { hasPushSubscription } from "@/lib/repos/push";
 import { listSyncStates } from "@/lib/repos/sync-state";
 import { listRecentJobRuns } from "@/lib/repos/job-runs";
 import { budgetStatus } from "@/lib/ai/budget";
@@ -32,12 +34,52 @@ export default function SettingsPage() {
         <Suspense fallback={<LoadingCard title="AI 예산" />}>
           <Budget />
         </Suspense>
+        <Suspense fallback={<LoadingCard title="푸시 알림" />}>
+          <PushCard />
+        </Suspense>
         <IcsUpload className="lg:col-span-2" />
         <Suspense fallback={<LoadingCard title="동기화 로그" />}>
           <JobLog className="lg:col-span-2" />
         </Suspense>
       </div>
     </>
+  );
+}
+
+async function PushCard() {
+  let subscribed = false;
+  try {
+    subscribed = await hasPushSubscription();
+  } catch (e) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>푸시 알림</CardTitle>
+        </CardHeader>
+        <ErrorState
+          what="구독 상태를 읽지 못했습니다"
+          fix={e instanceof Error ? e.message : "0009 마이그레이션이 호스티드에 적용됐는지 확인하세요."}
+        />
+      </Card>
+    );
+  }
+
+  const vapidReady = Boolean(
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim() && process.env.VAPID_PRIVATE_KEY?.trim(),
+  );
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>푸시 알림</CardTitle>
+        <CardHint>G4 1 · 4 · 5</CardHint>
+      </CardHeader>
+      <PushSettings
+        vapidPublicKey={process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim() || null}
+        vapidReady={vapidReady}
+        subscribedOnServer={subscribed}
+      />
+    </Card>
   );
 }
 

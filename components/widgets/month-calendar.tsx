@@ -12,7 +12,7 @@ import { addDays, monthRange, weekday, ymd } from "@/lib/time";
  * 이번 달 달력. 대시보드의 주 시선이라 글래스를 쓰는 두 위젯 중 하나다
  * (SPEC.md 6.4 규칙 1).
  *
- * 반복 일정은 마스터 날짜에만 찍힌다 — RRULE 전개는 docs/DEFERRED.md 참조.
+ * 반복 일정은 listEventsWithWritableFlag가 표시 범위만 전개한다.
  * 서버에서 데이터를 가져오고, 날짜 선택·상세·삭제는 InteractiveCalendar(클라이언트)가 맡는다.
  */
 export async function MonthCalendar({ className }: { className?: string }) {

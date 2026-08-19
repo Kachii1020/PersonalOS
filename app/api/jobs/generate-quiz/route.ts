@@ -9,6 +9,7 @@ import {
 } from "@/lib/repos/quiz";
 import { recordJobRun } from "@/lib/repos/job-runs";
 import { rejectUnauthorizedCron } from "@/lib/jobs/cron-auth";
+import { sendPush } from "@/lib/integrations/push/send";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
@@ -33,11 +34,12 @@ export async function POST(request: NextRequest) {
     const needed = Math.max(0, QUIZ_SIZE - dueIds.length);
 
     if (needed === 0) {
+      const push = await notifyQuizReview(dueIds.length);
       await recordJobRun({
         jobName: "generate-quiz",
         startedAt,
         status: "ok",
-        meta: { reviewDue: dueIds.length, generated: 0, aiCalled: false },
+        meta: { reviewDue: dueIds.length, generated: 0, aiCalled: false, push },
       });
       return NextResponse.json({ reviewDue: dueIds.length, generated: 0, aiCalled: false });
     }
@@ -70,6 +72,7 @@ export async function POST(request: NextRequest) {
     const domains = new Set(shuffled.map((q) => q.domain));
     const inserted = await insertQuizQuestions(shuffled);
 
+    const push = await notifyQuizReview(dueIds.length);
     await recordJobRun({
       jobName: "generate-quiz",
       startedAt,
@@ -80,6 +83,7 @@ export async function POST(request: NextRequest) {
         rejected: questions.length - valid.length,
         domains: [...domains],
         costUsd: result.costUsd,
+        push,
       },
     });
 
@@ -103,4 +107,10 @@ export async function POST(request: NextRequest) {
       { status },
     );
   }
+}
+
+function notifyQuizReview(reviewDue: number) {
+  const body =
+    reviewDue > 0 ? `복습 ${reviewDue}문항이 오늘 퀴즈에 들어와 있습니다.` : "오늘의 퀴즈가 준비됐습니다.";
+  return sendPush({ title: "오늘의 퀴즈", body, url: "/quiz" });
 }

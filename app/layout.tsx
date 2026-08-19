@@ -6,10 +6,17 @@ export const metadata: Metadata = {
   title: "Personal OS",
   description: "커리어 학습, 스케줄, 시사·금융 정보를 한 곳에서 관리하는 개인 대시보드",
   manifest: "/manifest.json",
-  appleWebApp: { capable: true, title: "Personal OS", statusBarStyle: "default" },
+  appleWebApp: {
+    capable: true,
+    title: "Personal OS",
+    /* 투명 상태바 — 콘텐츠가 화면 끝까지 확장되어 네이티브 앱처럼 보인다. */
+    statusBarStyle: "black-translucent",
+  },
 };
 
 export const viewport: Viewport = {
+  /* cover: 노치·다이나믹 아일랜드 아래까지 콘텐츠를 확장한다. safe area는 CSS env()로 처리. */
+  viewportFit: "cover",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#f7f8fa" },
     { media: "(prefers-color-scheme: dark)", color: "#0b0f16" },

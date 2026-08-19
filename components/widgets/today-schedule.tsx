@@ -58,7 +58,7 @@ export async function TodaySchedule({ className }: { className?: string }) {
           {events.map((event) => {
             const past = new Date(event.endsAt) < now;
             return (
-              <li key={event.id} className={past ? "flex gap-3 opacity-50" : "flex gap-3"}>
+              <li key={`${event.id}:${event.startsAt}`} className={past ? "flex gap-3 opacity-50" : "flex gap-3"}>
                 <span className="num w-20 shrink-0 pt-0.5 text-xs text-text-muted">
                   {event.isAllDay ? "종일" : `${hhmm(event.startsAt)}–${hhmm(event.endsAt)}`}
                 </span>

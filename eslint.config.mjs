@@ -20,6 +20,7 @@ const eslintConfig = [
       "next-env.d.ts",
       // Supabase CLI가 로컬 스택을 띄울 때 만드는 임시 파일. 우리 코드가 아니다.
       "supabase/.temp/**",
+      "scripts/gen-vapid.cjs",
     ],
   },
 ];
