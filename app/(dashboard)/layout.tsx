@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { MobileNav, Sidebar } from "@/components/shell/sidebar";
 import { BudgetBanner } from "@/components/shell/budget-banner";
+import { OfflineBanner } from "@/components/shell/offline-banner";
 import { SyncBanner } from "@/components/shell/sync-banner";
 import { ToastProvider } from "@/components/ui/toast";
 import { createClient } from "@/lib/supabase/server";
@@ -28,6 +29,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <Sidebar savedOrder={savedOrder} onReorder={saveSidebarOrder} onSignOut={signOut} />
         <div className="flex min-w-0 flex-1 flex-col">
           <MobileNav savedOrder={savedOrder} />
+          <OfflineBanner />
           <SyncBanner />
           <BudgetBanner />
           <main className="min-w-0 flex-1 p-4 lg:p-6">{children}</main>

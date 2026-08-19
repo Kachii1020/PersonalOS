@@ -11,10 +11,12 @@
     "db:reset": "tsx scripts/gen-seed.ts && supabase db reset",
     "test:g1": "node --import tsx --conditions=react-server --test tests/gates/g1.test.ts",
     "notion:check": "node --import tsx --conditions=react-server scripts/check-notion.ts",
+    "vapid:generate": "node scripts/gen-vapid.cjs",
     "test:g2": "node --import tsx --conditions=react-server --test tests/gates/g2.test.ts",
     "test:g3": "node --import tsx --conditions=react-server --test tests/gates/g3.test.ts",
+    "test:g4": "node --import tsx --conditions=react-server --test tests/gates/g4.test.ts",
     "test:unit": "node --import tsx --test tests/*.test.ts",
-    "test": "npm run test:unit && npm run test:g1 && npm run test:g2 && npm run test:g3"
+    "test": "npm run test:unit && npm run test:g1 && npm run test:g2 && npm run test:g3 && npm run test:g4"
   },
   "keywords": [],
   "author": "",
@@ -36,6 +38,7 @@
     "server-only": "^0.0.1",
     "tsdav": "^2.3.1",
     "unpdf": "^1.8.0",
+    "web-push": "^3.6.7",
     "yahoo-finance2": "^4.0.2"
   },
   "devDependencies": {
@@ -44,6 +47,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/web-push": "^3.6.4",
     "eslint": "^9",
     "eslint-config-next": "15.5.22",
     "supabase": "^2.111.0",

@@ -1,3 +1,5 @@
+Phase 4 구현 중 (G1·G2·G3 통과). SPEC.md Phase 4 + G4는 2026-08-18 승인 (A: domain_lesson purpose / B: /briefing 하단 / C: 브리핑+복습건수+sync실패). G4 조건 1·4·5는 2026-08-19 수동 통과. 2·6·8은 skip — **G4 미통과**.
+
 SPEC 완성 작업 중 (Phase 1·2·3은 G1·G2·G3 통과로 종료, 미구현 항목 해소 중)
 
 **G3 통과 — 판정은 `docs/G3-REPORT.md`.** 5개 조건 전부 통과.

@@ -26,6 +26,14 @@ export function todayStart(now: Date = new Date()): Date {
   return midnight(ymd(now));
 }
 
+/** JST 기준 이번 주 월요일 자정. 일요일은 직전 월요일로 붙는다. */
+export function weekStartMonday(now: Date = new Date()): Date {
+  const start = todayStart(now);
+  const day = weekday(start);
+  const fromMonday = day === 0 ? 6 : day - 1;
+  return addDays(start, -fromMonday);
+}
+
 /** JST 기준 이번 달 1일 자정과 다음 달 1일 자정. */
 export function monthRange(now: Date = new Date()): { start: Date; end: Date; year: number; month: number } {
   const [y, m] = ymd(now).split("-").map(Number) as [number, number, number];

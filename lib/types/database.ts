@@ -543,6 +543,30 @@ export type Database = {
           },
         ]
       }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+        }
+        Relationships: []
+      }
       quiz_attempts: {
         Row: {
           attempted_at: string
@@ -801,6 +825,30 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      weekly_reviews: {
+        Row: {
+          content: Json | null
+          created_at: string
+          id: string
+          status: string
+          week_start: string
+        }
+        Insert: {
+          content?: Json | null
+          created_at?: string
+          id?: string
+          status?: string
+          week_start: string
+        }
+        Update: {
+          content?: Json | null
+          created_at?: string
+          id?: string
+          status?: string
+          week_start?: string
         }
         Relationships: []
       }
