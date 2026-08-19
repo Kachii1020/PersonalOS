@@ -1,5 +1,11 @@
 # 결정 로그
 
+## 2026-08-19 — wrap은 PWA → Trust → Phase 4 한 브랜치
+
+- **결정**: `main`에 #2 → #3 → #5를 쌓아 `cursor/wrap-stack-3145` 하나 만든다. `layout.tsx`는 탭 바와 OfflineBanner를 모두 둔다.
+- **이유**: 세 PR을 따로 머지하면 같은 layout 충돌을 사람이 세 번 본다. 0008/0009는 번호가 안 겹친다.
+- **버린 대안**: Phase 4만 머지 — 탭 바와 RRULE이 `main`에 안 남는다.
+
 ## 2026-08-18 — AI 호출 지점 5개 정식화
 
 - **결정**: SPEC 5.5를 3곳에서 5곳으로 개정. 도메인 레슨(`purpose='domain_lesson'`)을 소급 승인하고 주간 리뷰(`weekly_review`)를 5번째로 등재. 모든 호출은 `lib/ai/client.ts` 경유.
