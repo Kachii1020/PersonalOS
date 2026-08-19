@@ -313,11 +313,27 @@ create table job_runs (
 create table ai_usage (
   id            bigserial primary key,
   used_at       timestamptz not null default now(),
-  purpose       text not null,        -- briefing | quiz | material_summary
+  purpose       text not null,        -- briefing | quiz | material_summary | domain_lesson | weekly_review
   model         text not null,
   input_token   int not null,
   output_token  int not null,
   cost_usd      numeric(10,4) not null
+);
+
+create table push_subscriptions (
+  id            uuid primary key default gen_random_uuid(),
+  endpoint      text not null unique,
+  p256dh        text not null,
+  auth          text not null,
+  created_at    timestamptz not null default now()
+);
+
+create table weekly_reviews (
+  id            uuid primary key default gen_random_uuid(),
+  week_start    date not null unique,          -- 그 주 월요일 (JST)
+  status        text not null default 'pending', -- pending | ready | failed
+  content       jsonb,
+  created_at    timestamptz not null default now()
 );
 ```
 
@@ -419,19 +435,46 @@ PAT는 `public_repo` 스코프면 충분. 잔디는 GitHub의 contributions 그�
 
 ### 5.5 Anthropic API
 
-**호출하는 곳은 3군데뿐이다.**
+**호출하는 곳은 아래 5군데뿐이다.** 여섯 곳을 만들려면 이 표를 먼저 개정한다.
+모든 호출은 `lib/ai/client.ts`의 단일 함수를 경유한다. 이 제약은 불변이다.
 
-| 용도 | 빈도 | 배치 방식 |
-|---|---|---|
-| 브리핑 생성 | 1일 1회 | 5개 섹터 전부를 **1회 호출**에 넣는다 |
-| 퀴즈 생성 | 1일 1회 | 5문제를 1회 호출로 |
-| 강의자료 요약 | 수동 | 버튼 클릭 시에만 |
+| 용도 | purpose | 빈도 | 배치 방식 |
+|---|---|---|---|
+| 브리핑 생성 | briefing | 1일 1회 | 5개 섹터 전부를 **1회 호출**에 넣는다 |
+| 퀴즈 생성 | quiz | 1일 1회 | 5문제를 1회 호출로 |
+| 강의자료 요약 | material_summary | 수동 | 버튼 클릭 시에만 |
+| 도메인 레슨 | domain_lesson | 수동 스크립트 | 도메인당 1회. 이미 있으면 건너뛴다 |
+| 주간 리뷰 | weekly_review | 주 1회 (일 21:00 JST) | 집계는 SQL, AI는 서술만. **1회 호출** |
+
+도메인 레슨은 post-gate에서 `scripts/gen-lessons.ts`로 이미 들어왔다. 이 개정으로 소급 승인한다.
+주간 리뷰의 숫자(정답률, 완료 태스크, 커밋 수)는 서버가 SQL로 계산해 프롬프트에 넣는다. AI가 숫자를 만들면 반려.
 
 **비용 가드 (구현 필수)**
 - 모든 호출 전에 `ai_usage`의 이번 달 `cost_usd` 합계를 조회한다.
 - 합계가 $10 이상이면 호출하지 않고 예외를 던진다. 브리핑은 "월 예산 소진"으로 표시한다.
 - 호출 후 응답의 usage를 `ai_usage`에 기록한다.
 - 예산의 80%를 넘으면 대시보드 상단에 경고 배너.
+
+### 5.6 Web Push
+
+iOS 16.4+ 에서 홈 화면에 추가된 PWA만 구독할 수 있다. 권한 요청은 반드시 `/settings`의 버튼 클릭(사용자 제스처)에서 한다.
+
+- 구독은 `push_subscriptions`에 저장한다 (endpoint 유니크, p256dh, auth).
+- 발송은 서버에서만. 라이브러리는 `web-push`, VAPID. 공개키만 `NEXT_PUBLIC_VAPID_PUBLIC_KEY`.
+- 발송 시점: 브리핑 `ready`, 퀴즈 생성 직후 복습 대기 건수, `sync_state`가 ok→failed로 바뀔 때.
+- **발송 실패는 잡을 실패시키지 않는다.** `job_runs.meta`에 기록한다.
+- 구독이 HTTP 410이면 해당 행을 지우고 잡은 계속한다.
+- `public/sw.js`의 `push` / `notificationclick`이 알림을 띄우고 해당 화면으로 연다 (브리핑 → `/briefing`).
+
+### 5.7 오프라인
+
+기존 결정("HTML·API를 캐시하지 않는다")을 **부분 번복**한다. 원래 우려(낡은 미러를 신선한 데이터로 착각)는 아래 조건으로 지킨다.
+
+- 내비게이션(HTML)은 **network-first**. 온라인이면 캐시는 응답하지 않는다.
+- 네트워크가 실패했을 때만 마지막 HTML을 폴백한다. 이때 화면에 "오프라인 — 마지막 동기화 데이터"를 띄운다.
+- `/_next/static` 해시 자산은 지금처럼 캐시-우선.
+- API·Supabase 요청은 캐시하지 않는다.
+- 캐시 이름을 올려 activate에서 구버전을 지운다.
 
 ---
 
@@ -458,6 +501,8 @@ PAT는 `public_repo` 스코프면 충분. 잔디는 GitHub의 contributions 그�
 
 사이드바는 접기 가능하고, 페이지 순서를 드래그로 재정렬할 수 있다 (순서는 `localStorage`가 아니라 Supabase의 `user_prefs`에 저장해서 폰과 PC가 같게 유지).
 
+주간 리뷰는 대시보드에 위젯을 추가하지 않는다. `/briefing` 하단 섹션으로 붙인다. 글래스는 쓰지 않는다 (6.4 규칙 1: 글래스는 달력·브리핑 카드만).
+
 ### 6.2 페이지 목록
 
 | 경로 | 내용 | Phase |
@@ -472,7 +517,7 @@ PAT는 `public_repo` 스코프면 충분. 잔디는 GitHub의 contributions 그�
 | `/invest` | 티커 목록, 리서치 노트, 시세 | 3 |
 | `/portfolio` | GitHub 레포·활동 | 3 |
 | `/apply` | 지원 파이프라인 | 3 |
-| `/settings` | 연동 상태, API 예산, 동기화 로그 | 1 |
+| `/settings` | 연동 상태, API 예산, 동기화 로그, 푸시 알림 구독/해제 | 1 |
 
 ### 6.3 디자인 토큰
 
@@ -579,6 +624,22 @@ PAT는 `public_repo` 스코프면 충분. 잔디는 GitHub의 contributions 그�
 - [ ] GitHub 공개 레포 전체가 수집되고 90일 커밋 잔디가 렌더된다
 - [ ] 지원 파이프라인이 Notion에서 읽히고 단계별로 그룹핑된다
 
+### Phase 4 — 앱처럼 행동하기 (게이트 G4)
+
+범위: Web Push, 오프라인 폴백, 주간 리뷰.
+
+실행 순서: db-architect → push(서버=ingest 패턴, 구독 UI·SW=ui-shell) → offline(ui-shell) → weekly-review(ai-pipeline) → verifier(G4)
+
+**G4 통과 조건**
+- [ ] `/settings`에서 푸시 구독 → `push_subscriptions`에 1행 → 테스트 발송 → 기기에 알림 수신 (구독 왕복). 실기기라 수동 판정 가능 (G2 조건 2 전례)
+- [ ] 브리핑 잡이 `ready`로 끝나면 푸시가 발송되고, 발송 실패가 브리핑 잡 자체를 실패시키지 않는다
+- [ ] 만료된 구독(HTTP 410)은 발송 시 해당 행이 삭제되고 잡은 계속된다
+- [ ] 온라인으로 대시보드를 1회 방문한 뒤 네트워크를 끊고 재실행 → 마지막 데이터 + 오프라인 표시로 렌더 (백지·500 없음)
+- [ ] 온라인 상태에서는 항상 네트워크 응답이 우선이다 (캐시가 신선한 데이터를 가리지 않는다)
+- [ ] 주간 리뷰 잡 1회 실행 → `weekly_reviews` 1행 `ready` + `ai_usage` 정확히 1행 (`purpose='weekly_review'`)
+- [ ] 주간 리뷰의 퀴즈 정답률·완료 태스크 수·커밋 수가 SQL 수기 집계와 일치한다
+- [ ] 월 예산 소진 상태에서 주간 리뷰 잡 실행 → 402, `weekly_reviews`에 `ready` 행이 남지 않는다
+
 ---
 
 ## 8. 환경변수
@@ -613,6 +674,9 @@ FRED_API_KEY=
 ECOS_API_KEY=
 
 CRON_SECRET=
+
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=
+VAPID_PRIVATE_KEY=
 ```
 
 ---

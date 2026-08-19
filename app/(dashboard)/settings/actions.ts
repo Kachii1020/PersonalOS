@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { ingestIcs } from "@/lib/integrations/ics/ingest";
+import { deletePushSubscriptionByEndpoint, upsertPushSubscription } from "@/lib/repos/push";
+import { sendPush } from "@/lib/integrations/push/send";
 
 export type IcsFormState = { ok: boolean; message: string } | null;
 
@@ -36,4 +38,43 @@ export async function uploadIcs(_prev: IcsFormState, formData: FormData): Promis
       (result.unmatched > 0 ? ` · 코드 없음 ${result.unmatched}건` : "") +
       (result.unparsed > 0 ? ` · 읽지 못함 ${result.unparsed}건` : ""),
   };
+}
+
+export async function savePushSubscription(input: {
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+}): Promise<{ ok: boolean; message: string }> {
+  try {
+    await upsertPushSubscription(input);
+    revalidatePath("/settings");
+    return { ok: true, message: "구독을 저장했습니다." };
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+export async function deletePushSubscription(endpoint: string): Promise<{ ok: boolean; message: string }> {
+  try {
+    await deletePushSubscriptionByEndpoint(endpoint);
+    revalidatePath("/settings");
+    return { ok: true, message: "구독을 삭제했습니다." };
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+export async function sendTestPush(): Promise<{ ok: boolean; message: string }> {
+  try {
+    const result = await sendPush({
+      title: "테스트 알림",
+      body: "Personal OS 푸시가 이 기기에 도달했습니다.",
+      url: "/settings",
+    });
+    if (result.skipped) return { ok: false, message: "VAPID 키가 없거나 저장된 구독이 없습니다." };
+    if (result.sent === 0) return { ok: false, message: `발송된 알림이 없습니다. 만료 ${result.gone} · 실패 ${result.failed}` };
+    return { ok: true, message: `알림 ${result.sent}건을 보냈습니다.` };
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) };
+  }
 }

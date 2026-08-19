@@ -17,6 +17,18 @@ export type SyncState = {
  * 실패를 조용히 넘기지 않기 위한 곳이라 이 함수 자체는 예외를 던지지 않는다 —
  * 기록에 실패했다고 잡을 다시 실패시키면 원인이 가려진다.
  */
+/** 직전 last_status. 푸시는 ok→failed 전환에만 보낸다. */
+export async function lastSyncStatus(key: SyncKey): Promise<"ok" | "failed" | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase.from("sync_state").select("last_status").eq("key", key).maybeSingle();
+  if (error) {
+    console.error(`[sync-state] ${key} 직전 상태 조회 실패:`, error.message);
+    return null;
+  }
+  if (data?.last_status === "ok" || data?.last_status === "failed") return data.last_status;
+  return null;
+}
+
 export async function recordSync(
   key: SyncKey,
   result: { status: "ok" | "failed"; error?: string | null; cursor?: Json },

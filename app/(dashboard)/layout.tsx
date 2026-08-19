@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/shell/sidebar";
 import { BottomTabBar } from "@/components/shell/bottom-tab-bar";
 import { BudgetBanner } from "@/components/shell/budget-banner";
+import { OfflineBanner } from "@/components/shell/offline-banner";
 import { SyncBanner } from "@/components/shell/sync-banner";
 import { ToastProvider } from "@/components/ui/toast";
 import { createClient } from "@/lib/supabase/server";
@@ -30,6 +31,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
       <div className="flex min-h-dvh bg-bg">
         <Sidebar savedOrder={savedOrder} onReorder={saveSidebarOrder} onSignOut={signOut} />
         <div className="flex min-w-0 flex-1 flex-col">
+          <OfflineBanner />
           <SyncBanner />
           <BudgetBanner />
           {/* 모바일: 하단 탭 바 높이(50px) + safe area 만큼 main에 여백을 준다. */}
