@@ -4,7 +4,7 @@
 
 이 클라우드 VM에서 확인한 것: `npm run vapid:generate`가 키를 만들고 `.env.local`(mode 0600)에 쓴다. `.env.local`은 gitignore. 그 키는 에이전트 로그에 찍혔으므로 **버린다.** 프로덕션 키는 노트북에서 다시 만든다.
 
-이 VM에서 못 한 것: 호스티드 `db push`(CLI 미로그인, `SUPABASE_ACCESS_TOKEN` 없음), iPhone G4 1·4·5.
+이 VM에서 못 한 것: 호스티드 `db push`는 운영자가 수행. iPhone G4 1·4·5는 2026-08-19 운영자가 수동 통과로 보고 (`docs/G4-REPORT.md`).
 
 ## 1. VAPID 키
 
@@ -90,4 +90,4 @@ on conflict (key) do update set value = excluded.value;
 2. 설정에서 아무 변경(테마 등) 후 새로고침
 3. 변경이 즉시 보인다 (캐시가 가리지 않음)
 
-판정은 `docs/G4-REPORT.md` 조건 1·4·5를 수동 통과로 고친다.
+2026-08-19 운영자 보고로 1·4·5 수동 통과. 판정은 `docs/G4-REPORT.md`.
