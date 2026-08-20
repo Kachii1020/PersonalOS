@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Plus } from "lucide-react";
 import { cn } from "@/lib/design/cn";
+import { openQuickCapture } from "./quick-capture";
 import { TAB_BAR_ITEMS, MORE_TAB, MORE_ITEMS, type NavItem } from "./nav-items";
 
 /** "더보기" 하위 페이지에 있을 때도 더보기 탭을 활성으로 표시하기 위한 경로 집합. */
@@ -29,12 +31,33 @@ export function BottomTabBar() {
       )}
     >
       <div className="flex h-[50px] items-end justify-around px-2">
-        {TAB_BAR_ITEMS.map((item) => (
+        {TAB_BAR_ITEMS.slice(0, 2).map((item) => (
+          <TabItem key={item.href} item={item} active={isActive(pathname, item.href)} />
+        ))}
+        <CaptureFab />
+        {TAB_BAR_ITEMS.slice(2).map((item) => (
           <TabItem key={item.href} item={item} active={isActive(pathname, item.href)} />
         ))}
         <TabItem item={MORE_TAB} active={moreActive} />
       </div>
     </nav>
+  );
+}
+
+/** 퀵 캡처 FAB (1-B). 탭 바 중앙 — 데스크톱은 키보드 N이 같은 시트를 연다. */
+function CaptureFab() {
+  return (
+    <button
+      type="button"
+      aria-label="빠른 추가"
+      onClick={openQuickCapture}
+      className={cn(
+        "-mt-4 mb-1 flex size-11 cursor-pointer items-center justify-center self-center rounded-full",
+        "bg-accent text-bg transition-transform duration-150 active:scale-[0.9]",
+      )}
+    >
+      <Plus className="size-6" aria-hidden />
+    </button>
   );
 }
 
