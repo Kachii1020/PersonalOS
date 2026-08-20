@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createTask, setTaskStatus } from "@/lib/repos/tasks";
+import { createTask, setTaskStatus, updateTaskCategory } from "@/lib/repos/tasks";
 
 export type TaskFormState = { ok: boolean; message: string } | null;
 
@@ -40,4 +40,26 @@ export async function completeTask(formData: FormData): Promise<void> {
   await setTaskStatus(id, "done");
   revalidatePath("/tasks");
   revalidatePath("/");
+}
+
+const CATEGORIES = new Set(["school", "career", "study", "invest", "etc"]);
+
+/** 칸반 드래그 (2-B). 알 수 없는 분류가 오면 저장하지 않는다. */
+export async function moveTaskCategory(
+  id: string,
+  category: string | null,
+): Promise<{ ok: boolean; message: string }> {
+  if (!id) return { ok: false, message: "태스크 ID가 없습니다." };
+  if (category !== null && !CATEGORIES.has(category)) {
+    return { ok: false, message: `알 수 없는 분류입니다: ${category}` };
+  }
+
+  try {
+    await updateTaskCategory(id, category);
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) };
+  }
+
+  revalidatePath("/tasks");
+  return { ok: true, message: "분류를 옮겼습니다." };
 }
