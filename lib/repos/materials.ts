@@ -92,3 +92,41 @@ export async function saveSummary(id: string, summary: string, keywords: string[
   const { error } = await supabase.from("course_materials").update({ summary, keywords }).eq("id", id);
   if (error) throw new Error(`요약 저장 실패: ${error.message}`);
 }
+
+/** 원본 열기 (2-E). 비공개 버킷이라 60초짜리 서명 URL을 발급한다. */
+export async function getMaterialDownloadUrl(id: string): Promise<{ filename: string; url: string }> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("course_materials")
+    .select("filename, storage_path")
+    .eq("id", id)
+    .single();
+  if (error) throw new Error(`강의자료 조회 실패: ${error.message}`);
+
+  const signed = await supabase.storage.from(BUCKET).createSignedUrl(data.storage_path, 60);
+  if (signed.error) throw new Error(`서명 URL 발급 실패: ${signed.error.message}`);
+  return { filename: data.filename, url: signed.data.signedUrl };
+}
+
+/**
+ * 삭제 (2-E). 행을 먼저 지운다 — 행이 남고 파일만 없으면 열기가 매번 깨진다.
+ * 파일 정리가 실패하면 에러로 알린다 (조용한 고아 파일 금지).
+ */
+export async function deleteMaterial(id: string): Promise<string> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("course_materials")
+    .select("filename, storage_path")
+    .eq("id", id)
+    .single();
+  if (error) throw new Error(`강의자료 조회 실패: ${error.message}`);
+
+  const { error: rowError } = await supabase.from("course_materials").delete().eq("id", id);
+  if (rowError) throw new Error(`강의자료 삭제 실패: ${rowError.message}`);
+
+  const { error: storageError } = await supabase.storage.from(BUCKET).remove([data.storage_path]);
+  if (storageError) {
+    throw new Error(`목록에서는 지웠지만 파일 정리에 실패했습니다: ${storageError.message}`);
+  }
+  return data.filename;
+}

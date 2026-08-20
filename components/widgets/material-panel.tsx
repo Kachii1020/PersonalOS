@@ -1,14 +1,20 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { FileText, Presentation } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
+import { ExternalLink, FileText, Presentation, Trash2 } from "lucide-react";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { Field, Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useToast } from "@/components/ui/toast";
-import { uploadMaterial, summarizeMaterial, type FormState } from "@/app/(dashboard)/courses/actions";
+import {
+  getMaterialLink,
+  removeMaterial,
+  uploadMaterial,
+  summarizeMaterial,
+  type FormState,
+} from "@/app/(dashboard)/courses/actions";
 import type { MaterialRow } from "@/lib/repos/materials";
 import { monthDayWeekday } from "@/lib/time";
 
@@ -67,6 +73,8 @@ export function MaterialPanel({
 
 function MaterialItem({ courseId, material }: { courseId: string; material: MaterialRow }) {
   const [state, action, pending] = useActionState<FormState, FormData>(summarizeMaterial, null);
+  const [deleteState, deleteAction, deleting] = useActionState<FormState, FormData>(removeMaterial, null);
+  const [opening, setOpening] = useState(false);
   const toast = useToast();
   // MIME 상수는 server-only 모듈에 있다. 아이콘은 장식이라 확장자로 고른다.
   const Icon = material.filename.toLowerCase().endsWith(".pptx") ? Presentation : FileText;
@@ -74,6 +82,22 @@ function MaterialItem({ courseId, material }: { courseId: string; material: Mate
   useEffect(() => {
     if (state?.ok) toast(state.message, "success");
   }, [state, toast]);
+
+  useEffect(() => {
+    if (deleteState) toast(deleteState.message, deleteState.ok ? "success" : "error");
+  }, [deleteState, toast]);
+
+  /** 서명 URL은 60초짜리라 누른 순간 발급해서 바로 연다 (2-E). */
+  async function open() {
+    setOpening(true);
+    try {
+      const result = await getMaterialLink(material.id);
+      if (result.ok && result.url) window.open(result.url, "_blank", "noopener");
+      else toast(result.message, "error");
+    } finally {
+      setOpening(false);
+    }
+  }
 
   return (
     <li className="rounded-lg border border-line p-3">
@@ -88,13 +112,31 @@ function MaterialItem({ courseId, material }: { courseId: string; material: Mate
           </p>
         </div>
 
-        <form action={action} className="shrink-0">
-          <input type="hidden" name="id" value={material.id} />
-          <input type="hidden" name="courseId" value={courseId} />
-          <Button type="submit" size="sm" disabled={pending}>
-            {pending ? "요약 중" : material.summary ? "다시 요약" : "요약하기"}
+        <div className="flex shrink-0 items-center gap-1.5">
+          <Button type="button" size="sm" variant="ghost" onClick={() => void open()} disabled={opening}>
+            <ExternalLink aria-hidden className="size-3.5" />
+            {opening ? "여는 중" : "열기"}
           </Button>
-        </form>
+          <form action={action}>
+            <input type="hidden" name="id" value={material.id} />
+            <input type="hidden" name="courseId" value={courseId} />
+            <Button type="submit" size="sm" disabled={pending}>
+              {pending ? "요약 중" : material.summary ? "다시 요약" : "요약하기"}
+            </Button>
+          </form>
+          <form
+            action={deleteAction}
+            onSubmit={(e) => {
+              if (!window.confirm(`'${material.filename}'을 삭제할까요? 요약도 함께 사라집니다.`)) e.preventDefault();
+            }}
+          >
+            <input type="hidden" name="id" value={material.id} />
+            <input type="hidden" name="courseId" value={courseId} />
+            <Button type="submit" size="sm" variant="ghost" disabled={deleting} aria-label={`'${material.filename}' 삭제`}>
+              <Trash2 aria-hidden className="size-3.5" />
+            </Button>
+          </form>
+        </div>
       </div>
 
       {state && !state.ok && (
