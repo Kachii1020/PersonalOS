@@ -56,18 +56,30 @@ jobs:
             jobs="sync-calendar"
           fi
 
+          APP_URL="${APP_URL%/}"
+          if [ -z "$APP_URL" ]; then
+            echo "::error::APP_URL secret이 비어 있습니다."
+            exit 1
+          fi
+          echo "APP_URL=$APP_URL"
+
           for job in $jobs; do
             echo "→ $job"
             code=$(curl -sS -o /tmp/out.json -w '%{http_code}' \
               -X POST "$APP_URL/api/jobs/$job" \
               -H "x-cron-secret: $CRON_SECRET" \
               --max-time 120)
+            echo "HTTP $code"
             cat /tmp/out.json
             echo
             # 402는 월 AI 예산 소진이다. 정상적인 차단이므로 실패로 보지 않는다.
             if [ "$code" = "402" ]; then
               echo "::warning::$job 건너뜀 — 월 AI 예산 소진"
               continue
+            fi
+            if [ "$code" -ge 300 ] && [ "$code" -lt 400 ]; then
+              echo "::error::$job 이 리다이렉트됐다 (HTTP $code). GitHub secret APP_URL을 https://…vercel.app 로 넣고 끝 슬래시를 빼세요. curl -L 는 POST를 GET으로 바꿔 잡을 실행하지 않습니다."
+              exit 1
             fi
             # 잡이 실패를 sync_state에 기록해도, 워크플로도 같이 빨갛게 만든다.
             if [ "$code" -ge 400 ]; then
