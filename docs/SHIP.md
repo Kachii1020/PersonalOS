@@ -99,6 +99,7 @@ on conflict (key) do update set value = excluded.value;
 1. 이 PR을 `main`에 머지하고 Vercel이 `main`을 배포하게 한다.
 2. `git pull origin main` 후 `npx supabase db push` — **`0010_event_exdates`만** 올라가야 정상. `0001`–`0007` revert / `db pull` 하지 말 것.
 3. GitHub repo Secrets: `APP_URL`, `CRON_SECRET` (Vercel과 같은 값).
+   `APP_URL`은 `https://….vercel.app` 만. `http://` 나 끝 `/` 면 리다이렉트만 되고 잡은 안 돈다 (로그에 `Redirecting...`, 워크플로는 예전엔 초록).
 4. Actions → `cron` → Run workflow:
 
 | Job | 통과 기준 |
