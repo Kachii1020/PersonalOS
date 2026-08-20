@@ -8,7 +8,7 @@
 - ~~**퀴즈 생성 / 강의자료 요약**~~ — Phase 2에서 구현. G2 통과.
 - ~~자리표시자 페이지~~ — ui-widgets가 Phase 1–3 화면으로 교체. G1·G2·G3 통과.
 - ~~PWA 아이콘 SVG만~~ — `public/icon-192.png` / `icon-512.png` 있음.
-- **호스티드 `0008`** — 운영자가 `0001`–`0007`+`0009`는 push함. Trust 머지 후 `0008_event_exdates`만 추가 push.
+- **호스티드 `0010`** — `0009`가 먼저 올라가서 `0008`은 쓰지 않는다. `0010_event_exdates`를 `db push`. revert/`db pull` 금지.
 - **사이드바 재정렬의 실제 입력 검증** — 로직·저장·복원은 확인했지만, 실제 마우스 드래그와 Alt+화살표 키 입력은 브라우저 자동화가 이벤트를 포커스된 요소로 전달하지 못해 확인하지 못했다. 수동으로 한 번 확인할 것.
 - ~~**반복 일정(RRULE) 전개**~~ — `listEventsBetween` / `listEventsWithWritableFlag` / `nextClass`가 표시 범위만 전개한다.
 - **RECURRENCE-ID 예외 인스턴스** — 수정된 반복 회차는 파서가 무시하고 마스터만 남긴다. 예외 회차를 쓰려면 uid+recurrence-id 복합 키가 필요하다.
