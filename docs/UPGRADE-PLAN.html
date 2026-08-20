@@ -1,0 +1,1069 @@
+<title>Personal OS Upgrade Plan</title>
+<style>
+  /* --- Tokens --- */
+  :root {
+    --ground: #f5f6f8;
+    --surface: #ffffff;
+    --surface-raised: #f0f2f5;
+    --ink: #1a1d24;
+    --ink-secondary: #5a6170;
+    --ink-tertiary: #8b919e;
+    --accent: #2f5d8c;
+    --accent-soft: #e8f0f8;
+    --accent-muted: #4a7fad;
+    --tier0: #0d7a63;
+    --tier0-bg: #e6f5f1;
+    --tier1: #2f5d8c;
+    --tier1-bg: #e8f0f8;
+    --tier2: #6d5a8f;
+    --tier2-bg: #f0ecf5;
+    --tier3: #b3611e;
+    --tier3-bg: #faf0e6;
+    --border: #e2e5ea;
+    --border-strong: #c8ccd3;
+    --code-bg: #f4f5f7;
+    --code-ink: #1a1d24;
+    --tag-bg: #eef1f5;
+    --tag-ink: #3e4550;
+    --stripe-a: #fafbfc;
+    --stripe-b: #ffffff;
+    --positive: #0e7c66;
+    --negative: #b3261e;
+    --warning: #a8780a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ground: #0e1117;
+      --surface: #161b24;
+      --surface-raised: #1e2430;
+      --ink: #e0e4eb;
+      --ink-secondary: #99a0ad;
+      --ink-tertiary: #6b7280;
+      --accent: #7fb0e0;
+      --accent-soft: #1b2a3a;
+      --accent-muted: #5a94c7;
+      --tier0: #3fbfa0;
+      --tier0-bg: #0f2922;
+      --tier1: #7fb0e0;
+      --tier1-bg: #152030;
+      --tier2: #b89ad4;
+      --tier2-bg: #21182e;
+      --tier3: #e8a265;
+      --tier3-bg: #2a1c0f;
+      --border: #2a303b;
+      --border-strong: #3d4450;
+      --code-bg: #1a2030;
+      --code-ink: #c8cdd6;
+      --tag-bg: #1e2430;
+      --tag-ink: #b0b6c0;
+      --stripe-a: #12171f;
+      --stripe-b: #161b24;
+      --positive: #3fbfa0;
+      --negative: #f2857c;
+      --warning: #e8b84a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ground: #0e1117;
+    --surface: #161b24;
+    --surface-raised: #1e2430;
+    --ink: #e0e4eb;
+    --ink-secondary: #99a0ad;
+    --ink-tertiary: #6b7280;
+    --accent: #7fb0e0;
+    --accent-soft: #1b2a3a;
+    --accent-muted: #5a94c7;
+    --tier0: #3fbfa0;
+    --tier0-bg: #0f2922;
+    --tier1: #7fb0e0;
+    --tier1-bg: #152030;
+    --tier2: #b89ad4;
+    --tier2-bg: #21182e;
+    --tier3: #e8a265;
+    --tier3-bg: #2a1c0f;
+    --border: #2a303b;
+    --border-strong: #3d4450;
+    --code-bg: #1a2030;
+    --code-ink: #c8cdd6;
+    --tag-bg: #1e2430;
+    --tag-ink: #b0b6c0;
+    --stripe-a: #12171f;
+    --stripe-b: #161b24;
+    --positive: #3fbfa0;
+    --negative: #f2857c;
+    --warning: #e8b84a;
+  }
+
+  /* --- Reset & Base --- */
+  body {
+    background: var(--ground);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* --- Layout --- */
+  .page { max-width: 920px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+  @media (max-width: 640px) { .page { padding: 1.5rem 1rem 3rem; } }
+
+  /* --- Typography --- */
+  h1 { font-size: 1.75rem; font-weight: 700; line-height: 1.2; margin: 0 0 0.5rem; text-wrap: balance; letter-spacing: -0.02em; }
+  h2 { font-size: 1.25rem; font-weight: 700; line-height: 1.3; margin: 2.5rem 0 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border); text-wrap: balance; }
+  h3 { font-size: 1rem; font-weight: 600; line-height: 1.4; margin: 1.75rem 0 0.75rem; }
+  h4 { font-size: 0.875rem; font-weight: 600; line-height: 1.4; margin: 1.25rem 0 0.5rem; color: var(--ink-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+  p { margin: 0 0 0.75rem; }
+  .subtitle { color: var(--ink-secondary); font-size: 0.95rem; margin: 0 0 2rem; }
+
+  /* --- Tier headers --- */
+  .tier-header {
+    display: flex; align-items: center; gap: 0.625rem;
+    margin: 2.5rem 0 1rem; padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border);
+  }
+  .tier-header h2 { margin: 0; padding: 0; border: none; }
+  .tier-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.06em;
+    padding: 0.2em 0.6em; border-radius: 4px; color: #fff; white-space: nowrap;
+    text-transform: uppercase; flex-shrink: 0;
+  }
+  .tier-badge--0 { background: var(--tier0); }
+  .tier-badge--1 { background: var(--tier1); }
+  .tier-badge--2 { background: var(--tier2); }
+  .tier-badge--3 { background: var(--tier3); }
+
+  /* --- Cards --- */
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 1.25rem; margin: 0 0 1rem;
+  }
+  .card--tier0 { border-left: 3px solid var(--tier0); }
+  .card--tier1 { border-left: 3px solid var(--tier1); }
+  .card--tier2 { border-left: 3px solid var(--tier2); }
+  .card--tier3 { border-left: 3px solid var(--tier3); }
+
+  /* --- Code --- */
+  code {
+    font-family: 'JetBrains Mono', 'SF Mono', 'Fira Code', ui-monospace, monospace;
+    font-size: 0.8125em; background: var(--code-bg); color: var(--code-ink);
+    padding: 0.15em 0.4em; border-radius: 3px;
+  }
+  pre {
+    background: var(--code-bg); color: var(--code-ink); border: 1px solid var(--border);
+    border-radius: 6px; padding: 1rem; overflow-x: auto; font-size: 0.8125rem;
+    line-height: 1.55; margin: 0.75rem 0 1rem;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+
+  /* --- Tables --- */
+  .table-wrap { overflow-x: auto; margin: 0.75rem 0 1rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+  th { text-align: left; font-weight: 600; padding: 0.5rem 0.75rem; border-bottom: 2px solid var(--border); color: var(--ink-secondary); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  td { padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) td { background: var(--stripe-a); }
+  td code { font-size: 0.75rem; }
+
+  /* --- Tags --- */
+  .tag {
+    display: inline-block; font-size: 0.6875rem; font-weight: 600;
+    padding: 0.15em 0.5em; border-radius: 3px; letter-spacing: 0.02em;
+    background: var(--tag-bg); color: var(--tag-ink);
+  }
+  .tag--file { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .tag--new { background: var(--tier0-bg); color: var(--tier0); }
+  .tag--modify { background: var(--tier1-bg); color: var(--tier1); }
+  .tag--migration { background: var(--tier3-bg); color: var(--tier3); }
+
+  /* --- Lists --- */
+  ul, ol { padding-left: 1.5rem; margin: 0 0 0.75rem; }
+  li { margin: 0.25rem 0; }
+  li + li { margin-top: 0.375rem; }
+
+  /* --- Dividers --- */
+  hr { border: none; border-top: 1px solid var(--border); margin: 2rem 0; }
+
+  /* --- Directory tree --- */
+  .tree { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 0.8rem; line-height: 1.7; white-space: pre; }
+  .tree .new { color: var(--positive); font-weight: 600; }
+  .tree .dim { color: var(--ink-tertiary); }
+  .tree .hl { color: var(--accent); font-weight: 500; }
+
+  /* --- Task steps --- */
+  .step { display: flex; gap: 0.75rem; margin: 0.75rem 0; }
+  .step-num {
+    flex-shrink: 0; width: 1.5rem; height: 1.5rem;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; border-radius: 50%;
+    background: var(--accent-soft); color: var(--accent);
+    margin-top: 0.1rem;
+  }
+  .step-body { flex: 1; }
+
+  /* --- Toc --- */
+  .toc { list-style: none; padding: 0; margin: 1rem 0; columns: 2; column-gap: 2rem; }
+  .toc li { margin: 0.25rem 0; break-inside: avoid; }
+  .toc a { color: var(--accent); text-decoration: none; font-size: 0.875rem; font-weight: 500; }
+  .toc a:hover { text-decoration: underline; }
+  .toc .toc-tier { color: var(--ink-tertiary); font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.75rem; display: block; }
+  @media (max-width: 640px) { .toc { columns: 1; } }
+
+  /* --- Infra diagram --- */
+  .infra { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin: 1rem 0; }
+  .infra-box { background: var(--surface-raised); border: 1px solid var(--border); border-radius: 6px; padding: 0.875rem; }
+  .infra-box h4 { margin: 0 0 0.375rem; font-size: 0.75rem; }
+  .infra-box p { margin: 0; font-size: 0.8125rem; color: var(--ink-secondary); }
+  .infra-box code { font-size: 0.75rem; }
+  @media (max-width: 640px) { .infra { grid-template-columns: 1fr; } }
+
+  /* --- Work item --- */
+  .work-item { margin: 1rem 0; }
+  .work-item h3 { margin-bottom: 0.375rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+  .work-item .files { margin: 0.375rem 0 0.5rem; }
+  .work-item .files span { display: inline-flex; margin: 0.125rem 0.25rem 0.125rem 0; }
+
+  /* --- Aside --- */
+  .aside {
+    background: var(--surface-raised); border-left: 3px solid var(--accent);
+    padding: 0.875rem 1rem; border-radius: 0 6px 6px 0; margin: 1rem 0;
+    font-size: 0.875rem;
+  }
+  .aside p:last-child { margin-bottom: 0; }
+  .aside--warn { border-left-color: var(--warning); }
+  .aside--danger { border-left-color: var(--negative); }
+</style>
+
+<div class="page">
+
+<h1>Personal OS — Next Level Upgrade Plan</h1>
+<p class="subtitle">Tier 0–3 전체 작업 명세. 프로젝트 컨텍스트, 인프라 연결, 파일 위치, 구현 순서를 포함한다.<br>대상: 이 문서를 받는 AI 모델 또는 사람 개발자.</p>
+
+<!-- ===== TOC ===== -->
+<nav>
+<ul class="toc">
+  <li><span class="toc-tier">컨텍스트</span></li>
+  <li><a href="#ctx-infra">인프라 연결 구조</a></li>
+  <li><a href="#ctx-dirs">디렉토리 맵</a></li>
+  <li><a href="#ctx-rules">코딩 규칙</a></li>
+  <li><a href="#ctx-env">환경변수</a></li>
+  <li><span class="toc-tier">작업</span></li>
+  <li><a href="#t0">Tier 0 — Ship &amp; Stabilize</a></li>
+  <li><a href="#t1">Tier 1 — Daily Habit</a></li>
+  <li><a href="#t2">Tier 2 — Quality of Life</a></li>
+  <li><a href="#t3">Tier 3 — Intelligence</a></li>
+  <li><span class="toc-tier">부록</span></li>
+  <li><a href="#migration">마이그레이션 전체</a></li>
+  <li><a href="#execution">실행 순서</a></li>
+</ul>
+</nav>
+
+<hr>
+
+<!-- ================================================ -->
+<!--  SECTION A: PROJECT CONTEXT                      -->
+<!-- ================================================ -->
+
+<h2 id="ctx-infra">인프라 연결 구조</h2>
+
+<div class="infra">
+  <div class="infra-box">
+    <h4>GitHub</h4>
+    <p>Repo: <code>Kachii1020/PersonalOS</code><br>
+    Branch: <code>main</code><br>
+    Actions: <code>.github/workflows/cron.yml</code><br>
+    Secrets: <code>APP_URL</code>, <code>CRON_SECRET</code></p>
+  </div>
+  <div class="infra-box">
+    <h4>Vercel</h4>
+    <p>Framework: Next.js 15 (App Router)<br>
+    Plan: Hobby (무료)<br>
+    연결: GitHub main auto-deploy<br>
+    Config: <code>vercel.json</code> 없음 (기본값)</p>
+  </div>
+  <div class="infra-box">
+    <h4>Supabase</h4>
+    <p>Project: <code>leitsqwmtxqsgnsvzdfc</code><br>
+    로컬 포트: API 54421 / DB 54422<br>
+    마이그레이션: <code>0001–0007, 0009, 0010</code><br>
+    인증: 매직 링크 + 이메일 화이트리스트</p>
+  </div>
+</div>
+
+<h3>데이터 흐름</h3>
+<pre><code>┌─────────────┐   cron.yml     ┌──────────────────┐    service_role    ┌───────────────┐
+│ GitHub      │───schedule────▶│ Vercel           │───────────────────▶│ Supabase      │
+│ Actions     │  POST /api/    │ Next.js 15       │                    │ (Postgres)    │
+│             │  jobs/{name}   │ App Router       │◀──── anon_key ─────│               │
+└─────────────┘  +cron-secret  │                  │    (세션 RLS)      │  RLS + 화이트  │
+                               │  lib/repos/*     │                    │  리스트 검사    │
+┌─────────────┐                │  lib/integrations│                    └───────────────┘
+│ 외부 API    │◀───서버에서만──│  lib/ai/*        │
+│ iCloud      │                │                  │    ┌──────────────┐
+│ Notion      │                │  components/     │───▶│ 브라우저      │
+│ Yahoo Fin   │                │  widgets/*       │    │ (PWA)        │
+│ Anthropic   │                │  shell/*         │    │ SW: sw.js    │
+│ Google News │                └──────────────────┘    └──────────────┘
+│ FRED/ECOS   │
+│ GitHub API  │
+└─────────────┘</code></pre>
+
+<h3>Supabase 클라이언트 3종</h3>
+<div class="table-wrap">
+<table>
+<tr><th>파일</th><th>용도</th><th>키</th><th>RLS</th></tr>
+<tr><td><code>lib/supabase/server.ts</code></td><td>서버 컴포넌트, 서버 액션</td><td><code>ANON_KEY</code> + 세션 쿠키</td><td>적용</td></tr>
+<tr><td><code>lib/supabase/admin.ts</code></td><td>크론 잡, 서버 라우트</td><td><code>SERVICE_ROLE_KEY</code></td><td>우회</td></tr>
+<tr><td><code>lib/supabase/middleware.ts</code></td><td>미들웨어 세션 갱신</td><td><code>ANON_KEY</code></td><td>N/A</td></tr>
+</table>
+</div>
+
+<div class="aside">
+<p><strong>규칙:</strong> 컴포넌트/페이지가 외부 SDK(tsdav, yahoo-finance2, Notion SDK 등)를 직접 import하면 반려. 전부 <code>lib/repos/*.ts</code> → <code>lib/integrations/*</code>를 경유한다.</p>
+</div>
+
+<!-- ================================================ -->
+<h2 id="ctx-dirs">디렉토리 맵</h2>
+
+<p>기존 파일은 <span class="dim">회색</span>, 새로 만들거나 수정할 파일은 <span class="new" style="color:var(--positive);font-weight:600">초록</span>으로 표시한다.</p>
+
+<div class="tree">personalOS/
+├── app/
+│   ├── layout.tsx                        <span class="dim">루트 레이아웃 (폰트, 테마 부트, SW 등록)</span>
+│   ├── login/page.tsx                    <span class="dim">매직 링크 로그인</span>
+│   ├── (dashboard)/
+│   │   ├── layout.tsx                    <span class="hl">수정: 커맨드 팔레트 주입</span>
+│   │   ├── actions.ts                    <span class="dim">사이드바 순서, 로그아웃</span>
+│   │   ├── page.tsx                      <span class="hl">수정: 스트릭 위젯 추가</span>
+│   │   ├── calendar/page.tsx             <span class="hl">수정: 주간 뷰 탭 추가</span>
+│   │   ├── tasks/page.tsx                <span class="hl">수정: 필터/뷰 전환</span>
+│   │   ├── quiz/
+│   │   │   ├── page.tsx                  <span class="hl">수정: 적응형 난이도 표시</span>
+│   │   │   └── review/page.tsx           <span class="dim">오답노트</span>
+│   │   ├── briefing/page.tsx             <span class="dim">브리핑 아카이브 + 주간리뷰</span>
+│   │   ├── courses/…                     <span class="dim">과목/성적</span>
+│   │   ├── invest/page.tsx               <span class="dim">투자</span>
+│   │   ├── portfolio/page.tsx            <span class="dim">GitHub</span>
+│   │   ├── apply/page.tsx                <span class="dim">지원 파이프라인</span>
+│   │   ├── wiki/page.tsx                 <span class="dim">위키</span>
+│   │   ├── settings/page.tsx             <span class="hl">수정: 알림 세분화 UI</span>
+│   │   └── more/page.tsx                 <span class="dim">모바일 더보기</span>
+│   └── api/
+│       └── jobs/                         <span class="dim">크론 잡 9개</span>
+│           ├── sync-calendar/route.ts
+│           ├── fetch-news/route.ts
+│           ├── generate-briefing/route.ts
+│           ├── generate-quiz/route.ts
+│           ├── fetch-prices/route.ts
+│           ├── sync-github/route.ts
+│           ├── sync-ics/route.ts
+│           ├── fetch-macro/route.ts
+│           └── generate-weekly-review/route.ts
+├── components/
+│   ├── shell/
+│   │   ├── sidebar.tsx                   <span class="dim">데스크톱 사이드바</span>
+│   │   ├── bottom-tab-bar.tsx            <span class="dim">모바일 탭 바</span>
+│   │   ├── nav-items.ts                  <span class="dim">네비게이션 정의</span>
+│   │   ├── theme-toggle.tsx              <span class="dim">다크모드</span>
+│   │   ├── sync-banner.tsx               <span class="dim">동기화 실패 배너</span>
+│   │   ├── budget-banner.tsx             <span class="dim">AI 예산 80% 배너</span>
+│   │   ├── offline-banner.tsx            <span class="dim">오프라인 표시</span>
+│   │   ├── <span class="new">command-palette.tsx</span>       <span class="new">NEW: ⌘K 전역 검색/이동</span>
+│   │   └── <span class="new">quick-capture.tsx</span>         <span class="new">NEW: 모바일 FAB 퀵 캡처</span>
+│   ├── ui/                               <span class="dim">원시 컴포넌트 (button, card, input…)</span>
+│   │   └── <span class="new">dialog.tsx</span>                <span class="new">NEW: 모달 대화상자</span>
+│   └── widgets/
+│       ├── month-calendar.tsx            <span class="dim">월간 달력</span>
+│       ├── <span class="new">week-calendar.tsx</span>         <span class="new">NEW: 주간 타임라인</span>
+│       ├── today-schedule.tsx            <span class="dim">오늘 일정</span>
+│       ├── week-deadlines.tsx            <span class="dim">이번 주 마감</span>
+│       ├── daily-briefing.tsx            <span class="dim">브리핑</span>
+│       ├── quiz-card.tsx                 <span class="dim">퀴즈</span>
+│       ├── quiz-flow.tsx                 <span class="dim">퀴즈 플로우</span>
+│       ├── quiz-summary.tsx              <span class="dim">퀴즈 요약</span>
+│       ├── market-snapshot.tsx           <span class="dim">시세</span>
+│       ├── github-heatmap.tsx            <span class="dim">커밋 잔디</span>
+│       ├── <span class="new">streak-tracker.tsx</span>        <span class="new">NEW: 연속 일수 위젯</span>
+│       ├── <span class="new">task-board.tsx</span>            <span class="new">NEW: 칸반 보드 뷰</span>
+│       └── …                             <span class="dim">(기존 위젯 16개)</span>
+├── lib/
+│   ├── ai/
+│   │   ├── client.ts                     <span class="dim">단일 AI 호출 경유점</span>
+│   │   ├── budget.ts                     <span class="dim">비용 가드</span>
+│   │   └── prompts/
+│   │       ├── briefing.ts               <span class="dim">브리핑 프롬프트</span>
+│   │       ├── quiz.ts                   <span class="hl">수정: 적응형 난이도</span>
+│   │       ├── material.ts               <span class="dim">강의자료 요약</span>
+│   │       ├── weekly-review.ts          <span class="hl">수정: 행동 제안 추가</span>
+│   │       ├── domain-lesson.ts          <span class="dim">도메인 레슨</span>
+│   │       └── <span class="new">intent-parse.ts</span>       <span class="new">NEW: 자연어 인텐트 파싱</span>
+│   ├── repos/
+│   │   ├── <span class="new">streaks.ts</span>                <span class="new">NEW: 연속 일수 계산</span>
+│   │   ├── <span class="new">search.ts</span>                 <span class="new">NEW: 전역 검색 쿼리</span>
+│   │   ├── quiz.ts                       <span class="hl">수정: 도메인별 정답률</span>
+│   │   └── …                             <span class="dim">(기존 repos 20개)</span>
+│   ├── integrations/                     <span class="dim">외부 API 래퍼</span>
+│   ├── design/
+│   │   ├── tokens.css                    <span class="dim">디자인 토큰</span>
+│   │   └── cn.ts                         <span class="dim">className 유틸</span>
+│   ├── supabase/                         <span class="dim">클라이언트 3종</span>
+│   ├── time.ts                           <span class="dim">날짜 유틸 (JST 기준)</span>
+│   ├── types/database.ts                 <span class="hl">수정: 새 테이블 타입 추가</span>
+│   └── weekly-stats.ts                   <span class="dim">주간 리뷰 집계</span>
+├── config/
+│   ├── news-sources.ts                   <span class="dim">RSS 소스 18개</span>
+│   ├── tickers.ts                        <span class="dim">기본 티커 20개</span>
+│   └── macro-series.ts                   <span class="dim">FRED+ECOS 6개</span>
+├── supabase/
+│   ├── config.toml                       <span class="dim">로컬 스택 (포트 544xx)</span>
+│   └── migrations/
+│       ├── 0001–0010                     <span class="dim">기존 마이그레이션</span>
+│       └── <span class="new">0011_streaks_search.sql</span>   <span class="new">NEW: 스트릭 + 검색 뷰</span>
+├── public/
+│   ├── sw.js                             <span class="dim">서비스 워커</span>
+│   └── manifest.json                     <span class="dim">PWA 매니페스트</span>
+├── tests/                                <span class="dim">게이트 + 유닛 테스트</span>
+├── scripts/                              <span class="dim">gen-seed, check-notion 등</span>
+├── .github/workflows/cron.yml            <span class="dim">크론 스케줄</span>
+├── SPEC.md                               <span class="dim">제품 스펙</span>
+├── CLAUDE.md                             <span class="dim">에이전트 규칙</span>
+└── docs/
+    ├── CURRENT_PHASE.md                  <span class="dim">현재 Phase 4</span>
+    ├── DECISIONS.md                      <span class="dim">결정 로그 (40+건)</span>
+    ├── DEFERRED.md                       <span class="dim">미룬 것들</span>
+    └── G1–G4-REPORT.md                   <span class="dim">게이트 판정</span></div>
+
+<!-- ================================================ -->
+<h2 id="ctx-rules">코딩 규칙 (CLAUDE.md에서 발췌)</h2>
+
+<div class="card">
+<ol>
+<li><strong>외부 API는 리포지토리 레이어 뒤에.</strong> 컴포넌트가 <code>tsdav</code>, <code>yahoo-finance2</code>, Notion SDK를 직접 import하면 반려. 전부 <code>lib/repos/*.ts</code>를 통한다.</li>
+<li><strong>AI 호출 지점은 <code>lib/ai/client.ts</code> 하나뿐.</strong> 새 purpose를 추가하려면 SPEC 5.5 표를 먼저 개정한다. 현재 5개: briefing, quiz, material_summary, domain_lesson, weekly_review. <strong>자연어 인터페이스를 추가하면 6번째가 된다 — SPEC 개정 필요.</strong></li>
+<li><strong>실패는 조용하지 않다.</strong> <code>catch {}</code> 빈 블록 금지. 모든 외부 호출 실패는 <code>sync_state</code> 또는 <code>job_runs</code>에 기록.</li>
+<li><strong>글래스는 달력·브리핑 카드에만.</strong> 나머지는 불투명 <code>--surface</code>.</li>
+<li><strong>숫자는 등폭 + 우측 정렬.</strong> <code>.num</code> 클래스 사용.</li>
+<li><strong>모든 작업 후</strong> <code>npm run typecheck && npm run lint && npm run test</code>.</li>
+<li><strong>마이그레이션은 기존 파일 수정 금지.</strong> 새 파일로 <code>alter</code>.</li>
+</ol>
+</div>
+
+<!-- ================================================ -->
+<h2 id="ctx-env">환경변수</h2>
+
+<p>Vercel에 설정된 값 (비밀값은 마스킹). <code>.env.local</code>이 호스티드, <code>.env.development.local</code>이 로컬 Supabase 오버라이드.</p>
+
+<div class="table-wrap">
+<table>
+<tr><th>변수</th><th>용도</th><th>위치</th></tr>
+<tr><td><code>NEXT_PUBLIC_SUPABASE_URL</code></td><td>Supabase 프로젝트 URL</td><td>Vercel + .env.local</td></tr>
+<tr><td><code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td><td>Supabase anon key (RLS 적용)</td><td>Vercel + .env.local</td></tr>
+<tr><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td>RLS 우회 (서버 전용)</td><td>Vercel + .env.local</td></tr>
+<tr><td><code>ALLOWED_EMAIL</code></td><td>화이트리스트 이메일 1개</td><td>Vercel + .env.local</td></tr>
+<tr><td><code>APPLE_ID</code> / <code>APPLE_APP_PASSWORD</code></td><td>iCloud CalDAV 인증</td><td>Vercel + .env.local</td></tr>
+<tr><td><code>ANTHROPIC_API_KEY</code></td><td>AI 호출 (<code>lib/ai/client.ts</code> 경유)</td><td>Vercel + .env.local</td></tr>
+<tr><td><code>AI_MONTHLY_BUDGET_USD</code></td><td>월 AI 예산 하드캡 (기본 10)</td><td>Vercel + .env.local</td></tr>
+<tr><td><code>NOTION_TOKEN</code> / <code>NOTION_DB_*</code></td><td>Notion 읽기 전용 미러</td><td>Vercel + .env.local</td></tr>
+<tr><td><code>GITHUB_USERNAME</code></td><td>GitHub 프로필 수집</td><td>Vercel + .env.local</td></tr>
+<tr><td><code>CRON_SECRET</code></td><td>잡 엔드포인트 인증 헤더</td><td>Vercel + GitHub Secrets</td></tr>
+<tr><td><code>NEXT_PUBLIC_VAPID_PUBLIC_KEY</code> / <code>VAPID_PRIVATE_KEY</code></td><td>Web Push</td><td>Vercel + .env.local</td></tr>
+<tr><td><code>FRED_API_KEY</code> / <code>ECOS_API_KEY</code></td><td>매크로 지표</td><td>Vercel + .env.local</td></tr>
+</table>
+</div>
+
+<hr>
+
+<!-- ================================================ -->
+<!--  TIER 0                                          -->
+<!-- ================================================ -->
+
+<div class="tier-header" id="t0">
+  <span class="tier-badge tier-badge--0">Tier 0</span>
+  <h2>Ship &amp; Stabilize — 나머지 전부의 전제 조건</h2>
+</div>
+
+<p>코드 변경 없음. 인프라 작업과 실검증만.</p>
+
+<div class="card card--tier0">
+<h3>0-A. G4 잔여 조건 마감 (2·6·8)</h3>
+<p>조건 2·6·8은 호스티드에서 잡을 한 번 실행하면 끝난다.</p>
+<div class="step"><span class="step-num">1</span><div class="step-body"><code>0010_event_exdates.sql</code>이 아직 안 올라갔으면 <code>npx supabase db push</code></div></div>
+<div class="step"><span class="step-num">2</span><div class="step-body">GitHub Actions → <code>cron</code> → Run workflow → <code>generate-briefing</code>. 결과: <code>briefings</code>에 <code>ready</code>, 푸시 발송 시도됨 (성공/실패 무관, 잡은 <code>ok</code>)</div></div>
+<div class="step"><span class="step-num">3</span><div class="step-body">Run workflow → <code>generate-weekly-review</code>. 결과: <code>weekly_reviews</code> 1행 <code>ready</code> + <code>ai_usage</code> 1행 <code>purpose='weekly_review'</code></div></div>
+<div class="step"><span class="step-num">4</span><div class="step-body">Vercel에서 <code>AI_MONTHLY_BUDGET_USD=0</code> → <code>generate-weekly-review</code> → 402 반환 → 예산을 <code>10</code>으로 복구</div></div>
+<div class="step"><span class="step-num">5</span><div class="step-body">결과를 <code>docs/G4-REPORT.md</code>에 기록. G4 전체 통과 선언.</div></div>
+</div>
+
+<div class="card card--tier0">
+<h3>0-B. Notion 토큰 연결</h3>
+<div class="step"><span class="step-num">1</span><div class="step-body">Notion에서 통합 생성 → <code>NOTION_TOKEN</code> 발급</div></div>
+<div class="step"><span class="step-num">2</span><div class="step-body">5개 DB(<code>NOTION_DB_WIKI</code>, <code>NOTION_DB_RESEARCH</code>, <code>NOTION_DB_COURSE_NOTES</code>, <code>NOTION_DB_ALGO</code>, <code>NOTION_DB_APPLICATIONS</code>)의 database ID를 환경변수에 추가</div></div>
+<div class="step"><span class="step-num">3</span><div class="step-body"><code>npm run notion:check</code> 실행 → 5개 DB 전부 접근 확인</div></div>
+<div class="step"><span class="step-num">4</span><div class="step-body">Vercel에 같은 값 추가 → 재배포</div></div>
+</div>
+
+<div class="card card--tier0">
+<h3>0-C. 실사용 1주일</h3>
+<p>크론이 매일 도는 상태에서 아침마다 대시보드를 열고 문제를 기록한다. 아래 항목을 체크:</p>
+<ul>
+<li>크론 9개가 매일 초록색으로 도는가</li>
+<li>브리핑 내용이 실제로 유용한가</li>
+<li>캘린더에 반복 일정이 제대로 전개되는가</li>
+<li>모바일 PWA에서 누락 없이 렌더되는가</li>
+<li>푸시 알림이 아침에 실제로 오는가</li>
+</ul>
+</div>
+
+<hr>
+
+<!-- ================================================ -->
+<!--  TIER 1                                          -->
+<!-- ================================================ -->
+
+<div class="tier-header" id="t1">
+  <span class="tier-badge tier-badge--1">Tier 1</span>
+  <h2>Daily Habit — 매일 여는 이유를 만든다</h2>
+</div>
+
+<!-- 1-A -->
+<div class="work-item">
+<h3>1-A. 스트릭 트래커 <span class="tag tag--new">난이도: 소</span></h3>
+<div class="files">
+  <span class="tag tag--file tag--new">lib/repos/streaks.ts</span>
+  <span class="tag tag--file tag--new">components/widgets/streak-tracker.tsx</span>
+  <span class="tag tag--file tag--modify">app/(dashboard)/page.tsx</span>
+</div>
+
+<h4>무엇을 만드는가</h4>
+<p>대시보드 하단 3분할 영역에 <strong>퀴즈 연속일 / 브리핑 읽기 연속일 / 커밋 연속일</strong> 숫자 3개를 표시하는 위젯.</p>
+
+<h4>데이터 소스 (전부 이미 있음)</h4>
+<div class="table-wrap">
+<table>
+<tr><th>스트릭</th><th>테이블</th><th>쿼리 로직</th></tr>
+<tr><td>퀴즈</td><td><code>quiz_attempts</code></td><td><code>attempted_at</code>를 JST 날짜로 그룹, 오늘부터 역순으로 연속 날짜 수</td></tr>
+<tr><td>브리핑</td><td><code>briefings</code></td><td><code>briefing_date</code>에서 <code>status='ready'</code>인 연속 날짜 수</td></tr>
+<tr><td>커밋</td><td><code>github_daily_commits</code></td><td><code>as_of</code>에서 <code>commit_count > 0</code>인 연속 날짜 수</td></tr>
+</table>
+</div>
+
+<h4>구현 상세</h4>
+<pre><code>// lib/repos/streaks.ts
+import "server-only";
+import { createClient } from "@/lib/supabase/server";
+import { todayJST, addDays } from "@/lib/time";
+
+export type StreakData = {
+  quiz: number;      // 퀴즈 풀기 연속일
+  briefing: number;  // 브리핑 생성 연속일
+  commits: number;   // 커밋 연속일
+};
+
+export async function getStreaks(): Promise&lt;StreakData&gt; {
+  const supabase = await createClient();
+  const today = todayJST();
+
+  // 각각 최근 90일 데이터를 가져와서 연속일 계산
+  // 쿼리는 날짜별 존재 여부만 확인 (COUNT 불필요)
+  // …
+}</code></pre>
+
+<pre><code>// components/widgets/streak-tracker.tsx
+// 숫자 3개를 가로 배치. 각각 아이콘 + 숫자 + "일" 라벨.
+// 연속이 0이면 "오늘 첫 기록을 남겨보세요" + 해당 페이지 링크.
+// 숫자는 .num 클래스 (등폭 우측 정렬).
+// 글래스 아님 — 불투명 --surface.</code></pre>
+
+<h4>대시보드 배치</h4>
+<p>현재 하단 3분할: 퀴즈 | 지수·환율 | GitHub 잔디. <strong>이 아래에 1행 전폭으로 스트릭을 추가</strong> — SPEC 6.1 기존 그리드를 건드리지 않는다.</p>
+</div>
+
+<!-- 1-B -->
+<div class="work-item">
+<h3>1-B. 모바일 퀵 캡처 <span class="tag tag--new">난이도: 소</span></h3>
+<div class="files">
+  <span class="tag tag--file tag--new">components/shell/quick-capture.tsx</span>
+  <span class="tag tag--file tag--modify">app/(dashboard)/layout.tsx</span>
+  <span class="tag tag--file tag--modify">app/(dashboard)/actions.ts</span>
+</div>
+
+<h4>무엇을 만드는가</h4>
+<p>모바일 하단 탭 바 중앙에 <strong>+ 버튼 (FAB)</strong>. 탭하면 바텀 시트가 올라와서:</p>
+<ul>
+<li><strong>할 일 추가</strong> — 제목만 입력 + Enter로 저장. category는 나중에 수정.</li>
+<li><strong>일정 추가</strong> — 제목 + 날짜 최소 입력. iCloud PUT까지 실행.</li>
+</ul>
+
+<h4>구현 상세</h4>
+<ul>
+<li><code>quick-capture.tsx</code>: <code>"use client"</code> 컴포넌트. <code>&lt;dialog&gt;</code> 또는 바텀 시트 UI.</li>
+<li>서버 액션은 <code>app/(dashboard)/actions.ts</code>에 <code>quickAddTask</code>, <code>quickAddEvent</code> 추가.</li>
+<li><code>quickAddTask</code>: <code>lib/repos/tasks.ts</code>의 기존 insert 재사용.</li>
+<li><code>quickAddEvent</code>: <code>lib/repos/events.ts</code>의 기존 <code>createEvent</code> 재사용 (iCloud PUT 포함).</li>
+<li>데스크톱에서는 숨김 (<code>lg:hidden</code>). 데스크톱은 커맨드 팔레트(1-C)가 같은 역할.</li>
+<li>하단 탭 바(<code>bottom-tab-bar.tsx</code>)의 중앙에 배치 — 기존 탭 4개 사이에 끼움.</li>
+</ul>
+</div>
+
+<!-- 1-C -->
+<div class="work-item">
+<h3>1-C. ⌘K 커맨드 팔레트 <span class="tag tag--new">난이도: 중</span></h3>
+<div class="files">
+  <span class="tag tag--file tag--new">components/shell/command-palette.tsx</span>
+  <span class="tag tag--file tag--new">components/ui/dialog.tsx</span>
+  <span class="tag tag--file tag--new">lib/repos/search.ts</span>
+  <span class="tag tag--file tag--modify">app/(dashboard)/layout.tsx</span>
+</div>
+
+<h4>무엇을 만드는가</h4>
+<p><code>⌘K</code>(Mac) / <code>Ctrl+K</code>(Windows)로 오버레이. 입력 즉시 결과가 바뀌는 퍼지 검색.</p>
+
+<h4>검색 범위</h4>
+<div class="table-wrap">
+<table>
+<tr><th>카테고리</th><th>소스</th><th>검색 필드</th></tr>
+<tr><td>페이지 이동</td><td>정적 (<code>NAV_ITEMS</code>)</td><td>label</td></tr>
+<tr><td>일정</td><td><code>events</code></td><td>summary, location</td></tr>
+<tr><td>할 일</td><td><code>tasks</code></td><td>title</td></tr>
+<tr><td>과목</td><td><code>courses</code></td><td>name, code</td></tr>
+<tr><td>위키</td><td>Notion (캐시된)</td><td>title</td></tr>
+<tr><td>퀵 액션</td><td>정적</td><td>"할 일 추가", "일정 추가", "테마 전환"</td></tr>
+</table>
+</div>
+
+<h4>구현 상세</h4>
+<pre><code>// lib/repos/search.ts
+import "server-only";
+import { createClient } from "@/lib/supabase/server";
+
+export type SearchResult = {
+  type: "page" | "event" | "task" | "course" | "wiki" | "action";
+  title: string;
+  subtitle?: string;
+  href: string;
+  icon?: string;
+};
+
+// 서버 액션으로 호출. 입력 debounce 300ms.
+export async function globalSearch(query: string): Promise&lt;SearchResult[]&gt; {
+  if (query.length &lt; 2) return [];
+
+  const supabase = await createClient();
+
+  // 정적 항목 (페이지 + 액션) 먼저 필터
+  // → Supabase에서 events, tasks, courses를 ilike 검색
+  // → 최대 10건 반환
+}</code></pre>
+
+<ul>
+<li><code>command-palette.tsx</code>: <code>"use client"</code>. <code>&lt;dialog&gt;</code> 기반 모달. 키보드 J/K로 항목 이동, Enter로 선택/이동.</li>
+<li><code>dialog.tsx</code>: 범용 모달 컴포넌트. <code>command-palette</code>와 <code>quick-capture</code> 양쪽이 쓴다.</li>
+<li>레이아웃에서 <code>&lt;CommandPalette /&gt;</code>를 바로 주입 — 모든 페이지에서 접근 가능.</li>
+<li>모바일에서도 동작하지만, 트리거는 검색 아이콘 탭 (키보드 단축키는 데스크톱 전용).</li>
+</ul>
+
+<div class="aside">
+<p><strong>Supabase 검색 성능:</strong> 전문 검색(FTS)은 과잉. <code>ilike '%query%'</code>로 시작하고, 데이터가 수천 건을 넘으면 그때 <code>tsvector</code> 인덱스를 추가한다. 단일 사용자 앱이라 데이터 규모가 작다.</p>
+</div>
+</div>
+
+<!-- 1-D -->
+<div class="work-item">
+<h3>1-D. 아침 루틴 화면 <span class="tag tag--new">난이도: 중</span> <span class="tag">선택적</span></h3>
+
+<p>대시보드의 위젯을 <strong>아침 5분 흐름</strong>으로 스텝화하는 것. 별도 페이지가 아니라 <strong>대시보드의 모드</strong>로 구현한다.</p>
+
+<div class="aside--warn aside">
+<p><strong>이건 선택적이다.</strong> 스트릭 + 퀵 캡처 + 커맨드 팔레트만으로도 Tier 1의 목적(매일 여는 이유)은 충분히 달성된다. 실사용 1주일(0-C) 후에 필요성을 판단해도 늦지 않다.</p>
+</div>
+</div>
+
+<hr>
+
+<!-- ================================================ -->
+<!--  TIER 2                                          -->
+<!-- ================================================ -->
+
+<div class="tier-header" id="t2">
+  <span class="tier-badge tier-badge--2">Tier 2</span>
+  <h2>Quality of Life — 쓰는 맛이 달라진다</h2>
+</div>
+
+<!-- 2-A -->
+<div class="work-item">
+<h3>2-A. 캘린더 주간 뷰 <span class="tag tag--new">난이도: 중</span></h3>
+<div class="files">
+  <span class="tag tag--file tag--new">components/widgets/week-calendar.tsx</span>
+  <span class="tag tag--file tag--modify">app/(dashboard)/calendar/page.tsx</span>
+  <span class="tag tag--file tag--modify">lib/repos/events.ts</span>
+</div>
+
+<h4>무엇을 만드는가</h4>
+<p><code>/calendar</code>에 <strong>월간 | 주간</strong> 탭 전환. 주간 뷰는 07:00–22:00 시간축 타임라인. 이벤트를 시간 슬롯에 블록으로 표시.</p>
+
+<h4>구현 상세</h4>
+<ul>
+<li><strong>시간축</strong>: 7열(월–일) × 15행(07–22). 각 셀 높이 60px. 이벤트는 <code>starts_at</code>/<code>ends_at</code>로 top/height 계산.</li>
+<li><strong>반복 일정</strong>: <code>listEventsBetween</code>이 이미 RRULE 전개를 하므로 그대로 사용.</li>
+<li><strong>현재 시각 인디케이터</strong>: 빨간 가로선. <code>setInterval</code> 1분마다 갱신.</li>
+<li>이벤트 클릭 → 기존 <code>event-form.tsx</code> 팝업 (이미 있음).</li>
+<li>모바일에서는 <strong>1일 뷰</strong>로 축소 (좌우 스와이프로 날짜 이동).</li>
+<li><code>month-calendar.tsx</code>는 그대로 유지. 탭 전환은 URL search param (<code>?view=week</code>).</li>
+</ul>
+</div>
+
+<!-- 2-B -->
+<div class="work-item">
+<h3>2-B. 태스크 필터/칸반 <span class="tag tag--new">난이도: 중</span></h3>
+<div class="files">
+  <span class="tag tag--file tag--new">components/widgets/task-board.tsx</span>
+  <span class="tag tag--file tag--modify">app/(dashboard)/tasks/page.tsx</span>
+  <span class="tag tag--file tag--modify">lib/repos/tasks.ts</span>
+</div>
+
+<h4>무엇을 만드는가</h4>
+<p><code>/tasks</code>에 두 가지 뷰:</p>
+<ul>
+<li><strong>리스트 뷰</strong> (현재): 마감순/카테고리별 필터 드롭다운 추가.</li>
+<li><strong>칸반 뷰</strong>: <code>category</code>별 세로 열 (school | career | study | invest | etc). 카드를 드래그해서 카테고리 변경.</li>
+</ul>
+
+<h4>구현 상세</h4>
+<ul>
+<li>뷰 전환은 URL search param (<code>?view=board</code>).</li>
+<li>칸반: HTML Drag and Drop API. 라이브러리 불필요 (단일 사용자, 리스트 작음).</li>
+<li>카드 이동 시 서버 액션 <code>updateTaskCategory</code> 호출.</li>
+<li>필터: <code>status</code> (open/done/all), <code>category</code>, 정렬 (마감순/생성순).</li>
+<li><code>lib/repos/tasks.ts</code>에 <code>listTasksFiltered(filters)</code> 추가.</li>
+</ul>
+</div>
+
+<!-- 2-C -->
+<div class="work-item">
+<h3>2-C. 알림 세분화 <span class="tag tag--new">난이도: 소</span></h3>
+<div class="files">
+  <span class="tag tag--file tag--new">supabase/migrations/0011_streaks_search.sql</span>
+  <span class="tag tag--file tag--modify">lib/repos/push.ts</span>
+  <span class="tag tag--file tag--modify">lib/integrations/push/send.ts</span>
+  <span class="tag tag--file tag--modify">components/widgets/push-settings.tsx</span>
+  <span class="tag tag--file tag--modify">app/(dashboard)/settings/page.tsx</span>
+</div>
+
+<h4>무엇을 만드는가</h4>
+<p>현재 푸시는 on/off 하나. <strong>카테고리별 선택</strong>으로 바꾼다:</p>
+<ul>
+<li>브리핑 알림 (기본 on)</li>
+<li>퀴즈 알림 (기본 on)</li>
+<li>마감 임박 알림 (기본 on) — due_at 1시간 전</li>
+<li>동기화 실패 알림 (기본 off)</li>
+</ul>
+
+<h4>스키마 변경</h4>
+<pre><code>-- 0011_streaks_search.sql 에 포함
+alter table push_subscriptions
+  add column if not exists prefs jsonb
+    not null default '{"briefing":true,"quiz":true,"deadline":true,"sync_fail":false}'::jsonb;</code></pre>
+
+<h4>구현 상세</h4>
+<ul>
+<li><code>push-settings.tsx</code>에 토글 4개 추가. 저장 시 <code>push_subscriptions.prefs</code> 업데이트.</li>
+<li><code>send.ts</code>: <code>sendPush(purpose, ...)</code> — purpose와 구독의 prefs를 비교해서 필터.</li>
+<li>마감 임박 알림은 <strong>새 크론 잡이 아니라</strong> 기존 <code>sync-calendar</code> 잡 말미에 체크 (due_at이 1시간 이내인 open 태스크).</li>
+</ul>
+</div>
+
+<!-- 2-D -->
+<div class="work-item">
+<h3>2-D. 키보드 내비게이션 <span class="tag tag--new">난이도: 소</span></h3>
+<div class="files">
+  <span class="tag tag--file tag--modify">components/shell/sidebar.tsx</span>
+  <span class="tag tag--file tag--modify">app/(dashboard)/layout.tsx</span>
+</div>
+
+<h4>무엇을 만드는가</h4>
+<p>데스크톱에서 키보드 단축키:</p>
+<div class="table-wrap">
+<table>
+<tr><th>키</th><th>동작</th></tr>
+<tr><td><code>⌘K</code> / <code>Ctrl+K</code></td><td>커맨드 팔레트 (1-C)</td></tr>
+<tr><td><code>G then H</code></td><td>홈 (대시보드)</td></tr>
+<tr><td><code>G then C</code></td><td>캘린더</td></tr>
+<tr><td><code>G then T</code></td><td>태스크</td></tr>
+<tr><td><code>G then Q</code></td><td>퀴즈</td></tr>
+<tr><td><code>G then B</code></td><td>브리핑</td></tr>
+<tr><td><code>N</code></td><td>퀵 캡처 (할 일 추가)</td></tr>
+</table>
+</div>
+
+<h4>구현 상세</h4>
+<ul>
+<li>레이아웃에 <code>useEffect</code>로 <code>keydown</code> 리스너. <code>G</code>키 후 500ms 내에 두 번째 키.</li>
+<li>입력 필드에 포커스가 있으면 단축키 무시.</li>
+<li>사이드바 항목에 단축키 힌트 표시 (hover 시 작은 텍스트).</li>
+</ul>
+</div>
+
+<!-- 2-E -->
+<div class="work-item">
+<h3>2-E. DEFERRED 해소 <span class="tag tag--modify">난이도: 소</span></h3>
+
+<p><code>docs/DEFERRED.md</code>에서 실사용에 걸리는 것들:</p>
+
+<div class="table-wrap">
+<table>
+<tr><th>항목</th><th>파일</th><th>작업</th></tr>
+<tr><td>강의자료 열기/삭제</td><td><code>lib/repos/materials.ts</code>, <code>components/widgets/material-panel.tsx</code></td><td>서명 URL 발급 + 삭제 버튼</td></tr>
+<tr><td>학기 추가 UI</td><td><code>components/widgets/semester-form.tsx</code> (이미 있음)</td><td><code>/courses</code>에 "학기 추가" 버튼 노출 확인</td></tr>
+</table>
+</div>
+</div>
+
+<hr>
+
+<!-- ================================================ -->
+<!--  TIER 3                                          -->
+<!-- ================================================ -->
+
+<div class="tier-header" id="t3">
+  <span class="tier-badge tier-badge--3">Tier 3</span>
+  <h2>Intelligence — 데이터가 나를 안다</h2>
+</div>
+
+<div class="aside aside--warn">
+<p><strong>Tier 3은 데이터가 쌓인 후에 효과가 있다.</strong> 최소 2주 실사용 (Tier 0 완료) 후에 착수하는 게 이상적. 하지만 코드 구조는 Tier 1–2와 동시에 준비해도 된다.</p>
+</div>
+
+<!-- 3-A -->
+<div class="work-item">
+<h3>3-A. 적응형 퀴즈 <span class="tag tag--new">난이도: 중</span></h3>
+<div class="files">
+  <span class="tag tag--file tag--modify">lib/ai/prompts/quiz.ts</span>
+  <span class="tag tag--file tag--modify">lib/repos/quiz.ts</span>
+  <span class="tag tag--file tag--modify">app/api/jobs/generate-quiz/route.ts</span>
+  <span class="tag tag--file tag--modify">app/(dashboard)/quiz/page.tsx</span>
+</div>
+
+<h4>무엇을 만드는가</h4>
+<p>퀴즈 생성 시 <strong>도메인별 정답률</strong>을 참고해서:</p>
+<ol>
+<li><strong>약한 도메인 집중</strong>: 정답률이 낮은 도메인에서 더 많은 문제 출제.</li>
+<li><strong>난이도 조절</strong>: 정답률 80%+ → 난이도 3 위주, 40%- → 난이도 1 위주.</li>
+<li><strong>틀린 유형 분석</strong>: <code>concept_hint</code> 필드(이미 존재)를 사용해 같은 개념에서 반복 오답이면 해당 개념 강화.</li>
+</ol>
+
+<h4>구현 상세</h4>
+<pre><code>// lib/repos/quiz.ts에 추가
+export async function getDomainAccuracy(
+  days: number = 30
+): Promise&lt;Map&lt;string, { total: number; correct: number; pct: number }&gt;&gt; {
+  // quiz_attempts JOIN quiz_questions로 도메인별 집계
+  // 최근 N일 기준
+}</code></pre>
+
+<pre><code>// lib/ai/prompts/quiz.ts 수정
+// 프롬프트에 도메인별 정답률을 주입:
+// "사용자의 최근 30일 정답률: ib 45%, macro 78%, ai_ml 62%…
+//  정답률이 낮은 도메인에서 더 많이 출제하고,
+//  정답률이 높은 도메인은 난이도를 올려라."</code></pre>
+
+<ul>
+<li><strong>AI 호출 횟수 변경 없음.</strong> 기존 1일 1회 호출에 정답률 데이터를 프롬프트에 추가하는 것뿐. SPEC 5.5 예산 영향 미미.</li>
+<li>퀴즈 UI에 <strong>정답률 배지</strong> 표시: 도메인 옆에 "45%" 같은 수치.</li>
+</ul>
+</div>
+
+<!-- 3-B -->
+<div class="work-item">
+<h3>3-B. 주간 리뷰 → 행동 제안 <span class="tag tag--modify">난이도: 소</span></h3>
+<div class="files">
+  <span class="tag tag--file tag--modify">lib/ai/prompts/weekly-review.ts</span>
+  <span class="tag tag--file tag--modify">components/widgets/weekly-review.tsx</span>
+</div>
+
+<h4>무엇을 만드는가</h4>
+<p>현재 주간 리뷰는 숫자 나열. <strong>프롬프트를 수정</strong>해서 구체적 행동 제안을 포함시킨다:</p>
+<ul>
+<li>"IB 정답률 40% — 관련 위키에서 DCF 항목을 복습하세요"</li>
+<li>"커밋이 3일 비었습니다 — 오늘 portfolio 이슈 하나를 잡아보세요"</li>
+<li>"지원 파이프라인에 마감 임박 건이 있습니다"</li>
+</ul>
+
+<h4>구현 상세</h4>
+<ul>
+<li>프롬프트에 <code>quiz byDomain</code> 정답률 + <code>tasks</code> 마감 임박 + <code>github</code> 최근 커밋 패턴을 주입.</li>
+<li>AI 출력 JSON에 <code>suggestions: Array&lt;{ text: string; href: string }&gt;</code> 필드 추가.</li>
+<li>위젯에서 제안을 클릭하면 해당 페이지로 이동.</li>
+<li><strong>AI 호출 횟수 변경 없음.</strong> 기존 주 1회 호출의 프롬프트만 확장.</li>
+</ul>
+</div>
+
+<!-- 3-C -->
+<div class="work-item">
+<h3>3-C. 자연어 인터페이스 <span class="tag tag--new">난이도: 대</span></h3>
+<div class="files">
+  <span class="tag tag--file tag--new">lib/ai/prompts/intent-parse.ts</span>
+  <span class="tag tag--file tag--modify">components/shell/command-palette.tsx</span>
+  <span class="tag tag--file tag--modify">app/(dashboard)/actions.ts</span>
+</div>
+
+<div class="aside aside--danger">
+<p><strong>SPEC 변경 필요.</strong> AI 호출 지점이 5→6이 된다. SPEC 5.5의 표에 <code>intent_parse</code>를 추가해야 한다. 또한 수동 트리거(커맨드 팔레트에서 입력)이므로 빈도 예측이 어렵다 — <strong>단가를 매우 낮게 유지</strong>해야 월 예산을 지킨다.</p>
+</div>
+
+<h4>무엇을 만드는가</h4>
+<p>커맨드 팔레트에 자연어 입력 → 인텐트 파싱 → 액션 실행.</p>
+<ul>
+<li>"내일 3시에 면접 준비" → 태스크 생성 (due_at: 내일 15:00, title: 면접 준비)</li>
+<li>"수요일 CS 과제 마감" → 태스크 생성 (due_at: 수요일, category: school)</li>
+<li>"이번 주 IB 퀴즈 점수" → 정답률 표시 (AI 불필요, 쿼리만)</li>
+</ul>
+
+<h4>구현 상세</h4>
+<pre><code>// lib/ai/prompts/intent-parse.ts
+// Haiku급 저가 모델 사용 (claude-haiku-4-5)
+// 입력: 자연어 문장
+// 출력: { intent: "add_task" | "add_event" | "query", params: {...} }
+// 비용: ~$0.001/회. 하루 10회 사용해도 월 $0.30.</code></pre>
+
+<ul>
+<li>커맨드 팔레트에서 검색 결과가 0건이고 입력이 자연어 같으면 "AI로 해석" 버튼 표시.</li>
+<li>사용자가 명시적으로 클릭해야 AI 호출 — 자동 호출하지 않음 (예산 보호).</li>
+<li>파싱 결과를 확인 UI로 보여주고, 사용자가 "실행"을 눌러야 액션 수행.</li>
+<li><strong>모델</strong>: <code>claude-haiku-4-5</code> — 인텐트 파싱은 추론이 필요 없어 가장 저렴한 모델로 충분.</li>
+</ul>
+</div>
+
+<hr>
+
+<!-- ================================================ -->
+<!--  MIGRATION                                       -->
+<!-- ================================================ -->
+
+<h2 id="migration">마이그레이션 전체</h2>
+
+<p>Tier 1–3 전체에서 필요한 스키마 변경은 <strong>마이그레이션 1개</strong>로 묶는다.</p>
+
+<pre><code>-- supabase/migrations/0011_upgrade_streaks_prefs.sql
+
+-- 1. 알림 세분화 (Tier 2-C)
+alter table push_subscriptions
+  add column if not exists prefs jsonb
+    not null default '{"briefing":true,"quiz":true,"deadline":true,"sync_fail":false}'::jsonb;
+
+-- 2. 스트릭 조회용 뷰는 만들지 않는다.
+--    단일 사용자라 집계가 빠르고, 뷰를 만들면 마이그레이션이 복잡해진다.
+--    lib/repos/streaks.ts가 직접 쿼리한다.
+
+-- 3. 검색 인덱스 (Tier 1-C) — 데이터가 작아서 ilike로 충분하지만,
+--    events.summary와 tasks.title에 trigram 인덱스를 미리 걸어둔다.
+create extension if not exists pg_trgm;
+create index if not exists idx_events_summary_trgm on events using gin (summary gin_trgm_ops);
+create index if not exists idx_tasks_title_trgm on tasks using gin (title gin_trgm_ops);
+
+-- GRANT (0001 패턴 따름)
+grant all on push_subscriptions to service_role;
+grant select, insert, update, delete on push_subscriptions to authenticated;</code></pre>
+
+<h3>적용 순서</h3>
+<div class="step"><span class="step-num">1</span><div class="step-body">로컬: <code>supabase db reset</code>으로 전체 검증</div></div>
+<div class="step"><span class="step-num">2</span><div class="step-body">호스티드: <code>npx supabase db push</code> (0011만 올라감)</div></div>
+
+<hr>
+
+<!-- ================================================ -->
+<!--  EXECUTION ORDER                                 -->
+<!-- ================================================ -->
+
+<h2 id="execution">실행 순서</h2>
+
+<p>의존 관계를 고려한 순서. 병렬 가능한 작업은 같은 행에 묶었다.</p>
+
+<div class="table-wrap">
+<table>
+<tr><th style="width:3rem">순서</th><th>작업</th><th>의존</th><th>담당 에이전트</th></tr>
+<tr><td class="num">1</td><td><strong>0-A</strong> G4 마감<br><strong>0-B</strong> Notion 연결</td><td>없음 (사람 작업)</td><td>사람</td></tr>
+<tr><td class="num">2</td><td><strong>0-C</strong> 실사용 1주일</td><td>0-A, 0-B</td><td>사람</td></tr>
+<tr><td class="num">3</td><td><strong>마이그레이션 0011</strong> 작성 + 적용</td><td>없음</td><td>db-architect</td></tr>
+<tr><td class="num">4</td><td><strong>1-A</strong> 스트릭 트래커</td><td>없음</td><td>ui-widgets</td></tr>
+<tr><td class="num">5</td><td><strong>1-B</strong> 퀵 캡처</td><td>없음</td><td>ui-shell</td></tr>
+<tr><td class="num">6</td><td><strong>1-C</strong> 커맨드 팔레트<br><strong>2-D</strong> 키보드 내비</td><td>dialog.tsx (1-C가 먼저)</td><td>ui-shell</td></tr>
+<tr><td class="num">7</td><td><strong>2-A</strong> 캘린더 주간 뷰</td><td>없음</td><td>ui-widgets</td></tr>
+<tr><td class="num">8</td><td><strong>2-B</strong> 태스크 필터/칸반</td><td>없음</td><td>ui-widgets</td></tr>
+<tr><td class="num">9</td><td><strong>2-C</strong> 알림 세분화</td><td>0011 마이그레이션</td><td>ui-widgets + integration-ingest</td></tr>
+<tr><td class="num">10</td><td><strong>2-E</strong> DEFERRED 해소</td><td>없음</td><td>ui-widgets</td></tr>
+<tr><td class="num">11</td><td><strong>3-A</strong> 적응형 퀴즈</td><td>실데이터 2주+</td><td>ai-pipeline</td></tr>
+<tr><td class="num">12</td><td><strong>3-B</strong> 행동 제안</td><td>실데이터 2주+</td><td>ai-pipeline</td></tr>
+<tr><td class="num">13</td><td><strong>3-C</strong> 자연어 인터페이스</td><td>1-C (커맨드 팔레트), SPEC 개정</td><td>ai-pipeline + ui-shell</td></tr>
+</table>
+</div>
+
+<h3>에이전트 배정 요약</h3>
+<div class="table-wrap">
+<table>
+<tr><th>에이전트</th><th>역할</th><th>맡는 작업</th></tr>
+<tr><td><code>db-architect</code></td><td>스키마, 마이그레이션</td><td>0011 마이그레이션</td></tr>
+<tr><td><code>ui-shell</code></td><td>레이아웃, 네비, 셸 컴포넌트</td><td>1-B 퀵 캡처, 1-C 커맨드 팔레트, 2-D 키보드</td></tr>
+<tr><td><code>ui-widgets</code></td><td>대시보드 위젯, 페이지별 UI</td><td>1-A 스트릭, 2-A 주간뷰, 2-B 칸반, 2-C 알림, 2-E DEFERRED</td></tr>
+<tr><td><code>ai-pipeline</code></td><td>AI 프롬프트, 비용 가드</td><td>3-A 적응형, 3-B 행동제안, 3-C 자연어</td></tr>
+<tr><td><code>verifier</code></td><td>게이트 검증</td><td>전체 완료 후 typecheck + lint + test</td></tr>
+</table>
+</div>
+
+<h3>검증 체크리스트</h3>
+<pre><code># 모든 작업 완료 후 반드시 실행
+npm run typecheck   # 0 errors
+npm run lint        # 0 errors
+npm run test        # 기존 테스트 전부 통과
+
+# 수동 확인
+# - 대시보드 375px 가로 스크롤 없음
+# - ⌘K가 모든 페이지에서 동작
+# - 모바일 FAB가 lg에서 숨겨짐
+# - 주간 뷰에서 반복 일정 전개됨
+# - 칸반에서 카드 드래그 이동 후 DB 반영
+# - 푸시 prefs 변경 후 해당 카테고리만 발송</code></pre>
+
+<h3>새 파일 전체 목록</h3>
+<div class="table-wrap">
+<table>
+<tr><th>파일</th><th>작업</th><th>설명</th></tr>
+<tr><td><code>components/shell/command-palette.tsx</code></td><td>1-C</td><td>⌘K 전역 검색/이동 오버레이</td></tr>
+<tr><td><code>components/shell/quick-capture.tsx</code></td><td>1-B</td><td>모바일 FAB + 바텀 시트</td></tr>
+<tr><td><code>components/ui/dialog.tsx</code></td><td>1-C</td><td>범용 모달 컴포넌트</td></tr>
+<tr><td><code>components/widgets/streak-tracker.tsx</code></td><td>1-A</td><td>연속일 숫자 3개</td></tr>
+<tr><td><code>components/widgets/week-calendar.tsx</code></td><td>2-A</td><td>시간축 주간 타임라인</td></tr>
+<tr><td><code>components/widgets/task-board.tsx</code></td><td>2-B</td><td>카테고리별 칸반 보드</td></tr>
+<tr><td><code>lib/repos/streaks.ts</code></td><td>1-A</td><td>연속일 계산 쿼리</td></tr>
+<tr><td><code>lib/repos/search.ts</code></td><td>1-C</td><td>전역 검색 쿼리</td></tr>
+<tr><td><code>lib/ai/prompts/intent-parse.ts</code></td><td>3-C</td><td>자연어 → 인텐트 파싱</td></tr>
+<tr><td><code>supabase/migrations/0011_upgrade_streaks_prefs.sql</code></td><td>2-C</td><td>prefs 컬럼 + trigram 인덱스</td></tr>
+</table>
+</div>
+
+<h3>수정 파일 전체 목록</h3>
+<div class="table-wrap">
+<table>
+<tr><th>파일</th><th>작업</th><th>변경 내용</th></tr>
+<tr><td><code>app/(dashboard)/layout.tsx</code></td><td>1-C, 2-D</td><td>CommandPalette 주입, 키보드 리스너</td></tr>
+<tr><td><code>app/(dashboard)/page.tsx</code></td><td>1-A</td><td>StreakTracker 위젯 추가 (하단 전폭)</td></tr>
+<tr><td><code>app/(dashboard)/actions.ts</code></td><td>1-B</td><td>quickAddTask, quickAddEvent 서버 액션</td></tr>
+<tr><td><code>app/(dashboard)/calendar/page.tsx</code></td><td>2-A</td><td>월간/주간 탭 전환</td></tr>
+<tr><td><code>app/(dashboard)/tasks/page.tsx</code></td><td>2-B</td><td>리스트/칸반 뷰 전환 + 필터</td></tr>
+<tr><td><code>app/(dashboard)/quiz/page.tsx</code></td><td>3-A</td><td>도메인별 정답률 배지 표시</td></tr>
+<tr><td><code>app/(dashboard)/settings/page.tsx</code></td><td>2-C</td><td>알림 카테고리 토글</td></tr>
+<tr><td><code>components/widgets/push-settings.tsx</code></td><td>2-C</td><td>prefs 토글 UI</td></tr>
+<tr><td><code>components/widgets/weekly-review.tsx</code></td><td>3-B</td><td>행동 제안 링크 렌더</td></tr>
+<tr><td><code>components/widgets/material-panel.tsx</code></td><td>2-E</td><td>열기/삭제 버튼</td></tr>
+<tr><td><code>lib/ai/prompts/quiz.ts</code></td><td>3-A</td><td>정답률 기반 프롬프트 확장</td></tr>
+<tr><td><code>lib/ai/prompts/weekly-review.ts</code></td><td>3-B</td><td>행동 제안 출력 추가</td></tr>
+<tr><td><code>lib/repos/quiz.ts</code></td><td>3-A</td><td>getDomainAccuracy 함수</td></tr>
+<tr><td><code>lib/repos/push.ts</code></td><td>2-C</td><td>prefs 필터링</td></tr>
+<tr><td><code>lib/repos/tasks.ts</code></td><td>2-B</td><td>listTasksFiltered</td></tr>
+<tr><td><code>lib/repos/events.ts</code></td><td>2-A</td><td>주간 범위 조회 최적화</td></tr>
+<tr><td><code>lib/repos/materials.ts</code></td><td>2-E</td><td>서명 URL 발급 + 삭제</td></tr>
+<tr><td><code>lib/integrations/push/send.ts</code></td><td>2-C</td><td>purpose별 prefs 체크</td></tr>
+<tr><td><code>lib/types/database.ts</code></td><td>2-C</td><td>push_subscriptions에 prefs 타입 추가</td></tr>
+</table>
+</div>
+
+</div>
