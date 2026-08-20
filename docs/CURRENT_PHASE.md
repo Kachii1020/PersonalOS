@@ -1,4 +1,6 @@
-Phase 4 코드 스택 완료 (PWA + Trust + Phase 4). G1·G2·G3 통과. G4 1·4·5 수동 통과, 2·6·8은 라이브 잡 대기 — **G4 미통과**. 호스티드 EXDATE는 `0010` (`docs/SHIP.md` 2·4절).
+Phase 4 코드 스택 완료 (PWA + Trust + Phase 4). G1·G2·G3 통과. G4 1·4·5 수동 통과 + 2·6 라이브 통과 (2026-08-20 Actions). **8만 남음 — G4 미통과.** 호스티드 EXDATE는 `0010` (`docs/SHIP.md` 2·4절).
+
+업그레이드(`docs/UPGRADE-PLAN.html`) Tier 1–2 구현 완료: 스트릭(1-A), 퀵 캡처(1-B), 커맨드 팔레트(1-C), 주간 뷰(2-A), 칸반(2-B), 알림 세분화(2-C), 키보드 내비(2-D), 자료 열기·삭제(2-E). 마이그레이션 `0011` — 호스티드 `db push` 필요. Tier 3은 실데이터 2주 후 (`docs/DEFERRED.md`).
 
 SPEC 완성 작업 중 (Phase 1·2·3은 G1·G2·G3 통과로 종료, 미구현 항목 해소 중)
 
