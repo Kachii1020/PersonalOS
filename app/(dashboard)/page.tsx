@@ -8,6 +8,7 @@ import { DailyBriefing } from "@/components/widgets/daily-briefing";
 import { QuizSummary } from "@/components/widgets/quiz-summary";
 import { MarketSnapshotWidget } from "@/components/widgets/market-snapshot";
 import { GithubHeatmapWidget } from "@/components/widgets/github-heatmap";
+import { StreakTracker } from "@/components/widgets/streak-tracker";
 
 export const metadata = { title: "대시보드 · Personal OS" };
 
@@ -53,6 +54,10 @@ export default function DashboardPage() {
 
         <Suspense fallback={<WidgetSkeleton title="GitHub 잔디" lines={4} />}>
           <GithubHeatmapWidget />
+        </Suspense>
+
+        <Suspense fallback={<WidgetSkeleton title="스트릭" lines={2} className={FULL_SPAN} />}>
+          <StreakTracker className={FULL_SPAN} />
         </Suspense>
       </div>
     </>

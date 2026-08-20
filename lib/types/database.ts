@@ -553,6 +553,7 @@ export type Database = {
           endpoint: string
           id: string
           p256dh: string
+          prefs: Json
         }
         Insert: {
           auth: string
@@ -560,6 +561,7 @@ export type Database = {
           endpoint: string
           id?: string
           p256dh: string
+          prefs?: Json
         }
         Update: {
           auth?: string
@@ -567,6 +569,7 @@ export type Database = {
           endpoint?: string
           id?: string
           p256dh?: string
+          prefs?: Json
         }
         Relationships: []
       }
