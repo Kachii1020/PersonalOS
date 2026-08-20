@@ -63,11 +63,14 @@ export async function POST(request: NextRequest) {
       costUsd: result.costUsd,
     });
 
-    const push = await sendPush({
-      title: "오늘의 브리핑",
-      body: `섹션 ${sections.length}개가 준비됐습니다.`,
-      url: "/briefing",
-    });
+    const push = await sendPush(
+      {
+        title: "오늘의 브리핑",
+        body: `섹션 ${sections.length}개가 준비됐습니다.`,
+        url: "/briefing",
+      },
+      "briefing",
+    );
 
     await recordJobRun({
       jobName: "generate-briefing",

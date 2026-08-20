@@ -2,7 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { ingestIcs } from "@/lib/integrations/ics/ingest";
-import { deletePushSubscriptionByEndpoint, upsertPushSubscription } from "@/lib/repos/push";
+import {
+  deletePushSubscriptionByEndpoint,
+  getPushPrefs,
+  updatePushPrefs,
+  upsertPushSubscription,
+  DEFAULT_PUSH_PREFS,
+  type PushPrefs,
+} from "@/lib/repos/push";
 import { sendPush } from "@/lib/integrations/push/send";
 
 export type IcsFormState = { ok: boolean; message: string } | null;
@@ -59,6 +66,29 @@ export async function deletePushSubscription(endpoint: string): Promise<{ ok: bo
     await deletePushSubscriptionByEndpoint(endpoint);
     revalidatePath("/settings");
     return { ok: true, message: "구독을 삭제했습니다." };
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/** 이 기기의 알림 카테고리 설정 (2-C). 구독이 아직 없으면 기본값을 준다. */
+export async function loadPushPrefs(endpoint: string): Promise<PushPrefs> {
+  if (!endpoint) return DEFAULT_PUSH_PREFS;
+  try {
+    return await getPushPrefs(endpoint);
+  } catch {
+    return DEFAULT_PUSH_PREFS;
+  }
+}
+
+export async function savePushPrefs(
+  endpoint: string,
+  prefs: PushPrefs,
+): Promise<{ ok: boolean; message: string }> {
+  if (!endpoint) return { ok: false, message: "구독을 먼저 만드세요." };
+  try {
+    await updatePushPrefs(endpoint, prefs);
+    return { ok: true, message: "알림 설정을 저장했습니다." };
   } catch (e) {
     return { ok: false, message: e instanceof Error ? e.message : String(e) };
   }

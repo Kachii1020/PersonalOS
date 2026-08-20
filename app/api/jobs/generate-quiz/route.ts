@@ -112,5 +112,5 @@ export async function POST(request: NextRequest) {
 function notifyQuizReview(reviewDue: number) {
   const body =
     reviewDue > 0 ? `복습 ${reviewDue}문항이 오늘 퀴즈에 들어와 있습니다.` : "오늘의 퀴즈가 준비됐습니다.";
-  return sendPush({ title: "오늘의 퀴즈", body, url: "/quiz" });
+  return sendPush({ title: "오늘의 퀴즈", body, url: "/quiz" }, "quiz");
 }

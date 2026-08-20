@@ -1,4 +1,5 @@
 import "server-only";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export type TaskRow = {
@@ -106,6 +107,32 @@ export async function createTask(input: {
     notes: input.notes,
   });
   if (error) throw new Error(`태스크 생성 실패: ${error.message}`);
+}
+
+/**
+ * 잡 전용 (2-C 마감 임박 알림): due_at이 [from, to) 안인 열린 태스크.
+ * sync-calendar가 매시 정각에 돌므로 [now, now+1h)를 주면 태스크당 대략 한 번 알림이 간다.
+ */
+export async function listTasksDueBetweenForJob(fromIso: string, toIso: string): Promise<TaskRow[]> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("tasks")
+    .select("id, title, notes, due_at, status, category")
+    .eq("status", "open")
+    .not("due_at", "is", null)
+    .gte("due_at", fromIso)
+    .lt("due_at", toIso)
+    .order("due_at", { ascending: true });
+
+  if (error) throw new Error(`마감 임박 태스크 조회 실패: ${error.message}`);
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    title: r.title,
+    notes: r.notes,
+    dueAt: r.due_at,
+    status: r.status as TaskRow["status"],
+    category: r.category,
+  }));
 }
 
 export async function setTaskStatus(id: string, status: TaskRow["status"]): Promise<void> {
