@@ -2,7 +2,13 @@
 
 import { revalidatePath } from "next/cache";
 import { createCourse, createSemester, setGrade } from "@/lib/repos/courses";
-import { createMaterial, getExtractedText, saveSummary } from "@/lib/repos/materials";
+import {
+  createMaterial,
+  deleteMaterial,
+  getExtractedText,
+  getMaterialDownloadUrl,
+  saveSummary,
+} from "@/lib/repos/materials";
 import { extractText, isSupported, PDF_MIME, PPTX_MIME } from "@/lib/integrations/materials/extract";
 import { callStructured, AiParseError, AiRefusalError } from "@/lib/ai/client";
 import { BudgetExceededError } from "@/lib/ai/budget";
@@ -135,6 +141,32 @@ export async function summarizeMaterial(_prev: FormState, formData: FormData): P
 
   revalidatePath(`/courses/${courseId}`);
   return { ok: true, message: "요약했습니다." };
+}
+
+/** 원본 열기 (2-E). 클라이언트가 이 URL을 새 탭으로 연다. 60초 뒤 만료. */
+export async function getMaterialLink(id: string): Promise<{ ok: boolean; url?: string; message: string }> {
+  if (!id) return { ok: false, message: "자료를 찾을 수 없습니다." };
+  try {
+    const { url, filename } = await getMaterialDownloadUrl(id);
+    return { ok: true, url, message: filename };
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+/** 삭제 (2-E). 스토리지 파일까지 지운다. */
+export async function removeMaterial(_prev: FormState, formData: FormData): Promise<FormState> {
+  const id = String(formData.get("id") ?? "");
+  const courseId = String(formData.get("courseId") ?? "");
+  if (!id) return { ok: false, message: "자료를 찾을 수 없습니다." };
+
+  try {
+    const filename = await deleteMaterial(id);
+    revalidatePath(`/courses/${courseId}`);
+    return { ok: true, message: `'${filename}'을 삭제했습니다.` };
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : String(e) };
+  }
 }
 
 /** 브라우저가 확장자만 보내고 MIME을 비워두는 경우가 있다. */

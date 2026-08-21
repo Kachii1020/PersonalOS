@@ -2,7 +2,9 @@ import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/shell/sidebar";
 import { BottomTabBar } from "@/components/shell/bottom-tab-bar";
 import { BudgetBanner } from "@/components/shell/budget-banner";
+import { CommandPalette } from "@/components/shell/command-palette";
 import { OfflineBanner } from "@/components/shell/offline-banner";
+import { QuickCapture } from "@/components/shell/quick-capture";
 import { SyncBanner } from "@/components/shell/sync-banner";
 import { ToastProvider } from "@/components/ui/toast";
 import { createClient } from "@/lib/supabase/server";
@@ -41,6 +43,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <BottomTabBar />
         </div>
       </div>
+      {/* 전역 오버레이 — 모든 페이지에서 ⌘K·N·FAB로 접근한다 (1-B, 1-C, 2-D). */}
+      <CommandPalette />
+      <QuickCapture />
     </ToastProvider>
   );
 }

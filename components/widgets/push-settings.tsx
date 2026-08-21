@@ -2,7 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { savePushSubscription, deletePushSubscription, sendTestPush } from "@/app/(dashboard)/settings/actions";
+import { cn } from "@/lib/design/cn";
+import {
+  savePushSubscription,
+  deletePushSubscription,
+  loadPushPrefs,
+  savePushPrefs,
+  sendTestPush,
+} from "@/app/(dashboard)/settings/actions";
+import type { PushPrefs } from "@/lib/repos/push";
 
 type Status = "checking" | "unsupported" | "need-install" | "off" | "on";
 
@@ -26,6 +34,8 @@ export function PushSettings({
   const [diag, setDiag] = useState<Diag | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [endpoint, setEndpoint] = useState<string | null>(null);
+  const [prefs, setPrefs] = useState<PushPrefs | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,7 +57,13 @@ export function PushSettings({
         return;
       }
       const existing = await currentSubscription();
-      if (!cancelled) setStatus(existing ? "on" : "off");
+      if (cancelled) return;
+      setStatus(existing ? "on" : "off");
+      if (existing) {
+        setEndpoint(existing.endpoint);
+        const loaded = await loadPushPrefs(existing.endpoint);
+        if (!cancelled) setPrefs(loaded);
+      }
     })();
     return () => {
       cancelled = true;
@@ -84,6 +100,8 @@ export function PushSettings({
         return;
       }
       setStatus("on");
+      setEndpoint(json.endpoint);
+      setPrefs(await loadPushPrefs(json.endpoint));
       setMessage("구독했습니다. 테스트 알림을 보내 왕복을 확인하세요.");
     } catch (e) {
       setMessage(e instanceof Error ? e.message : String(e));
@@ -102,6 +120,8 @@ export function PushSettings({
         await sub.unsubscribe();
       }
       setStatus("off");
+      setEndpoint(null);
+      setPrefs(null);
       setMessage("구독을 해제했습니다.");
     } catch (e) {
       setMessage(e instanceof Error ? e.message : String(e));
@@ -118,6 +138,18 @@ export function PushSettings({
       setMessage(result.message);
     } finally {
       setBusy(false);
+    }
+  }
+
+  /** 토글은 즉시 저장한다 (2-C). 실패하면 이전 값으로 되돌린다. */
+  async function togglePref(key: keyof PushPrefs, value: boolean) {
+    if (!prefs || !endpoint) return;
+    const next = { ...prefs, [key]: value };
+    setPrefs(next);
+    const result = await savePushPrefs(endpoint, next);
+    if (!result.ok) {
+      setPrefs(prefs);
+      setMessage(result.message);
     }
   }
 
@@ -166,6 +198,31 @@ export function PushSettings({
           </Button>
         </div>
       )}
+
+      {status === "on" && prefs && endpoint && (
+        <fieldset className="space-y-1.5 border-t border-line pt-3">
+          <legend className="pb-1 text-xs font-medium text-text">알림 종류</legend>
+          <PrefToggle
+            label="브리핑"
+            checked={prefs.briefing}
+            onChange={(v) => void togglePref("briefing", v)}
+            disabled={busy}
+          />
+          <PrefToggle label="퀴즈" checked={prefs.quiz} onChange={(v) => void togglePref("quiz", v)} disabled={busy} />
+          <PrefToggle
+            label="마감 1시간 전"
+            checked={prefs.deadline}
+            onChange={(v) => void togglePref("deadline", v)}
+            disabled={busy}
+          />
+          <PrefToggle
+            label="동기화 실패"
+            checked={prefs.sync_fail}
+            onChange={(v) => void togglePref("sync_fail", v)}
+            disabled={busy}
+          />
+        </fieldset>
+      )}
       {message && <p className="text-sm text-text-muted">{message}</p>}
 
       <ol className="list-decimal space-y-1 pl-5 text-xs text-text-muted">
@@ -174,6 +231,31 @@ export function PushSettings({
         <li>G4-5: 비행기 모드를 끄고 새로고침 → 최신 화면 (캐시가 가리지 않음)</li>
       </ol>
     </div>
+  );
+}
+
+function PrefToggle({
+  label,
+  checked,
+  onChange,
+  disabled,
+}: {
+  label: string;
+  checked: boolean;
+  onChange: (value: boolean) => void;
+  disabled: boolean;
+}) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-3 text-sm">
+      <span className="text-text">{label}</span>
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.checked)}
+        className={cn("size-4 cursor-pointer accent-[var(--accent)]", disabled && "cursor-not-allowed")}
+      />
+    </label>
   );
 }
 

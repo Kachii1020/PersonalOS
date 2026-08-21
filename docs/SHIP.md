@@ -48,7 +48,8 @@ npx supabase db push
 |---|---|---|
 | `0001`–`0007` | Phase 1–3 + 퀴즈 | 적용됨 |
 | `0009_phase4_push_review.sql` | `push_subscriptions`, `weekly_reviews` | 적용됨 |
-| `0010_event_exdates.sql` | Trust — `events.exdates` | **이 파일만 push** |
+| `0010_event_exdates.sql` | Trust — `events.exdates` | 운영자 push 완료 (2026-08-20) |
+| `0011_upgrade_streaks_prefs.sql` | 업그레이드 — `push_subscriptions.prefs` + trigram 인덱스 | **업그레이드 PR 머지 후 push** |
 
 `0001`–`0007`을 `repair --status reverted` 하거나 `db pull` 하지 말 것. 테이블이 있는데 히스토리만 지워진다.
 
