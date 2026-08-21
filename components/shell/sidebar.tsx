@@ -55,11 +55,11 @@ export function Sidebar({ savedOrder, onReorder, onSignOut }: ShellProps) {
   return (
     <aside
       className={cn(
-        "hidden shrink-0 border-r border-line bg-surface transition-[width] lg:flex lg:flex-col",
+        "hidden shrink-0 bg-surface shadow-[1px_0_3px_rgba(0,0,0,0.04)] dark:shadow-none dark:border-r dark:border-line transition-[width] lg:flex lg:flex-col",
         collapsed ? "w-14" : "w-56",
       )}
     >
-      <div className={cn("flex h-14 items-center border-b border-line", collapsed ? "justify-center px-2" : "px-4")}>
+      <div className={cn("flex h-14 items-center", collapsed ? "justify-center px-2" : "px-4")}>
         {!collapsed && <span className="text-sm font-semibold text-text">Personal OS</span>}
       </div>
 
@@ -170,7 +170,7 @@ function NavRow({
         className={cn(
           "flex h-9 flex-1 cursor-pointer items-center gap-2 rounded-lg text-sm transition-[background-color,color,transform] duration-100 active:scale-[0.97]",
           collapsed ? "justify-center px-0" : "px-2.5",
-          active ? "bg-accent-soft font-medium text-accent" : "text-text-muted hover:bg-accent-soft hover:text-accent",
+          active ? "bg-accent font-medium text-white" : "text-text-muted hover:bg-accent-soft hover:text-accent",
         )}
       >
         <Icon className="size-4 shrink-0" aria-hidden="true" />

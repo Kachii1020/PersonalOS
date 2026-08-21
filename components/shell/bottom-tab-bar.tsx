@@ -23,7 +23,7 @@ export function BottomTabBar() {
     <nav
       aria-label="탭 메뉴"
       className={cn(
-        "fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface/95 backdrop-blur-md lg:hidden",
+        "fixed inset-x-0 bottom-0 z-30 bg-surface/95 shadow-[0_-1px_3px_rgba(0,0,0,0.06)] dark:shadow-none dark:border-t dark:border-line backdrop-blur-md lg:hidden",
         /* safe area 하단 패딩 — 홈 인디케이터 겹침 방지 */
         "pb-[env(safe-area-inset-bottom)]",
       )}

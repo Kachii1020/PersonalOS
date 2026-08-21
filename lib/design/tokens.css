@@ -2,21 +2,17 @@
 
 :root,
 [data-theme="light"] {
-  --bg: #f7f8fa; /* 종이 같은 아주 옅은 회청 */
+  --bg: #f4f5f7; /* 토스 톤 — 따뜻한 라이트 그레이 */
   --surface: #ffffff; /* 불투명 카드 */
   --glass: rgba(255, 255, 255, 0.82); /* 하한 0.80, 절대 낮추지 말 것 */
-  --glass-border: rgba(15, 23, 42, 0.08);
-  --text: #0f172a;
-  /*
-   * SPEC 값은 #64748b인데 --bg(#f7f8fa) 위에서 4.48:1로 AA(4.5:1)에 0.02 모자란다.
-   * 한 단계만 어둡게 해서 4.54:1을 만들었다. 2026-08-03 승인, SPEC 6.3에 반영됨.
-   */
-  --text-muted: #63738a;
-  --accent: #2f5d8c; /* 차분한 감청 */
-  --accent-soft: #e4edf6;
-  --positive: #0e7c66;
-  --negative: #b3261e;
-  --line: rgba(15, 23, 42, 0.1);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --text: #191f28; /* 토스 기본 텍스트 */
+  --text-muted: #626e7b; /* AA 4.77:1 on --bg, 5.20:1 on --surface */
+  --accent: #0064ff; /* 토스 코발트 블루 */
+  --accent-soft: #e8f3ff;
+  --positive: #007a5e; /* AA 5.32:1 on --surface */
+  --negative: #d4313c; /* AA 4.88:1 on --surface */
+  --line: rgba(0, 0, 0, 0.06);
 }
 
 [data-theme="dark"] {
@@ -26,16 +22,10 @@
   --glass-border: rgba(255, 255, 255, 0.1);
   --text: #e8edf4;
   --text-muted: #94a3b8;
-  --accent: #7fb0e0;
+  --accent: #4d9aff; /* 코발트 다크 대응 — 6.14:1 on --surface */
   --accent-soft: #1b2a3a;
-  /*
-   * SPEC 6.3의 dark 블록은 --positive / --negative / --line을 정의하지 않는다.
-   * 라이트 값을 그대로 상속하면 --surface(#141a24) 위에서 3.40:1 / 2.67:1로
-   * AA에 크게 못 미친다. 아래 값은 각각 7.62:1 / 7.00:1.
-   * 2026-08-03 승인, SPEC 6.3에 반영됨.
-   */
-  --positive: #3fbfa0;
-  --negative: #f2857c;
+  --positive: #3fbfa0; /* 7.62:1 on --surface */
+  --negative: #f2857c; /* 7.00:1 on --surface */
   --line: rgba(255, 255, 255, 0.1);
 }
 
@@ -46,8 +36,15 @@
  */
 .glass {
   background-color: var(--glass);
-  border: 1px solid var(--glass-border);
+  border: none;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   backdrop-filter: blur(12px);
+}
+
+/* 다크에서는 그림자 대신 미묘한 border — 배경이 어두우면 그림자가 안 보인다. */
+[data-theme="dark"] .glass {
+  box-shadow: none;
+  border: 1px solid var(--glass-border);
 }
 
 /* 숫자는 등폭 + 우측 정렬 (SPEC.md 6.4 규칙 9). */

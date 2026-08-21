@@ -522,18 +522,18 @@ iOS 16.4+ 에서 홈 화면에 추가된 PWA만 구독할 수 있다. 권한 요
 ### 6.3 디자인 토큰
 
 ```css
-/* Light (기본) */
---bg:            #F7F8FA;   /* 종이 같은 아주 옅은 회청 */
+/* Light (기본) — 2026-08-21 토스 톤으로 변경 */
+--bg:            #F4F5F7;   /* 따뜻한 라이트 그레이 */
 --surface:       #FFFFFF;   /* 불투명 카드 */
 --glass:         rgba(255,255,255,0.82);  /* 하한 0.80, 절대 낮추지 말 것 */
---glass-border:  rgba(15,23,42,0.08);
---text:          #0F172A;
---text-muted:    #63738A;   /* 2026-08-03 보정: #64748B는 --bg 위에서 4.48:1로 AA 미달 */
---accent:        #2F5D8C;   /* 차분한 감청 */
---accent-soft:   #E4EDF6;
---positive:      #0E7C66;
---negative:      #B3261E;
---line:          rgba(15,23,42,0.10);
+--glass-border:  rgba(0,0,0,0.06);
+--text:          #191F28;
+--text-muted:    #626E7B;   /* AA 4.77:1 on --bg, 5.20:1 on --surface */
+--accent:        #0064FF;   /* 토스 코발트 블루 */
+--accent-soft:   #E8F3FF;
+--positive:      #007A5E;   /* AA 5.32:1 on --surface */
+--negative:      #D4313C;   /* AA 4.88:1 on --surface */
+--line:          rgba(0,0,0,0.06);
 
 /* Dark */
 --bg:            #0B0F16;
@@ -542,12 +542,10 @@ iOS 16.4+ 에서 홈 화면에 추가된 PWA만 구독할 수 있다. 권한 요
 --glass-border:  rgba(255,255,255,0.10);
 --text:          #E8EDF4;
 --text-muted:    #94A3B8;
---accent:        #7FB0E0;
+--accent:        #4D9AFF;   /* 코발트 다크 대응 — 6.14:1 on --surface */
 --accent-soft:   #1B2A3A;
-/* 2026-08-03 추가: 미정의 상태로 두면 라이트 값을 상속해 --surface 위에서
-   3.40:1 / 2.67:1로 AA에 크게 미달한다. */
---positive:      #3FBFA0;
---negative:      #F2857C;
+--positive:      #3FBFA0;   /* 7.62:1 on --surface */
+--negative:      #F2857C;   /* 7.00:1 on --surface */
 --line:          rgba(255,255,255,0.10);
 ```
 

@@ -18,7 +18,7 @@ export const viewport: Viewport = {
   /* cover: 노치·다이나믹 아일랜드 아래까지 콘텐츠를 확장한다. safe area는 CSS env()로 처리. */
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f7f8fa" },
+    { media: "(prefers-color-scheme: light)", color: "#f4f5f7" },
     { media: "(prefers-color-scheme: dark)", color: "#0b0f16" },
   ],
 };
