@@ -23,4 +23,5 @@
 - ~~**뉴스 보존 기간**~~ — `fetch-news` 말미에 `fetched_at` 30일 초과 행을 지우고 `job_runs.meta.pruned`에 건수를 남긴다. `briefing_sections`는 URL 배열이라 FK 없음.
 - ~~**G4 실기기**~~ — 2026-08-19 운영자가 조건 1·4·5 수동 통과로 보고. `docs/G4-REPORT.md`.
 - ~~**VAPID 키**~~ — 운영자가 생성·Vercel 반영. 리포에 넣지 않는다.
-- **G4 조건 2·6·8** — 라이브 브리핑 잡·주간 리뷰 잡·예산 소진 분기는 아직 실행 증거가 없다. 순서는 `docs/SHIP.md` 4절.
+- ~~**G4 조건 2·6**~~ — 2026-08-20 Actions `generate-briefing` / `generate-weekly-review` 성공.
+- ~~**G4 조건 8**~~ — 2026-08-20 운영자 면제. 사유·잔여 리스크는 `docs/G4-REPORT.md`. 첫 실제 예산 소진 달에 `job_runs`의 402 기록으로 자연 검증.
