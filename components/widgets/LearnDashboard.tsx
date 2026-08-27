@@ -1,7 +1,7 @@
 // components/widgets/LearnDashboard.tsx
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useTransition } from "react";
 import {
   BookOpen,
   CheckCircle2,
@@ -11,6 +11,7 @@ import {
   ExternalLink,
   Download,
 } from "lucide-react";
+import { submitLearnAnswer } from "@/app/(dashboard)/learn/actions";
 
 // ─── Types ───
 interface Exercise {
@@ -505,21 +506,55 @@ const RESOURCES = [
   },
 ];
 
+// ─── Props ───
+export type LearnDashboardProps = {
+  /** module_slug → quiz_questions.id[] (concept_hint 순) */
+  questionIdMap?: Record<string, string[]>;
+  /** question_id → 기존 응시 결과 */
+  existingAttempts?: Record<string, { chosenIndex: number; isCorrect: boolean }>;
+};
+
 // ─── Helpers ───
-function useLocalProgress() {
-  // In production: lib/repos/learn.ts → Supabase learn_progress.
-  // For now: React state (matches SPEC rule: no localStorage in artifacts).
-  const [answers, setAnswers] = useState<Record<string, number>>({});
-  const [correct, setCorrect] = useState<Record<string, boolean>>({});
+function useProgress(
+  questionIdMap: Record<string, string[]>,
+  existingAttempts: Record<string, { chosenIndex: number; isCorrect: boolean }>,
+) {
+  // 기존 응시 기록에서 초기 상태 복원
+  const initialAnswers: Record<string, number> = {};
+  const initialCorrect: Record<string, boolean> = {};
+  for (const [moduleSlug, qIds] of Object.entries(questionIdMap)) {
+    qIds.forEach((qId, idx) => {
+      const attempt = existingAttempts[qId];
+      if (attempt) {
+        const key = `${moduleSlug}-${idx}`;
+        initialAnswers[key] = attempt.chosenIndex;
+        if (attempt.isCorrect) initialCorrect[key] = true;
+      }
+    });
+  }
+
+  const [answers, setAnswers] = useState<Record<string, number>>(initialAnswers);
+  const [correct, setCorrect] = useState<Record<string, boolean>>(initialCorrect);
+  const [, startTransition] = useTransition();
 
   const answer = useCallback(
     (moduleId: string, exIdx: number, optIdx: number, correctIdx: number) => {
       const key = `${moduleId}-${exIdx}`;
       if (answers[key] !== undefined) return;
+
+      // 낙관적 UI 업데이트
       setAnswers((prev) => ({ ...prev, [key]: optIdx }));
       if (optIdx === correctIdx) setCorrect((prev) => ({ ...prev, [key]: true }));
+
+      // 서버 기록 (quiz_attempts + quiz_review_queue + learn_progress)
+      const questionId = questionIdMap[moduleId]?.[exIdx];
+      if (questionId) {
+        startTransition(() => {
+          void submitLearnAnswer(questionId, optIdx, moduleId);
+        });
+      }
     },
-    [answers],
+    [answers, questionIdMap],
   );
 
   const getModuleDone = (m: Module) =>
@@ -622,11 +657,14 @@ function QuizCard({
 }
 
 // ─── Main Widget ───
-export function LearnDashboard() {
+export function LearnDashboard({
+  questionIdMap = {},
+  existingAttempts = {},
+}: LearnDashboardProps) {
   const [activePhase, setActivePhase] = useState(0);
   const [activeModule, setActiveModule] = useState(0);
   const [tab, setTab] = useState<"concepts" | "quiz" | "resources">("concepts");
-  const progress = useLocalProgress();
+  const progress = useProgress(questionIdMap, existingAttempts);
 
   const phase = CURRICULUM[activePhase];
   const mod = phase.modules[activeModule];
