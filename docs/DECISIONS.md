@@ -1,5 +1,11 @@
 # 결정 로그
 
+## 2026-08-27 — Learn 모듈 (Excel for Finance)
+
+- **결정**: /learn 페이지 추가. 커리큘럼 데이터는 LearnDashboard에 하드코딩(오프라인 퍼스트), 진행률만 Supabase learn_progress. xlsx 실습 파일은 public/learn/에 정적 호스팅.
+- **이유**: Supabase에서 커리큘럼을 매번 fetch하면 초기 로딩이 느려지고 DB 의존성 추가. 커리큘럼이 자주 안 바뀌므로 하드코딩이 단순.
+- **버린 대안**: 서버 컴포넌트에서 DB fetch(불필요한 복잡도), Notion에 커리큘럼 저장(데이터 소유권 위반 — 기계 데이터는 Supabase).
+
 ## 2026-08-24 — SEC EDGAR + BIS API 통합
 
 - **결정**: SEC EDGAR XBRL API로 미국 9종목 분기 재무제표 수집, BIS SDMX API로 일본 매크로 3개 시리즈 수집. SEC는 별도 잡(월 1회), BIS는 기존 fetch-macro에 편승.
