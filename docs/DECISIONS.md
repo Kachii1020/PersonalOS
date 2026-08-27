@@ -1,5 +1,11 @@
 # 결정 로그
 
+## 2026-08-24 — SEC EDGAR + BIS API 통합
+
+- **결정**: SEC EDGAR XBRL API로 미국 9종목 분기 재무제표 수집, BIS SDMX API로 일본 매크로 3개 시리즈 수집. SEC는 별도 잡(월 1회), BIS는 기존 fetch-macro에 편승.
+- **이유**: /invest가 시세만 있어서 밸류에이션 판단 불가. EDGAR는 Capital IQ/Eikon의 핵심 기능을 무료로 대체. BIS는 FRED(미국)+ECOS(한국)에 빠진 일본 매크로를 채움.
+- **버린 대안**: OpenBB(Python SDK, Next.js에 직접 통합 불가), IMF WEO(BIS로 일본 커버 충분), 일본 TDnet/한국 DART(별도 파서 필요, 이번 범위 밖).
+
 ## 2026-08-21 — 토스 톤 디자인 스킨 적용
 
 - **결정**: 디자인 토큰을 토스 스타일(코발트 블루 `#0064ff`, 따뜻한 회색 `#f4f5f7`)로 변경. 카드는 무테두리+그림자, 사이드바 활성 상태는 filled 블루, 배지는 filled pill.

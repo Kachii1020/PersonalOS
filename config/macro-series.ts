@@ -3,10 +3,13 @@
  *
  * FRED: https://api.stlouisfed.org/fred/series/observations
  * ECOS: https://ecos.bok.or.kr/api/StatisticSearch/{key}/json/kr/...
+ * BIS:  https://stats.bis.org/api/v2/data/dataflow/BIS/{dataflow}/1.0
  */
 
+import type { BisSeriesConfig } from "@/lib/integrations/finance/bis";
+
 export type MacroSeries = {
-  source: "fred" | "ecos";
+  source: "fred" | "ecos" | "bis";
   seriesId: string;
   displayName: string;
   unit: string;
@@ -14,6 +17,8 @@ export type MacroSeries = {
   ecosItemCode?: string;
   /** ECOS 전용 — 주기 (MM=월, QQ=분기, DD=일) */
   ecosCycle?: string;
+  /** BIS 전용 — dataflow + 필터 파라미터 */
+  bisConfig?: Omit<BisSeriesConfig, "seriesId">;
 };
 
 export const MACRO_SERIES: MacroSeries[] = [
@@ -39,5 +44,37 @@ export const MACRO_SERIES: MacroSeries[] = [
     ecosCycle: "M",
     displayName: "한국 소비자물가지수",
     unit: "Index",
+  },
+
+  // ---- BIS (일본) ----
+  {
+    source: "bis",
+    seriesId: "BIS_CBPOL_JP",
+    displayName: "일본 정책금리",
+    unit: "%",
+    bisConfig: {
+      dataflow: "WS_CBPOL",
+      params: { FREQ: "M", REF_AREA: "JP" },
+    },
+  },
+  {
+    source: "bis",
+    seriesId: "BIS_RPP_JP",
+    displayName: "일본 주거용 부동산 가격",
+    unit: "Index",
+    bisConfig: {
+      dataflow: "WS_SPP",
+      params: { FREQ: "Q", REF_AREA: "JP", VALUE: "R" },
+    },
+  },
+  {
+    source: "bis",
+    seriesId: "BIS_CREDIT_GDP_JP",
+    displayName: "일본 민간 신용/GDP",
+    unit: "% GDP",
+    bisConfig: {
+      dataflow: "WS_CREDIT_GAP",
+      params: { FREQ: "Q", BORROWERS_CTY: "JP", CG_DTYPE: "A" },
+    },
   },
 ];

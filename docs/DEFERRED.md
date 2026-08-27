@@ -1,5 +1,10 @@
 # 미룬 것들
 
+- **SEC 펀더멘탈 차트** — sec_filings에 분기 실적이 쌓이면 매출·순이익 추이 차트를 /invest에 넣을 수 있다. 데이터 수집만 이번에 했고, 시각화는 별도 작업.
+- **일본·한국 종목 재무제표** — TDnet(일본)·DART(한국) API로 7203.T, 6758.T, 005930.KS 등의 실적을 수집할 수 있지만 파서가 별도로 필요하다. 이번 범위에서 제외.
+- **EDGAR P/E 연환산** — 현재 분기 EPS로 P/E를 계산하므로 단순 분기 P/E다. TTM(trailing twelve months) EPS로 바꾸려면 최근 4분기 합산 로직이 필요.
+- **호스티드 0011** — `supabase/migrations/0011_sec_filings.sql`을 `db push`로 올려야 한다.
+
 - **Notion 클라이언트 실호출 미검증** — `lib/integrations/notion/client.ts`와 `npm run notion:check`를 만들었지만 토큰이 없어 실제 워크스페이스에 붙여보지 못했다. 엔드포인트·헤더·응답 모양은 공식 문서(2026-03-11)로 확인했고, 토큰 없을 때의 실패 경로만 실행해봤다. **토큰이 들어오면 `notion:check`부터 돌려서 확인할 것.** 여기가 통과하기 전에는 notion-bridge의 나머지를 쌓지 않는다.
 
 - ~~**프로덕션 빌드 실검증**~~ — 호스티드 스키마 + 로그인 + iPhone G4 1·4·5 (2026-08-19).

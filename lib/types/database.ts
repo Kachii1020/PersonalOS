@@ -448,6 +448,138 @@ export type Database = {
         }
         Relationships: []
       }
+      learn_modules: {
+        Row: {
+          concepts: string[]
+          id: string
+          phase_id: string
+          position: number
+          slug: string
+          title: string
+        }
+        Insert: {
+          concepts?: string[]
+          id?: string
+          phase_id: string
+          position?: number
+          slug: string
+          title: string
+        }
+        Update: {
+          concepts?: string[]
+          id?: string
+          phase_id?: string
+          position?: number
+          slug?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learn_modules_phase_id_fkey"
+            columns: ["phase_id"]
+            isOneToOne: false
+            referencedRelation: "learn_phases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learn_phases: {
+        Row: {
+          description: string | null
+          id: string
+          phase_number: number
+          position: number
+          title: string
+          track_id: string
+          weeks_label: string | null
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          phase_number: number
+          position?: number
+          title: string
+          track_id: string
+          weeks_label?: string | null
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          phase_number?: number
+          position?: number
+          title?: string
+          track_id?: string
+          weeks_label?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learn_phases_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "learn_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learn_progress: {
+        Row: {
+          completed_at: string | null
+          id: string
+          module_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          module_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          module_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learn_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: true
+            referencedRelation: "learn_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learn_tracks: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          position: number
+          slug: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          position?: number
+          slug: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          position?: number
+          slug?: string
+          title?: string
+        }
+        Relationships: []
+      }
       macro_snapshots: {
         Row: {
           as_of: string
@@ -602,6 +734,30 @@ export type Database = {
           },
         ]
       }
+      quiz_domain_lessons: {
+        Row: {
+          content: string
+          domain: string
+          generated_at: string
+          key_terms: string[]
+          title: string
+        }
+        Insert: {
+          content: string
+          domain: string
+          generated_at?: string
+          key_terms: string[]
+          title: string
+        }
+        Update: {
+          content?: string
+          domain?: string
+          generated_at?: string
+          key_terms?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
       quiz_questions: {
         Row: {
           answer_index: number
@@ -612,6 +768,7 @@ export type Database = {
           domain: string
           explanation: string
           id: string
+          module_slug: string | null
           question: string
         }
         Insert: {
@@ -623,6 +780,7 @@ export type Database = {
           domain: string
           explanation: string
           id?: string
+          module_slug?: string | null
           question: string
         }
         Update: {
@@ -634,31 +792,8 @@ export type Database = {
           domain?: string
           explanation?: string
           id?: string
+          module_slug?: string | null
           question?: string
-        }
-        Relationships: []
-      }
-      quiz_domain_lessons: {
-        Row: {
-          domain: string
-          title: string
-          content: string
-          key_terms: string[]
-          generated_at: string
-        }
-        Insert: {
-          domain: string
-          title: string
-          content: string
-          key_terms: string[]
-          generated_at?: string
-        }
-        Update: {
-          domain?: string
-          title?: string
-          content?: string
-          key_terms?: string[]
-          generated_at?: string
         }
         Relationships: []
       }
@@ -687,6 +822,56 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sec_filings: {
+        Row: {
+          cik: string
+          eps: number | null
+          equity: number | null
+          filed_at: string | null
+          fiscal_end: string
+          form_type: string
+          id: number
+          net_income: number | null
+          revenue: number | null
+          ticker_id: string
+          total_assets: number | null
+        }
+        Insert: {
+          cik: string
+          eps?: number | null
+          equity?: number | null
+          filed_at?: string | null
+          fiscal_end: string
+          form_type: string
+          id?: number
+          net_income?: number | null
+          revenue?: number | null
+          ticker_id: string
+          total_assets?: number | null
+        }
+        Update: {
+          cik?: string
+          eps?: number | null
+          equity?: number | null
+          filed_at?: string | null
+          fiscal_end?: string
+          form_type?: string
+          id?: number
+          net_income?: number | null
+          revenue?: number | null
+          ticker_id?: string
+          total_assets?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sec_filings_ticker_id_fkey"
+            columns: ["ticker_id"]
+            isOneToOne: false
+            referencedRelation: "tickers"
             referencedColumns: ["id"]
           },
         ]

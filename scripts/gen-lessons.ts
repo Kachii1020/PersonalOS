@@ -10,7 +10,7 @@
  */
 
 import { createClient } from "@supabase/supabase-js";
-import { QUIZ_DOMAINS, type QuizDomain } from "@/lib/ai/prompts/quiz";
+import { QUIZ_DOMAINS } from "@/lib/ai/prompts/quiz";
 import { callStructured } from "@/lib/ai/client";
 import {
   DOMAIN_LESSON_SCHEMA,

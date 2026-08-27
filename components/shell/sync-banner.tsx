@@ -9,6 +9,7 @@ const FIXES: Record<string, { label: string; fix: string }> = {
   prices: { label: "시세 갱신 실패", fix: "마지막 스냅샷을 표시 중입니다." },
   github: { label: "GitHub 수집 실패", fix: "GITHUB_TOKEN 만료 여부를 확인하세요." },
   macro: { label: "매크로 지표 수집 실패", fix: "FRED_API_KEY 또는 ECOS_API_KEY를 확인하세요." },
+  "sec-filings": { label: "SEC 실적 수집 실패", fix: "설정에서 잡 로그를 확인하세요." },
 };
 
 /**

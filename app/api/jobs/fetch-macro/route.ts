@@ -5,6 +5,7 @@ import { recordJobRun } from "@/lib/repos/job-runs";
 import { upsertMacroSnapshots } from "@/lib/repos/macro";
 import { fetchFredSeries } from "@/lib/integrations/finance/fred";
 import { fetchEcosSeries } from "@/lib/integrations/finance/ecos";
+import { fetchBisSeries } from "@/lib/integrations/finance/bis";
 import { MACRO_SERIES } from "@/config/macro-series";
 
 export const dynamic = "force-dynamic";
@@ -69,6 +70,33 @@ export async function POST(request: NextRequest) {
       for (const obs of result.observations) {
         rows.push({
           source: "ecos",
+          series_id: series.seriesId,
+          display_name: series.displayName,
+          as_of: obs.date,
+          value: obs.value,
+          unit: series.unit,
+        });
+      }
+    }
+
+    // BIS 시리즈
+    const bisSeries = MACRO_SERIES.filter((s) => s.source === "bis");
+    for (const series of bisSeries) {
+      if (!series.bisConfig) {
+        failures.push({ seriesId: series.seriesId, error: "bisConfig 없음" });
+        continue;
+      }
+      const result = await fetchBisSeries(
+        { seriesId: series.seriesId, ...series.bisConfig },
+        1,
+      );
+      if (!result.ok) {
+        failures.push({ seriesId: result.seriesId, error: result.error });
+        continue;
+      }
+      for (const obs of result.observations) {
+        rows.push({
+          source: "bis",
           series_id: series.seriesId,
           display_name: series.displayName,
           as_of: obs.date,

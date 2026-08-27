@@ -15,7 +15,8 @@ on:
     - cron: "0 22 * * *" # 07:00 JST — 퀴즈 생성
     - cron: "30 22 * * *" # 07:30 JST — 시세 + 환율
     - cron: "45 22 * * *" # 07:45 JST — GitHub 수집
-    - cron: "50 22 * * 1" # 07:50 JST 월요일 — 매크로 지표 (주 1회)
+    - cron: "50 22 * * 1" # 07:50 JST 월요일 — 매크로 지표 (주 1회, BIS 포함)
+    - cron: "0 23 1 * *"  # 08:00 JST 매월 1일 — SEC EDGAR 실적
     - cron: "0 12 * * 0" # 21:00 JST 일요일 — 주간 리뷰
   workflow_dispatch:
     inputs:
@@ -23,7 +24,7 @@ on:
         description: "수동 실행할 잡"
         required: true
         type: choice
-        options: [sync-calendar, fetch-news, generate-briefing, generate-quiz, fetch-prices, sync-github, sync-ics, fetch-macro, generate-weekly-review]
+        options: [sync-calendar, fetch-news, generate-briefing, generate-quiz, fetch-prices, sync-github, sync-ics, fetch-macro, fetch-sec-filings, generate-weekly-review]
 
 jobs:
   run:
@@ -50,6 +51,8 @@ jobs:
             jobs="sync-github"
           elif [ "${{ github.event.schedule }}" = "50 22 * * 1" ]; then
             jobs="fetch-macro"
+          elif [ "${{ github.event.schedule }}" = "0 23 1 * *" ]; then
+            jobs="fetch-sec-filings"
           elif [ "${{ github.event.schedule }}" = "0 12 * * 0" ]; then
             jobs="generate-weekly-review"
           else

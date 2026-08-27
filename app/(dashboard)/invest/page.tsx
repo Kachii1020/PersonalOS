@@ -12,6 +12,7 @@ import { latestPrices } from "@/lib/repos/prices";
 import { latestFxRate } from "@/lib/repos/fx";
 import { listResearchNotes } from "@/lib/repos/research";
 import { latestMacroSnapshots, type MacroSnapshot } from "@/lib/repos/macro";
+import { latestFilingPerTicker, type SecFiling } from "@/lib/repos/sec-filings";
 import { monthDayWeekday } from "@/lib/time";
 
 export const metadata = { title: "투자 · Personal OS" };
@@ -153,6 +154,19 @@ export default async function InvestPage() {
       >
         <MacroIndicators />
       </Suspense>
+
+      <Suspense
+        fallback={
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle>펀더멘탈</CardTitle>
+            </CardHeader>
+            <SkeletonLines lines={3} />
+          </Card>
+        }
+      >
+        <Fundamentals prices={prices} tickers={tickers} />
+      </Suspense>
     </>
   );
 }
@@ -182,7 +196,7 @@ async function MacroIndicators() {
     <Card className="mt-4">
       <CardHeader>
         <CardTitle>매크로 지표</CardTitle>
-        <CardHint>FRED · ECOS</CardHint>
+        <CardHint>FRED · ECOS · BIS</CardHint>
       </CardHeader>
 
       <div className="overflow-x-auto">
@@ -271,6 +285,103 @@ async function ResearchNotes() {
       )}
     </Card>
   );
+}
+
+async function Fundamentals({
+  prices,
+  tickers,
+}: {
+  prices: Awaited<ReturnType<typeof latestPrices>>;
+  tickers: Awaited<ReturnType<typeof listTickers>>;
+}) {
+  let filings: SecFiling[];
+  try {
+    filings = await latestFilingPerTicker();
+  } catch (e) {
+    console.error(e);
+    return (
+      <Card className="mt-4">
+        <CardHeader>
+          <CardTitle>펀더멘탈</CardTitle>
+        </CardHeader>
+        <ErrorState what="펀더멘탈 데이터를 불러오지 못했습니다" fix="SEC 잡 로그를 확인하세요." />
+      </Card>
+    );
+  }
+
+  if (filings.length === 0) return null;
+
+  // 시세와 EPS로 P/E 계산
+  const priceMap = new Map(prices.map((p) => [p.tickerId, p.close]));
+  const tickerNameMap = new Map(tickers.map((t) => [t.id, { name: t.displayName, symbol: t.symbol }]));
+
+  return (
+    <Card className="mt-4">
+      <CardHeader>
+        <CardTitle>펀더멘탈</CardTitle>
+        <CardHint>SEC EDGAR · {filings.length}종목</CardHint>
+      </CardHeader>
+
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm" aria-label="SEC 펀더멘탈 데이터">
+          <thead>
+            <tr className="border-b border-line text-left text-text-muted">
+              <th className="pb-2 pr-4 font-medium">종목</th>
+              <th className="pb-2 pr-4 text-right font-medium">매출</th>
+              <th className="pb-2 pr-4 text-right font-medium">순이익</th>
+              <th className="pb-2 pr-4 text-right font-medium">EPS</th>
+              <th className="pb-2 pr-4 text-right font-medium">P/E</th>
+              <th className="pb-2 text-right font-medium">기간</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filings.map((f) => {
+              const price = priceMap.get(f.tickerId);
+              const pe = price != null && f.eps != null && f.eps > 0
+                ? price / f.eps
+                : null;
+
+              return (
+                <tr
+                  key={f.tickerId}
+                  className="border-b border-line/50 transition-colors last:border-0 hover:bg-accent-soft/30"
+                >
+                  <td className="py-2 pr-4">
+                    <span className="font-medium text-text">{tickerNameMap.get(f.tickerId)?.name ?? f.cik}</span>
+                    <span className="ml-1 text-text-muted">{tickerNameMap.get(f.tickerId)?.symbol}</span>
+                  </td>
+                  <td className="num py-2 pr-4 text-right text-text">
+                    {f.revenue != null ? formatLargeUsd(f.revenue) : "—"}
+                  </td>
+                  <td className="num py-2 pr-4 text-right text-text">
+                    {f.netIncome != null ? formatLargeUsd(f.netIncome) : "—"}
+                  </td>
+                  <td className="num py-2 pr-4 text-right text-text">
+                    {f.eps != null ? `$${f.eps.toFixed(2)}` : "—"}
+                  </td>
+                  <td className="num py-2 pr-4 text-right text-text">
+                    {pe != null ? pe.toFixed(1) : "—"}
+                  </td>
+                  <td className="num py-2 text-right text-text-muted">
+                    {f.fiscalEnd} {f.formType}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+  );
+}
+
+function formatLargeUsd(value: number): string {
+  const abs = Math.abs(value);
+  const sign = value < 0 ? "-" : "";
+  if (abs >= 1e12) return `${sign}$${(abs / 1e12).toFixed(1)}T`;
+  if (abs >= 1e9) return `${sign}$${(abs / 1e9).toFixed(1)}B`;
+  if (abs >= 1e6) return `${sign}$${(abs / 1e6).toFixed(0)}M`;
+  return `${sign}$${abs.toLocaleString("en-US")}`;
 }
 
 function formatPrice(value: number, currency: string): string {
