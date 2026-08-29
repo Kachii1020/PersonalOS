@@ -96,6 +96,34 @@ export async function updateProgress(
   );
 }
 
+export interface LabCompletion {
+  exercise_id: string;
+  module_slug: string;
+  completed_at: string;
+}
+
+export async function getLabCompletions(): Promise<LabCompletion[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("lab_completions")
+    .select("exercise_id, module_slug, completed_at");
+  if (error) return [];
+  return data;
+}
+
+export async function recordLabCompletion(
+  exerciseId: string,
+  moduleSlug: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("lab_completions").upsert(
+    { exercise_id: exerciseId, module_slug: moduleSlug },
+    { onConflict: "exercise_id" },
+  );
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
 // ─── Quiz integration ───
 // Quiz questions with domain='excel_finance' are fetched through
 // the existing lib/repos/quiz.ts — no duplication here.

@@ -1,6 +1,7 @@
 // components/widgets/LearnDashboard.tsx
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, useCallback, useTransition } from "react";
 import {
   BookOpen,
@@ -11,7 +12,14 @@ import {
   ExternalLink,
   Download,
 } from "lucide-react";
-import { submitLearnAnswer } from "@/app/(dashboard)/learn/actions";
+import { submitLearnAnswer, submitLabCompletion } from "@/app/(dashboard)/learn/actions";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getExercisesForModule } from "@/lib/spreadsheet/exercises";
+
+const LabExercise = dynamic(
+  () => import("@/components/widgets/lab-exercise").then((m) => m.LabExercise),
+  { ssr: false, loading: () => <Skeleton className="h-64 rounded-xl" /> },
+);
 
 // ─── Types ───
 interface Exercise {
@@ -512,7 +520,11 @@ export type LearnDashboardProps = {
   questionIdMap?: Record<string, string[]>;
   /** question_id → 기존 응시 결과 */
   existingAttempts?: Record<string, { chosenIndex: number; isCorrect: boolean }>;
+  /** 완료된 lab exercise_id 목록 */
+  labCompletions?: string[];
 };
+
+type ContentTab = "concepts" | "lab" | "quiz" | "resources";
 
 // ─── Helpers ───
 function useProgress(
@@ -660,14 +672,27 @@ function QuizCard({
 export function LearnDashboard({
   questionIdMap = {},
   existingAttempts = {},
+  labCompletions = [],
 }: LearnDashboardProps) {
   const [activePhase, setActivePhase] = useState(0);
   const [activeModule, setActiveModule] = useState(0);
-  const [tab, setTab] = useState<"concepts" | "quiz" | "resources">("concepts");
+  const [tab, setTab] = useState<ContentTab>("concepts");
+  const [completedLabs, setCompletedLabs] = useState(labCompletions);
   const progress = useProgress(questionIdMap, existingAttempts);
 
   const phase = CURRICULUM[activePhase];
   const mod = phase.modules[activeModule];
+
+  const handleLabCompleted = useCallback(
+    async (exerciseId: string) => {
+      const result = await submitLabCompletion(exerciseId, mod.id);
+      if (result.ok) {
+        setCompletedLabs((prev) => (prev.includes(exerciseId) ? prev : [...prev, exerciseId]));
+      }
+      return result;
+    },
+    [mod.id],
+  );
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
@@ -748,6 +773,11 @@ export function LearnDashboard({
         {phase.modules.map((m, i) => {
           const done = progress.getModuleDone(m);
           const total = m.exercises.length;
+          const moduleLabs = getExercisesForModule(m.id);
+          const moduleLabTotal = moduleLabs.length;
+          const moduleLabDone = moduleLabs.filter((ex) =>
+            completedLabs.includes(ex.id),
+          ).length;
           const active = activeModule === i;
           return (
             <button
@@ -763,15 +793,18 @@ export function LearnDashboard({
               }`}
             >
               {m.title}
-              {done > 0 && (
+              {(done > 0 || moduleLabDone > 0) && (
                 <span
                   className="ml-1.5 tabular-nums font-mono"
                   style={{
                     color:
-                      done === total ? "var(--positive)" : "var(--accent)",
+                      done === total && moduleLabDone === moduleLabTotal
+                        ? "var(--positive)"
+                        : "var(--accent)",
                   }}
                 >
                   {done}/{total}
+                  {moduleLabTotal > 0 && ` · 실습 ${moduleLabDone}/${moduleLabTotal}`}
                 </span>
               )}
             </button>
@@ -784,6 +817,7 @@ export function LearnDashboard({
         {(
           [
             ["concepts", "개념"],
+            ["lab", "실습"],
             ["quiz", "퀴즈"],
             ["resources", "리소스"],
           ] as const
@@ -835,13 +869,24 @@ export function LearnDashboard({
             </a>
           )}
           <button
-            onClick={() => setTab("quiz")}
+            onClick={() => setTab("lab")}
             className="mt-5 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-accent py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90"
           >
-            퀴즈 시작
+            실습 시작
             <ArrowRight size={14} />
           </button>
         </div>
+      )}
+
+      {/* Lab */}
+      {tab === "lab" && (
+        <LabExercise
+          key={mod.id}
+          moduleSlug={mod.id}
+          completedIds={completedLabs}
+          onCompleted={handleLabCompleted}
+          onGoToQuiz={() => setTab("quiz")}
+        />
       )}
 
       {/* Quiz */}
