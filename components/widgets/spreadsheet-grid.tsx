@@ -192,13 +192,16 @@ export const SpreadsheetGrid = forwardRef<SpreadsheetGridHandle, Props>(
       setCells(engine.snapshot());
     };
 
-    const selectCell = (row: number, col: number) => {
+    const selectCell = (row: number, col: number, edit: boolean) => {
       if (isEditable(selected.row, selected.col)) {
         commit(selected.row, selected.col, draft);
       }
       setSelected({ row, col });
-      if (isEditable(row, col)) {
+      if (edit && isEditable(row, col)) {
         requestAnimationFrame(() => inputRef.current?.focus());
+      } else {
+        setFormulaFocused(false);
+        inputRef.current?.blur();
       }
     };
 
@@ -212,13 +215,13 @@ export const SpreadsheetGrid = forwardRef<SpreadsheetGridHandle, Props>(
       if (event.key === "Enter") {
         event.preventDefault();
         commit(selected.row, selected.col, draft);
-        const next = nextEditable(selected.row, selected.col);
-        if (next) selectCell(next.row, next.col);
+        setFormulaFocused(false);
+        inputRef.current?.blur();
       } else if (event.key === "Tab") {
         event.preventDefault();
         commit(selected.row, selected.col, draft);
         const next = nextEditable(selected.row, selected.col);
-        if (next) selectCell(next.row, next.col);
+        if (next) selectCell(next.row, next.col, false);
       } else if (event.key === "Escape") {
         event.preventDefault();
         const cell = cells[selected.row]?.[selected.col];
@@ -262,6 +265,8 @@ export const SpreadsheetGrid = forwardRef<SpreadsheetGridHandle, Props>(
       event.preventDefault();
       event.stopPropagation();
       dragCleanupRef.current?.();
+      setFormulaFocused(false);
+      inputRef.current?.blur();
       if (isEditable(selected.row, selected.col)) {
         commit(selected.row, selected.col, draftRef.current);
       }
@@ -303,7 +308,7 @@ export const SpreadsheetGrid = forwardRef<SpreadsheetGridHandle, Props>(
     const selectedEditable = isEditable(selected.row, selected.col);
     const formulaError = selectedComputed?.error ?? null;
     const dragRange = pointing ?? filling;
-    const showFillHandle = !pointingMode && !pointing && !filling;
+    const showFillHandle = !pointing && !filling;
 
     return (
       <div>
@@ -395,9 +400,13 @@ export const SpreadsheetGrid = forwardRef<SpreadsheetGridHandle, Props>(
                           onPointerDown={(event) => {
                             if (pointingMode) beginPointing(row, col, event);
                           }}
+                          onDoubleClick={() => {
+                            if (pointingMode) return;
+                            selectCell(row, col, true);
+                          }}
                           onClick={() => {
                             if (pointingMode) return;
-                            selectCell(row, col);
+                            selectCell(row, col, false);
                           }}
                           className={`flex h-8 min-w-20 cursor-pointer items-center px-2 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent ${
                             numeric ? "justify-end font-mono tabular-nums" : "justify-start"
@@ -414,8 +423,10 @@ export const SpreadsheetGrid = forwardRef<SpreadsheetGridHandle, Props>(
                             type="button"
                             aria-label="채우기 핸들"
                             onPointerDown={beginFill}
-                            className="absolute -bottom-1 -right-1 z-20 h-2.5 w-2.5 cursor-pointer border border-surface bg-accent focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
-                          />
+                            className="absolute -bottom-2 -right-2 z-20 flex h-4 w-4 cursor-pointer items-center justify-center focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+                          >
+                            <span className="block h-2.5 w-2.5 border border-surface bg-accent" />
+                          </button>
                         )}
                       </td>
                     );
