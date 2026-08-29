@@ -90,7 +90,22 @@ insert into quiz_questions (domain, module_slug, concept_hint, question, choices
    'COUNT는 숫자만, COUNTA는 비어있지 않은 셀 전부, COUNTBLANK는 빈 셀.', 1),
   ('excel_finance', 'basic-fn', '2', '두 번째로 큰 값을 구하려면?',
    array['MAX-1','LARGE(범위, 2)','RANK(2)','INDEX(MAX)'], 1,
-   'LARGE(범위, k)는 k번째로 큰 값. SMALL은 반대.', 1);
+   'LARGE(범위, k)는 k번째로 큰 값. SMALL은 반대.', 1),
+  ('excel_finance', 'basic-fn', '3', '빈 셀 개수만 세려면?',
+   array['COUNTA','COUNTBLANK','COUNT','LEN'], 1,
+   'COUNTBLANK는 빈 셀. COUNT는 숫자, COUNTA는 비어 있지 않은 셀.', 1),
+  ('excel_finance', 'basic-fn', '4', '세 번째로 작은 값을 구하려면?',
+   array['MIN-2','SMALL(범위, 3)','LARGE(범위, 3)','RANK(3)'], 1,
+   'SMALL(범위, k)는 k번째로 작은 값. LARGE는 큰 쪽.', 1),
+  ('excel_finance', 'basic-fn', '5', '숫자 3개와 빈 칸 1개가 있는 범위에서 COUNT와 COUNTBLANK는?',
+   array['3과 1','4와 1','3과 0','4와 0'], 0,
+   'COUNT는 숫자만 3, COUNTBLANK는 빈 칸 1.', 1),
+  ('excel_finance', 'basic-fn', '6', 'LARGE(범위,1)과 같은 결과는?',
+   array['SMALL(범위,1)','MAX(범위)','MIN(범위)','AVERAGE(범위)'], 1,
+   'LARGE(...,1)은 최댓값이라 MAX와 같다.', 1),
+  ('excel_finance', 'basic-fn', '7', '한 열에서 최댓값만 필요하면?',
+   array['LARGE(범위, 1)','MAX(범위)가 더 짧다','RANK','둘 다 불가'], 1,
+   '최댓값만이면 MAX. LARGE는 k번째가 필요할 때.', 1);
 
 -- Phase 1 / logic
 insert into quiz_questions (domain, module_slug, concept_hint, question, choices, answer_index, explanation, difficulty) values
@@ -102,7 +117,34 @@ insert into quiz_questions (domain, module_slug, concept_hint, question, choices
    'IFERROR는 에러 시 지정한 값으로 대체. 재무 모델에서 필수.', 1),
   ('excel_finance', 'logic', '2', '=IF(AND(A1>100, B1="Y"), "승인", "보류") — A1=150, B1="N"일 때?',
    array['승인','보류','#VALUE!','TRUE'], 1,
-   'AND는 모든 조건이 TRUE여야 함. B1="N"이므로 FALSE → "보류".', 1);
+   'AND는 모든 조건이 TRUE여야 함. B1="N"이므로 FALSE → "보류".', 1),
+  ('excel_finance', 'logic', '3', 'OR는 언제 TRUE인가?',
+   array['모든 조건이 TRUE','하나라도 TRUE','모두 FALSE','숫자만'], 1,
+   'OR는 조건 중 하나만 참이면 참.', 1),
+  ('excel_finance', 'logic', '4', '이 그리드에서 IFS의 마지막 분기에 TRUE를 쓰면?',
+   array['그 외 전부','#NAME?','0','FALSE'], 1,
+   'HyperFormula는 TRUE를 이름로 본다. B2>=0처럼 비교를 쓴다.', 1),
+  ('excel_finance', 'logic', '5', 'IFNA가 IFERROR와 다른 점은?',
+   array['더 빠르다','#N/A만 대체하고 #DIV/0!는 남긴다','배열만 받는다','차이 없음'], 1,
+   '조회 실패만 가릴 때 IFNA. IFERROR는 모든 에러를 삼킨다.', 1),
+  ('excel_finance', 'logic', '6', '이 실습 그리드에서 AVERAGEIFS를 치면?',
+   array['조건 평균','#NAME?','AVERAGEIF와 동일','0'], 1,
+   'AVERAGEIFS는 엔진에 없다. AVERAGEIF만 계산한다.', 1),
+  ('excel_finance', 'logic', '7', '이 엔진에서 SUMPRODUCT((A1:A4="서울")*(C1:C4))는?',
+   array['서울 합계','#VALUE! (배열 조건 불가)','0','TRUE'], 1,
+   '수량×단가처럼 숫자 배열만 곱해 더한다. 조건 배열은 엑셀 365에서.', 1),
+  ('excel_finance', 'logic', '8', 'SUMIFS의 첫 인수는?',
+   array['조건 범위','합산 범위','조건','평균 범위'], 1,
+   'SUMIFS는 합산 범위가 먼저다. SUMIF와 순서가 반대.', 2),
+  ('excel_finance', 'logic', '9', 'NOT(A1>10)이 TRUE인 경우는?',
+   array['A1=20','A1=5','A1=10.1','A1이 텍스트'], 1,
+   'NOT은 조건을 뒤집는다. 5>10은 FALSE → NOT은 TRUE.', 1),
+  ('excel_finance', 'logic', '10', '한 조건으로 행 수를 세는 함수는?',
+   array['COUNTIFS만','COUNTIF','COUNTA','COUNTBLANK'], 1,
+   '조건 하나면 COUNTIF. 둘 이상이면 COUNTIFS.', 1),
+  ('excel_finance', 'logic', '11', 'IFS에서 어떤 조건도 참이 아니면?',
+   array['0','#N/A','마지막 값','FALSE'], 1,
+   '짝이 맞는 참이 없으면 #N/A. 그래서 마지막에 항상 참인 비교를 둔다.', 1);
 
 -- Phase 1 / lookup
 insert into quiz_questions (domain, module_slug, concept_hint, question, choices, answer_index, explanation, difficulty) values
@@ -114,7 +156,22 @@ insert into quiz_questions (domain, module_slug, concept_hint, question, choices
    '0은 exact match. 재무 데이터에서는 거의 항상 0.', 1),
   ('excel_finance', 'lookup', '2', '특정 회사의 특정 연도 매출을 동적으로 찾을 때 쓰는 패턴은?',
    array['VLOOKUP 중첩','INDEX-MATCH-MATCH','INDIRECT','OFFSET'], 1,
-   'INDEX(데이터, MATCH(행값,행헤더,0), MATCH(열값,열헤더,0)). 모델링 핵심 패턴.', 2);
+   'INDEX(데이터, MATCH(행값,행헤더,0), MATCH(열값,열헤더,0)). 모델링 핵심 패턴.', 2),
+  ('excel_finance', 'lookup', '3', 'XLOOKUP이 VLOOKUP보다 나은 핵심은?',
+   array['더 짧은 이름','조회열 위치 제한이 없다','피벗이 필요','근사만 된다'], 1,
+   '반환열을 따로 지정하므로 왼쪽 조회가 된다.', 2),
+  ('excel_finance', 'lookup', '4', 'XLOOKUP에서 키가 없을 때 0을 주려면?',
+   array['IFERROR만','네 번째 인수 if_not_found','FALSE','MATCH -1'], 1,
+   'XLOOKUP(값, 조회, 반환, 0)처럼 if_not_found를 넣는다.', 2),
+  ('excel_finance', 'lookup', '5', '이름에서 코드를 찾으려면 XLOOKUP의 조회 배열은?',
+   array['코드 열','이름 열','단가 열','시트 전체'], 1,
+   '찾는 값이 있는 열이 조회 배열, 주고 싶은 열이 반환 배열.', 1),
+  ('excel_finance', 'lookup', '6', '재무 조회에서 XLOOKUP 기본 일치 방식은?',
+   array['근사','정확 일치','와일드카드','정규식'], 1,
+   '기본이 정확 일치다. 근사를 켜지 않는다.', 1),
+  ('excel_finance', 'lookup', '7', '이 그리드의 VLOOKUP·XLOOKUP에서 FALSE를 쓰면?',
+   array['정확 일치','#NAME?','0과 같음','TRUE'], 1,
+   'FALSE는 이름이 아니다. 정확 일치는 0.', 1);
 
 -- Phase 2 / pivot
 insert into quiz_questions (domain, module_slug, concept_hint, question, choices, answer_index, explanation, difficulty) values
@@ -141,7 +198,28 @@ insert into quiz_questions (domain, module_slug, concept_hint, question, choices
    'NPV는 1기간 간격 가정. XNPV는 날짜 기반으로 불규칙 간격도 정확히 할인.', 2),
   ('excel_finance', 'fin-fn', '1', '=PMT(0.05/12, 360, -500000000)의 의미는?',
    array['5억, 연 5%, 30년 월 상환액','5억의 5% 이자','30년 후 미래가치','월 5%로 적금'], 0,
-   'PMT(월이율, 기간수, 현재가치). 대출 스케줄링에서 핵심.', 2);
+   'PMT(월이율, 기간수, 현재가치). 대출 스케줄링에서 핵심.', 2),
+  ('excel_finance', 'fin-fn', '2', '이 그리드에서 XNPV 날짜를 DATE()로 두고 참조하면?',
+   array['정상 계산','#VALUE!가 날 수 있다. 일련번호를 쓴다','XIRR과 같음','0'], 1,
+   'HyperFormula XNPV는 날짜 일련번호(숫자)를 기대한다. XIRR은 DATE()를 받는다.', 2),
+  ('excel_finance', 'fin-fn', '3', 'IPMT가 계산하는 것은?',
+   array['월 상환액 전체','해당 회차의 이자분','원금분','잔액'], 1,
+   'IPMT는 이자, PPMT는 원금. 둘을 더하면 PMT에 가깝다.', 2),
+  ('excel_finance', 'fin-fn', '4', '목표 금액에 도달하는 기간을 구하려면?',
+   array['RATE','NPER','PV','NPV'], 1,
+   'NPER(이율, 납입, pv, fv)가 기간을 역산한다.', 2),
+  ('excel_finance', 'fin-fn', '5', 'PPMT의 결과는?',
+   array['이자만','해당 회차 원금 상환분','남은 원금','총이자'], 1,
+   'PPMT는 그 회차에 깎이는 원금.', 2),
+  ('excel_finance', 'fin-fn', '6', '대출 IPMT에서 원금을 양수로 넣고 결과도 양수로 읽으면?',
+   array['항상 맞다','부호 규칙이 뒤집힐 수 있다','이자가 0','NPER이 필요'], 1,
+   'PMT 계열은 유출을 음수로 두는 편이 안전하다.', 2),
+  ('excel_finance', 'fin-fn', '7', '월 적립 NPER의 이율은?',
+   array['연 이율 그대로','연 이율/12','연 이율*12','WACC'], 1,
+   '납입이 월이면 이율도 월로 맞춘다.', 2),
+  ('excel_finance', 'fin-fn', '8', '날짜 간격이 다른 현금흐름의 수익률은?',
+   array['IRR','XIRR','RATE','NPER'], 1,
+   'IRR은 등간격. 날짜가 있으면 XIRR.', 2);
 
 -- Phase 3 / model-structure
 insert into quiz_questions (domain, module_slug, concept_hint, question, choices, answer_index, explanation, difficulty) values
