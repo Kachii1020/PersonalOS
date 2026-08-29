@@ -1,6 +1,6 @@
 # 미룬 것들
 
-- **호스티드 0013 lab_completions** — 마이그레이션은 리포에 있음. 호스티드 Supabase에 `db push`는 배포 시점에 적용.
+- ~~**호스티드 0013 lab_completions**~~ — `db push` 완료 (`Applying migration 0013_lab_exercises.sql`, 2026-08-29).
 - **실습 한글 함수명** — HyperFormula는 영어 함수명만. IB 실무와 맞춰 영어 유지. 한글 별칭은 넣지 않음.
 - **Phase 3 순환참조·멀티시트 모델** — 실습은 단일 시트 계산만. 순환참조/복잡한 시트 구조는 기존 MCQ로 커버.
 - **실습 모바일 전용 레이아웃** — overflow-x + 수식 바 고정만. 좁은 화면에서 그리드 편집은 가능하지만 권장하지 않음.
