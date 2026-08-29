@@ -25,6 +25,13 @@ import {
   lockToAxis,
   rangeAddress,
 } from "@/lib/spreadsheet/formula-edit";
+import {
+  completeFunction,
+  formulaFunctionQuery,
+  getLabFunction,
+  innermostFunction,
+  suggestFunctions,
+} from "@/lib/spreadsheet/functions";
 import type { CellRef, ComputedCell, LabExerciseDef, ValidationOutcome } from "@/lib/spreadsheet/types";
 
 export type CellMark = "ok" | "bad";
@@ -140,6 +147,8 @@ export const SpreadsheetGrid = forwardRef<SpreadsheetGridHandle, Props>(
     const [formulaFocused, setFormulaFocused] = useState(false);
     const [pointing, setPointing] = useState<{ start: CellRef; end: CellRef } | null>(null);
     const [filling, setFilling] = useState<{ start: CellRef; end: CellRef } | null>(null);
+    const [suggestIndex, setSuggestIndex] = useState(0);
+    const [suggestDismissed, setSuggestDismissed] = useState(false);
 
     draftRef.current = draft;
 
@@ -158,6 +167,8 @@ export const SpreadsheetGrid = forwardRef<SpreadsheetGridHandle, Props>(
       setDraft("");
       setPointing(null);
       setFilling(null);
+      setSuggestDismissed(false);
+      setSuggestIndex(0);
       return () => {
         dragCleanupRef.current?.();
         dragCleanupRef.current = null;
@@ -183,6 +194,17 @@ export const SpreadsheetGrid = forwardRef<SpreadsheetGridHandle, Props>(
 
     const isEditable = (row: number, col: number) => editableSet.has(markKey(row, col));
     const pointingMode = isFormulaPointing(draft, formulaFocused);
+    const functionQuery = formulaFunctionQuery(draft);
+    const suggestions = functionQuery ? suggestFunctions(functionQuery.query) : [];
+    const showSuggest =
+      formulaFocused && !pointing && !filling && !suggestDismissed && suggestions.length > 0;
+    const signatureName = innermostFunction(draft);
+    const signature = signatureName ? getLabFunction(signatureName) : undefined;
+
+    useEffect(() => {
+      setSuggestIndex(0);
+      setSuggestDismissed(false);
+    }, [functionQuery?.query, functionQuery?.start]);
 
     const commit = (row: number, col: number, value: string) => {
       if (!isEditable(row, col)) return;
@@ -211,7 +233,36 @@ export const SpreadsheetGrid = forwardRef<SpreadsheetGridHandle, Props>(
       return list[(idx + 1) % list.length] ?? list[0];
     };
 
+    const applySuggest = (name: string) => {
+      setDraft(completeFunction(draftRef.current, name));
+      setSuggestDismissed(true);
+      requestAnimationFrame(() => inputRef.current?.focus());
+    };
+
     const onFormulaKey = (event: KeyboardEvent<HTMLInputElement>) => {
+      if (showSuggest) {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          setSuggestIndex((i) => (i + 1) % suggestions.length);
+          return;
+        }
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          setSuggestIndex((i) => (i - 1 + suggestions.length) % suggestions.length);
+          return;
+        }
+        if (event.key === "Tab" || event.key === "Enter") {
+          event.preventDefault();
+          const pick = suggestions[suggestIndex] ?? suggestions[0];
+          if (pick) applySuggest(pick.name);
+          return;
+        }
+        if (event.key === "Escape") {
+          event.preventDefault();
+          setSuggestDismissed(true);
+          return;
+        }
+      }
       if (event.key === "Enter") {
         event.preventDefault();
         commit(selected.row, selected.col, draft);
@@ -312,28 +363,64 @@ export const SpreadsheetGrid = forwardRef<SpreadsheetGridHandle, Props>(
 
     return (
       <div>
-        <div className="sticky top-0 z-10 flex items-center gap-2 bg-bg py-2">
-          <span className="w-10 shrink-0 text-center font-mono text-xs text-text-muted">
-            {cellAddress(selected.row, selected.col)}
-          </span>
-          <input
-            ref={inputRef}
-            value={draft}
-            disabled={!selectedEditable}
-            onChange={(e) => setDraft(e.target.value)}
-            onFocus={() => setFormulaFocused(true)}
-            onBlur={() => {
-              if (suppressBlurCommitRef.current) return;
-              setFormulaFocused(false);
-              if (selectedEditable) commit(selected.row, selected.col, draft);
-            }}
-            onKeyDown={onFormulaKey}
-            aria-label="수식 입력"
-            className="min-w-0 flex-1 rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
-          />
+        <div className="sticky top-0 z-10 bg-bg py-2">
+          <div className="relative flex items-center gap-2">
+            <span className="w-10 shrink-0 text-center font-mono text-xs text-text-muted">
+              {cellAddress(selected.row, selected.col)}
+            </span>
+            <input
+              ref={inputRef}
+              value={draft}
+              disabled={!selectedEditable}
+              onChange={(e) => setDraft(e.target.value)}
+              onFocus={() => setFormulaFocused(true)}
+              onBlur={() => {
+                if (suppressBlurCommitRef.current) return;
+                setFormulaFocused(false);
+                if (selectedEditable) commit(selected.row, selected.col, draft);
+              }}
+              onKeyDown={onFormulaKey}
+              aria-label="수식 입력"
+              aria-autocomplete="list"
+              aria-haspopup="listbox"
+              className="min-w-0 flex-1 rounded-lg border border-line bg-surface px-3 py-2 text-sm text-text focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+            />
+            {showSuggest && (
+              <ul
+                id="formula-suggest"
+                role="listbox"
+                className="absolute top-full right-0 left-10 z-20 mt-1 max-h-48 overflow-y-auto rounded-lg border border-line bg-surface py-1"
+              >
+                {suggestions.map((fn, i) => (
+                  <li key={fn.name} role="none">
+                    <button
+                      type="button"
+                      role="option"
+                      aria-selected={i === suggestIndex}
+                      onMouseDown={(event) => {
+                        event.preventDefault();
+                        applySuggest(fn.name);
+                      }}
+                      className="flex w-full cursor-pointer items-baseline justify-between gap-3 px-3 py-1.5 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
+                      style={{
+                        backgroundColor: i === suggestIndex ? "var(--accent-soft)" : undefined,
+                      }}
+                    >
+                      <span className="font-mono text-sm text-text">{fn.name}</span>
+                      <span className="truncate font-mono text-[10px] text-text-muted">{fn.hint}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          {signature && !showSuggest && formulaFocused && (
+            <p className="mt-1 pl-12 font-mono text-[10px] text-text-muted">{signature.syntax}</p>
+          )}
         </div>
         <p className="mb-2 text-xs text-text-muted">
-          수식이 =로 시작할 때 셀을 드래그하면 범위가 들어갑니다. 셀 모서리 네모를 끌면 채웁니다.
+          = 뒤에 함수명이 뜨면 Tab으로 넣습니다. 셀을 드래그하면 범위가 들어갑니다. 모서리 네모를 끌면
+          채웁니다.
         </p>
         {formulaError && (
           <p className="mb-2 text-xs text-negative" role="alert">
