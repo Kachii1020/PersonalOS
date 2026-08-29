@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { recordAttempt } from "@/lib/repos/quiz";
 import { recordLabCompletion } from "@/lib/repos/learn";
-import { getExercisesForModule } from "@/lib/spreadsheet/exercises";
+import { coreLabsForModule } from "@/lib/learn/core-track";
 import { createClient } from "@/lib/supabase/server";
 
 export type LearnAnswerResult = {
@@ -24,8 +24,7 @@ export async function submitLearnAnswer(
 
   const { isCorrect } = await recordAttempt(questionId, chosenIndex);
 
-  // 모듈 전체 완료 여부 확인 → learn_progress 업데이트
-  await syncModuleProgress(moduleSlug);
+  await syncModuleProgress(moduleSlug, coreLabsForModule(moduleSlug).map((ex) => ex.id));
 
   revalidatePath("/learn");
   return { questionId, isCorrect };
@@ -42,7 +41,7 @@ export async function submitLabCompletion(
   const recorded = await recordLabCompletion(exerciseId, moduleSlug);
   if (!recorded.ok) return recorded;
 
-  await syncModuleProgress(moduleSlug, getExercisesForModule(moduleSlug).length);
+  await syncModuleProgress(moduleSlug, coreLabsForModule(moduleSlug).map((ex) => ex.id));
   revalidatePath("/learn");
   return { ok: true };
 }
@@ -50,11 +49,12 @@ export async function submitLabCompletion(
 /**
  * 모듈의 전체 문제를 풀었으면 learn_progress를 complete로 업데이트.
  * 일부만 풀었으면 in_progress.
- * totalLabCount를 넘기면 MCQ + 실습을 합산한다. 생략하면 기존 MCQ-only 판정.
+ * coreLabIds를 넘기면 MCQ + 핵심 실습을 합산한다. extra는 세지 않는다.
+ * 생략하면 기존 MCQ-only 판정.
  */
 async function syncModuleProgress(
   moduleSlug: string,
-  totalLabCount?: number,
+  coreLabIds?: string[],
 ): Promise<void> {
   const supabase = await createClient();
 
@@ -85,15 +85,19 @@ async function syncModuleProgress(
   if (!mod) return;
 
   let status: "complete" | "in_progress";
-  if (totalLabCount === undefined) {
+  if (coreLabIds === undefined) {
     if (!totalCount) return;
     status = answeredCount >= totalCount ? "complete" : "in_progress";
   } else {
-    const { count: labsDone } = await supabase
-      .from("lab_completions")
-      .select("id", { count: "exact", head: true })
-      .eq("module_slug", moduleSlug);
-    const labComplete = (labsDone ?? 0) >= totalLabCount;
+    let labComplete = coreLabIds.length === 0;
+    if (coreLabIds.length > 0) {
+      const { count: labsDone } = await supabase
+        .from("lab_completions")
+        .select("id", { count: "exact", head: true })
+        .eq("module_slug", moduleSlug)
+        .in("exercise_id", coreLabIds);
+      labComplete = (labsDone ?? 0) >= coreLabIds.length;
+    }
     const mcqComplete = totalCount === 0 || answeredCount >= totalCount;
     status = labComplete && mcqComplete ? "complete" : "in_progress";
   }

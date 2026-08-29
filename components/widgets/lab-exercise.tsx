@@ -6,31 +6,79 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
 import { SpreadsheetGrid, type CellMark, type SpreadsheetGridHandle } from "@/components/widgets/spreadsheet-grid";
+import { coreLabsForModule, extraLabsForModule } from "@/lib/learn/core-track";
 import { getExercisesForModule } from "@/lib/spreadsheet/exercises";
 import { cellAddress } from "@/lib/spreadsheet/engine";
+import type { LabExerciseDef } from "@/lib/spreadsheet/types";
 
 type Props = {
   moduleSlug: string;
   completedIds: string[];
+  initialExerciseId?: string;
+  startInExtra?: boolean;
   onCompleted: (exerciseId: string) => Promise<{ ok: true } | { ok: false; error: string }>;
   onGoToQuiz: () => void;
 };
 
-export function LabExercise({ moduleSlug, completedIds, onCompleted, onGoToQuiz }: Props) {
-  const exercises = useMemo(() => getExercisesForModule(moduleSlug), [moduleSlug]);
-  const firstOpen = Math.max(
-    0,
-    exercises.findIndex((ex) => !completedIds.includes(ex.id)),
+function initialIndex(list: LabExerciseDef[], completedIds: string[], focusId?: string) {
+  if (focusId) {
+    const focused = list.findIndex((ex) => ex.id === focusId);
+    if (focused >= 0) return focused;
+  }
+  const firstOpen = list.findIndex((ex) => !completedIds.includes(ex.id));
+  return firstOpen === -1 ? 0 : firstOpen;
+}
+
+export function LabExercise({
+  moduleSlug,
+  completedIds,
+  initialExerciseId,
+  startInExtra = false,
+  onCompleted,
+  onGoToQuiz,
+}: Props) {
+  const all = useMemo(() => getExercisesForModule(moduleSlug), [moduleSlug]);
+  const core = useMemo(() => coreLabsForModule(moduleSlug), [moduleSlug]);
+  const extra = useMemo(() => extraLabsForModule(moduleSlug), [moduleSlug]);
+
+  const [showExtra, setShowExtra] = useState(() => {
+    if (startInExtra && extra.length > 0) return true;
+    if (initialExerciseId && extra.some((ex) => ex.id === initialExerciseId)) return true;
+    return false;
+  });
+
+  const exercises = showExtra ? extra : core;
+
+  const [index, setIndex] = useState(() =>
+    initialIndex(showExtra ? extra : core, completedIds, initialExerciseId),
   );
-  const [index, setIndex] = useState(firstOpen === -1 ? 0 : firstOpen);
   const [hintCount, setHintCount] = useState(0);
   const [marks, setMarks] = useState<Record<string, CellMark>>({});
   const [feedback, setFeedback] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [passed, setPassed] = useState(false);
+  const [passed, setPassed] = useState(() => {
+    const list = showExtra ? extra : core;
+    const start = initialIndex(list, completedIds, initialExerciseId);
+    return completedIds.includes(list[start]?.id ?? "");
+  });
   const gridRef = useRef<SpreadsheetGridHandle>(null);
 
-  if (exercises.length === 0) {
+  const resetLocal = (nextIndex: number, list = exercises) => {
+    setIndex(nextIndex);
+    setHintCount(0);
+    setMarks({});
+    setFeedback(null);
+    setSaveError(null);
+    setPassed(completedIds.includes(list[nextIndex]?.id ?? ""));
+  };
+
+  const openList = (nextExtra: boolean) => {
+    const list = nextExtra ? extra : core;
+    setShowExtra(nextExtra);
+    resetLocal(initialIndex(list, completedIds), list);
+  };
+
+  if (all.length === 0) {
     return (
       <EmptyState
         message="이 모듈의 실습은 아직 없습니다. 퀴즈로 개념을 확인하세요."
@@ -43,18 +91,45 @@ export function LabExercise({ moduleSlug, completedIds, onCompleted, onGoToQuiz 
     );
   }
 
-  const exercise = exercises[index];
-  const doneHere = completedIds.includes(exercise.id) || passed;
-  const moduleDone = exercises.every((ex) => completedIds.includes(ex.id) || (ex.id === exercise.id && passed));
+  if (!showExtra && core.length === 0) {
+    return (
+      <EmptyState
+        message="이 모듈의 핵심 실습은 없습니다. 퀴즈로 확인하거나 더 풀어 보세요."
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="primary" onClick={onGoToQuiz}>
+              퀴즈로 이동
+            </Button>
+            {extra.length > 0 && (
+              <Button type="button" variant="secondary" onClick={() => openList(true)}>
+                더 풀기 {extra.length}
+              </Button>
+            )}
+          </div>
+        }
+      />
+    );
+  }
 
-  const resetLocal = (nextIndex: number) => {
-    setIndex(nextIndex);
-    setHintCount(0);
-    setMarks({});
-    setFeedback(null);
-    setSaveError(null);
-    setPassed(completedIds.includes(exercises[nextIndex]?.id ?? ""));
-  };
+  if (exercises.length === 0) {
+    return (
+      <EmptyState
+        message="이 목록에 실습이 없습니다. 핵심 실습으로 돌아가세요."
+        action={
+          <Button type="button" variant="primary" onClick={() => openList(false)}>
+            핵심만
+          </Button>
+        }
+      />
+    );
+  }
+
+  const safeIndex = Math.min(index, exercises.length - 1);
+  const exercise = exercises[safeIndex];
+  const doneHere = completedIds.includes(exercise.id) || passed;
+  const isDone = (id: string) =>
+    completedIds.includes(id) || (id === exercise.id && passed);
+  const coreDone = core.length > 0 && core.every((ex) => isDone(ex.id));
 
   const onValidate = async () => {
     const results = gridRef.current?.validate() ?? [];
@@ -90,16 +165,26 @@ export function LabExercise({ moduleSlug, completedIds, onCompleted, onGoToQuiz 
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs tabular-nums text-text-muted font-mono">
-          실습 {index + 1}/{exercises.length}
+          {showExtra ? "더 풀기" : "핵심 실습"} {safeIndex + 1}/{exercises.length}
           {doneHere && <span className="ml-2 text-positive">완료</span>}
         </p>
         <div className="flex items-center gap-1">
+          {extra.length > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => openList(!showExtra)}
+            >
+              {showExtra ? "핵심만" : `더 풀기 ${extra.length}`}
+            </Button>
+          )}
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            disabled={index === 0}
-            onClick={() => resetLocal(index - 1)}
+            disabled={safeIndex === 0}
+            onClick={() => resetLocal(safeIndex - 1)}
             aria-label="이전 실습"
           >
             <ChevronLeft size={14} />
@@ -108,8 +193,8 @@ export function LabExercise({ moduleSlug, completedIds, onCompleted, onGoToQuiz 
             type="button"
             variant="ghost"
             size="sm"
-            disabled={index >= exercises.length - 1}
-            onClick={() => resetLocal(index + 1)}
+            disabled={safeIndex >= exercises.length - 1}
+            onClick={() => resetLocal(safeIndex + 1)}
             aria-label="다음 실습"
           >
             <ChevronRight size={14} />
@@ -177,15 +262,22 @@ export function LabExercise({ moduleSlug, completedIds, onCompleted, onGoToQuiz 
         </div>
       </div>
 
-      {moduleDone && (
+      {coreDone && (
         <div className="rounded-xl border border-line bg-surface p-5 text-center">
           <div className="flex items-center justify-center gap-2">
             <CheckCircle2 size={18} className="text-positive" />
-            <span className="text-sm font-semibold text-text">이 모듈 실습을 모두 완료했습니다</span>
+            <span className="text-sm font-semibold text-text">핵심 실습을 모두 완료했습니다</span>
           </div>
-          <Button type="button" variant="primary" className="mt-3" onClick={onGoToQuiz}>
-            퀴즈 시작
-          </Button>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+            <Button type="button" variant="primary" onClick={onGoToQuiz}>
+              퀴즈 시작
+            </Button>
+            {!showExtra && extra.length > 0 && (
+              <Button type="button" variant="secondary" onClick={() => openList(true)}>
+                더 풀기 {extra.length}
+              </Button>
+            )}
+          </div>
         </div>
       )}
     </div>

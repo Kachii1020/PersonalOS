@@ -4,6 +4,15 @@ import { PHASE3 } from "./phase3";
 import type { Concept, Module, Phase, PhaseResources } from "./types";
 
 export type { Concept, ConceptKind, Module, Phase, PhaseResources, Quiz, ResourceLink } from "./types";
+export {
+  CORE_LAB_IDS,
+  coreLabsForModule,
+  extraLabsForModule,
+  isCoreLab,
+  practiceLabId,
+  practiceOpensExtra,
+} from "./core-track";
+export type { CoreLabId } from "./core-track";
 
 export const CURRICULUM: Phase[] = [PHASE1, PHASE2, PHASE3];
 

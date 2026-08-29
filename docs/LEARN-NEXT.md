@@ -39,3 +39,15 @@
 3. `excel-only`는 xlsx 링크 + 퀴즈만 → verify: 피벗/PQ lab 증가 0
 
 하지 않음: 멀티시트 3-Statement, 순환참조, 피벗 UI 클론.
+
+---
+
+## 4. 핵심 20 경로 (구현됨)
+
+기본 실습은 20개. 나머지 52개는 「더 풀기」. 상세는 `docs/LEARN-CORE.md`.
+
+1. `CORE_LAB_IDS` 20개, 모듈 목록은 그 부분열 → verify: 유일, 레지스트리에 존재, extra 52, 피벗 lab 1
+2. 실습 탭 기본 = 모듈 핵심. 개념 「실습으로」는 그 개념의 핵심(없으면 extra) → verify: `logic-sumif` → `logic-sumifs`
+3. 핵심을 다 끝내면 퀴즈. `learn_progress`도 핵심만 센다 → verify: 논리 모듈 칩이 24가 아니라 3
+
+하지 않음: 랩 추가, Coddy식 볼륨, SPEC.md 재작성.
