@@ -1,5 +1,11 @@
 # 결정 로그
 
+## 2026-08-29 — Learn 기본 경로는 핵심 20개
+
+- **결정**: 실습 탭 기본 목록은 `CORE_LAB_IDS` 20개. 나머지 52개는 「더 풀기」. 개념 「실습으로」는 그 개념의 첫 핵심 랩(없으면 extra). `learn_progress`는 핵심만 센다.
+- **이유**: 72개를 기본 경로로 두면 모듈 하나가 드릴이 된다. 볼륨은 유지하되 기본은 핵심만 푼다.
+- **버린 대안**: 랩을 150개로 늘리기, extra를 삭제하기, 개념마다 핵심 랩을 새로 만들기.
+
 ## 2026-08-29 — 볼륨 실습은 기존 개념 ID에만 붙인다
 
 - **결정**: AND/OR, IFS, SUMIFS, AVERAGEIF, IFNA, XLOOKUP, MIN/MAX/SMALL, COUNTBLANK, SUMPRODUCT, XNPV/XIRR, IPMT/PPMT, NPER만 늘린다. 피벗·PQ lab은 1개 유지. XNPV 날짜는 일련번호, SUMPRODUCT는 숫자 배열만.

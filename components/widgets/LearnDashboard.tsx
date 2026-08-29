@@ -17,6 +17,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   CURRICULUM,
   RESOURCES,
+  coreLabsForModule,
+  practiceLabId,
+  practiceOpensExtra,
   type Concept,
   type Module,
   type Quiz,
@@ -24,8 +27,6 @@ import {
 
 const FOCUS =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
-import { getExercisesForModule } from "@/lib/spreadsheet/exercises";
-
 const LabExercise = dynamic(
   () => import("@/components/widgets/lab-exercise").then((m) => m.LabExercise),
   { ssr: false, loading: () => <Skeleton className="h-64 rounded-xl" /> },
@@ -270,8 +271,19 @@ export function LearnDashboard({
   const [activePhase, setActivePhase] = useState(0);
   const [activeModule, setActiveModule] = useState(0);
   const [tab, setTab] = useState<ContentTab>("concepts");
+  const [labFocus, setLabFocus] = useState<{ id?: string; extra?: boolean } | null>(null);
   const [completedLabs, setCompletedLabs] = useState(labCompletions);
   const progress = useProgress(questionIdMap, existingAttempts);
+
+  const openLab = (next?: { id?: string; extra?: boolean }) => {
+    setLabFocus(next ?? null);
+    setTab("lab");
+  };
+
+  const openPractice = (concept: Concept) => {
+    const id = practiceLabId(concept);
+    openLab({ id, extra: practiceOpensExtra(concept) });
+  };
 
   const phase = CURRICULUM[activePhase];
   const mod = phase.modules[activeModule];
@@ -339,6 +351,7 @@ export function LearnDashboard({
               onClick={() => {
                 setActivePhase(i);
                 setActiveModule(0);
+                setLabFocus(null);
                 setTab("concepts");
               }}
               className={`cursor-pointer rounded-xl border p-3 text-left transition-colors ${FOCUS} ${
@@ -366,7 +379,7 @@ export function LearnDashboard({
         {phase.modules.map((m, i) => {
           const done = progress.getModuleDone(m);
           const total = m.quizzes.length;
-          const moduleLabs = getExercisesForModule(m.id);
+          const moduleLabs = coreLabsForModule(m.id);
           const moduleLabTotal = moduleLabs.length;
           const moduleLabDone = moduleLabs.filter((ex) =>
             completedLabs.includes(ex.id),
@@ -377,6 +390,7 @@ export function LearnDashboard({
               key={m.id}
               onClick={() => {
                 setActiveModule(i);
+                setLabFocus(null);
                 setTab("concepts");
               }}
               className={`cursor-pointer whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-colors ${FOCUS} ${
@@ -417,7 +431,10 @@ export function LearnDashboard({
         ).map(([key, label]) => (
           <button
             key={key}
-            onClick={() => setTab(key)}
+            onClick={() => {
+              if (key === "lab") setLabFocus(null);
+              setTab(key);
+            }}
             className={`cursor-pointer border-b-2 px-4 py-2.5 text-xs font-semibold transition-colors ${FOCUS} ${
               tab === key
                 ? "border-accent text-accent"
@@ -453,12 +470,12 @@ export function LearnDashboard({
               key={c.id}
               concept={c}
               index={i}
-              onOpenLab={() => setTab("lab")}
+              onOpenLab={() => openPractice(c)}
               onOpenQuiz={() => setTab("quiz")}
             />
           ))}
           <button
-            onClick={() => setTab("lab")}
+            onClick={() => openLab()}
             className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-accent py-3 text-sm font-semibold text-white transition-opacity hover:opacity-90 ${FOCUS}`}
           >
             실습 시작
@@ -470,9 +487,11 @@ export function LearnDashboard({
       {/* Lab */}
       {tab === "lab" && (
         <LabExercise
-          key={mod.id}
+          key={`${mod.id}-${labFocus?.id ?? "default"}-${labFocus?.extra ? "x" : "c"}`}
           moduleSlug={mod.id}
           completedIds={completedLabs}
+          initialExerciseId={labFocus?.id}
+          startInExtra={labFocus?.extra}
           onCompleted={handleLabCompleted}
           onGoToQuiz={() => setTab("quiz")}
         />
