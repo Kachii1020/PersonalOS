@@ -16,7 +16,7 @@
 
 ---
 
-## 2. 커리큘럼 데이터 모델 (다음)
+## 2. 커리큘럼 데이터 모델 (구현됨)
 
 `LearnDashboard.tsx`의 페이즈·불릿·퀴즈를 `lib/learn/curriculum.ts`로 뺀다. 개념마다 `id`, `kind` (`grid` | `excel-only`), 이론 카드(왜/문법/함정/IB 장면), `labIds`, `quizIds`.
 

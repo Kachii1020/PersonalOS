@@ -1,5 +1,11 @@
 # 결정 로그
 
+## 2026-08-29 — Learn 커리큘럼은 lib/learn 카드
+
+- **결정**: 페이즈·모듈·퀴즈를 LearnDashboard에서 빼고 `lib/learn`으로 옮긴다. 개념은 `grid` | `excel-only` 카드(왜/문법/함정/IB)와 `labIds`/`quizIds`다.
+- **이유**: 불릿은 실습과 연결되지 않는다. 엔진에 없는 피벗·PQ·단축키를 그리드에 넣지 않으려면 kind가 필요하다.
+- **버린 대안**: Supabase/Notion에 커리큘럼 이전, 모듈 추가와 실습 증설을 같은 PR에 넣기.
+
 ## 2026-08-29 — 수식 자동완성은 커리큘럼 함수만
 
 - **결정**: 수식바 목록은 HyperFormula이 계산하는 Learn 함수 47개만. `AVERAGEIFS`는 엔진에 없어 제외. Tab/Enter는 함수명+`(`만 넣고 셀은 커밋하지 않는다.
