@@ -1,6 +1,7 @@
 import { DetailedCellError, HyperFormula } from "hyperformula";
 import type {
   CellDef,
+  CellRef,
   ComputedCell,
   LabExerciseDef,
   Validation,
@@ -105,6 +106,19 @@ export class SheetEngine {
       return { value: raw, formula, error: null };
     }
     return { value: null, formula, error: "#ERROR!" };
+  }
+
+  fill(from: CellRef, destinations: CellRef[]): void {
+    const targets = destinations.filter((cell) => cell.row !== from.row || cell.col !== from.col);
+    if (targets.length === 0) return;
+    this.hf.copy({
+      start: { sheet: 0, row: from.row, col: from.col },
+      end: { sheet: 0, row: from.row, col: from.col },
+    });
+    for (const cell of targets) {
+      this.hf.paste({ sheet: 0, row: cell.row, col: cell.col });
+    }
+    this.hf.clearClipboard();
   }
 
   snapshot(): ComputedCell[][] {
