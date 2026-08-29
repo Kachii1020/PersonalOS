@@ -1,5 +1,11 @@
 # 결정 로그
 
+## 2026-08-29 — Interactive Excel Lab (HyperFormula)
+
+- **결정**: /learn에 실습 탭을 추가한다. 엔진은 HyperFormula 3.4.0 (`licenseKey: 'gpl-v3'`), 레슨 32개는 하드코딩, 완료만 `lab_completions`에 기록. 탭 진입 시 `next/dynamic`으로 코드 스플릿.
+- **이유**: 셀 참조·범위·재무/조회 함수가 필요해서 formulajs나 직접 구현보다 엔진이 맞다. 커리큘럼은 기존 Learn과 같이 코드에 두고, DB는 완료 여부만 맡긴다. GPLv3는 단일 사용자 비배포라 의무가 없다.
+- **버린 대안**: formulajs(범위·조회 없음), 서버 채점(왕복이 느리고 오프라인 불가), 실습을 별도 라우트로 분리(기존 3단계 탭을 깨뜨림).
+
 ## 2026-08-27 — Learn 모듈 (Excel for Finance)
 
 - **결정**: /learn 페이지 추가. 커리큘럼 데이터는 LearnDashboard에 하드코딩(오프라인 퍼스트), 진행률만 Supabase learn_progress. xlsx 실습 파일은 public/learn/에 정적 호스팅.

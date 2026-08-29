@@ -448,6 +448,27 @@ export type Database = {
         }
         Relationships: []
       }
+      lab_completions: {
+        Row: {
+          completed_at: string
+          exercise_id: string
+          id: string
+          module_slug: string
+        }
+        Insert: {
+          completed_at?: string
+          exercise_id: string
+          id?: string
+          module_slug: string
+        }
+        Update: {
+          completed_at?: string
+          exercise_id?: string
+          id?: string
+          module_slug?: string
+        }
+        Relationships: []
+      }
       learn_modules: {
         Row: {
           concepts: string[]
