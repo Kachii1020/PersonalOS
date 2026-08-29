@@ -76,7 +76,9 @@ export function LabExercise({ moduleSlug, completedIds, onCompleted, onGoToQuiz 
       return;
     }
 
-    setFeedback(results[0]?.message ?? "정답입니다.");
+    setFeedback(
+      results.length > 1 ? "모든 셀이 정답입니다." : (results[0]?.message ?? "정답입니다."),
+    );
     setPassed(true);
     const saved = await onCompleted(exercise.id);
     if (!saved.ok) {
