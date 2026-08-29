@@ -100,22 +100,97 @@ const SOLUTIONS: Record<string, { row: number; col: number; formula: string }[]>
     { row: 4, col: 1, formula: "=B3*B4" },
   ],
   "dcf-ev-equity": [{ row: 2, col: 1, formula: "=B1-B2" }],
+  "basic-fn-min": [{ row: 5, col: 1, formula: "=MIN(B2:B5)" }],
+  "basic-fn-max": [{ row: 5, col: 1, formula: "=MAX(B2:B5)" }],
+  "basic-fn-small": [
+    { row: 5, col: 1, formula: "=SMALL(B2:B5,1)" },
+    { row: 6, col: 1, formula: "=SMALL(B2:B5,2)" },
+  ],
+  "basic-fn-small-k3": [{ row: 5, col: 1, formula: "=SMALL(B2:B5,3)" }],
+  "basic-fn-countblank": [{ row: 6, col: 1, formula: "=COUNTBLANK(B2:B6)" }],
+  "basic-fn-countblank-mixed": [{ row: 5, col: 1, formula: "=COUNTBLANK(A1:A5)" }],
+  "logic-and": [
+    { row: 1, col: 2, formula: '=IF(AND(A2="서울",B2>=100),"승인","보류")' },
+    { row: 2, col: 2, formula: '=IF(AND(A3="서울",B3>=100),"승인","보류")' },
+    { row: 3, col: 2, formula: '=IF(AND(A4="서울",B4>=100),"승인","보류")' },
+  ],
+  "logic-or": [
+    { row: 1, col: 2, formula: '=IF(OR(A2="서울",B2>=100),"검토","대기")' },
+    { row: 2, col: 2, formula: '=IF(OR(A3="서울",B3>=100),"검토","대기")' },
+    { row: 3, col: 2, formula: '=IF(OR(A4="서울",B4>=100),"검토","대기")' },
+  ],
+  "logic-and-or": [
+    { row: 1, col: 2, formula: '=IF(AND(OR(A2="서울",A2="부산"),B2>=100),"승인","보류")' },
+    { row: 2, col: 2, formula: '=IF(AND(OR(A3="서울",A3="부산"),B3>=100),"승인","보류")' },
+    { row: 3, col: 2, formula: '=IF(AND(OR(A4="서울",A4="부산"),B4>=100),"승인","보류")' },
+  ],
+  "logic-not": [
+    { row: 1, col: 2, formula: '=IF(NOT(B2="N"),"진행","중단")' },
+    { row: 2, col: 2, formula: '=IF(NOT(B3="N"),"진행","중단")' },
+    { row: 3, col: 2, formula: '=IF(NOT(B4="N"),"진행","중단")' },
+  ],
+  "logic-and-3": [
+    { row: 1, col: 3, formula: '=IF(AND(A2="서울",B2="제품",C2>=100),"통과","보류")' },
+    { row: 2, col: 3, formula: '=IF(AND(A3="서울",B3="제품",C3>=100),"통과","보류")' },
+  ],
+  "logic-or-3": [
+    { row: 1, col: 2, formula: '=IF(OR(A2="서울",A2="부산",A2="인천"),"권역","기타")' },
+    { row: 2, col: 2, formula: '=IF(OR(A3="서울",A3="부산",A3="인천"),"권역","기타")' },
+    { row: 3, col: 2, formula: '=IF(OR(A4="서울",A4="부산",A4="인천"),"권역","기타")' },
+  ],
+  "logic-ifs": [
+    { row: 1, col: 2, formula: '=IFS(B2>=90,"A",B2>=70,"B",B2>=50,"C",B2>=0,"F")' },
+    { row: 2, col: 2, formula: '=IFS(B3>=90,"A",B3>=70,"B",B3>=50,"C",B3>=0,"F")' },
+    { row: 3, col: 2, formula: '=IFS(B4>=90,"A",B4>=70,"B",B4>=50,"C",B4>=0,"F")' },
+    { row: 4, col: 2, formula: '=IFS(B5>=90,"A",B5>=70,"B",B5>=50,"C",B5>=0,"F")' },
+  ],
+  "logic-ifs-flag": [
+    { row: 1, col: 2, formula: '=IFS(B2>=0.2,"Upside",B2>=0,"Base",B2<0,"Down")' },
+    { row: 2, col: 2, formula: '=IFS(B3>=0.2,"Upside",B3>=0,"Base",B3<0,"Down")' },
+    { row: 3, col: 2, formula: '=IFS(B4>=0.2,"Upside",B4>=0,"Base",B4<0,"Down")' },
+  ],
+  "logic-ifs-pass": [{ row: 4, col: 1, formula: '=IFS(B4>=70,"합격",B4>=0,"불합격")' }],
+  "logic-ifna": [{ row: 4, col: 1, formula: '=IFNA(VLOOKUP(B4,A2:B3,2,0),"없음")' }],
+  "logic-ifna-hit": [{ row: 4, col: 1, formula: '=IFNA(VLOOKUP(B4,A2:B3,2,0),"없음")' }],
+  "logic-sumifs": [{ row: 5, col: 2, formula: '=SUMIFS(C2:C5,A2:A5,"서울",B2:B5,"제품")' }],
+  "logic-sumifs-3": [{ row: 5, col: 3, formula: '=SUMIFS(D2:D5,A2:A5,"서울",B2:B5,"노트북",C2:C5,2024)' }],
+  "logic-sumifs-gte": [{ row: 5, col: 2, formula: '=SUMIFS(C2:C5,A2:A5,"서울",C2:C5,">="&100)' }],
+  "logic-averageif": [{ row: 5, col: 1, formula: '=AVERAGEIF(A2:A5,"서울",B2:B5)' }],
+  "logic-averageif-gte": [{ row: 5, col: 1, formula: '=AVERAGEIF(A2:A5,">=100")' }],
+  "logic-sumproduct": [{ row: 4, col: 1, formula: "=SUMPRODUCT(A2:A4,B2:B4)" }],
+  "logic-sumproduct-qty": [{ row: 5, col: 1, formula: "=SUMPRODUCT(A2:A5,B2:B5)" }],
+  "logic-countif": [{ row: 5, col: 1, formula: '=COUNTIF(A2:A5,"서울")' }],
+  "lookup-xlookup": [{ row: 5, col: 1, formula: "=XLOOKUP(B5,A2:A4,C2:C4)" }],
+  "lookup-xlookup-left": [{ row: 5, col: 1, formula: "=XLOOKUP(B5,B2:B4,A2:A4)" }],
+  "lookup-xlookup-missing": [{ row: 5, col: 1, formula: '=XLOOKUP(B5,A2:A4,B2:B4,"없음")' }],
+  "fin-xnpv": [{ row: 6, col: 1, formula: "=XNPV(B1,A3:A6,B3:B6)" }],
+  "fin-xnpv-uneven": [{ row: 6, col: 1, formula: "=XNPV(B1,A3:A6,B3:B6)" }],
+  "fin-xnpv-12": [{ row: 6, col: 1, formula: "=XNPV(B1,A3:A6,B3:B6)" }],
+  "fin-xirr": [{ row: 6, col: 1, formula: "=XIRR(A3:A6,B3:B6)" }],
+  "fin-xirr-uneven": [{ row: 5, col: 1, formula: "=XIRR(A2:A5,B2:B5)" }],
+  "fin-ipmt": [{ row: 4, col: 1, formula: "=IPMT(B3/12,1,B4*12,-B2)" }],
+  "fin-ipmt-12": [{ row: 4, col: 1, formula: "=IPMT(B3/12,12,B4*12,-B2)" }],
+  "fin-ipmt-last": [{ row: 4, col: 1, formula: "=IPMT(B3/12,360,B4*12,-B2)" }],
+  "fin-ppmt": [{ row: 4, col: 1, formula: "=PPMT(B3/12,1,B4*12,-B2)" }],
+  "fin-ppmt-12": [{ row: 4, col: 1, formula: "=PPMT(B3/12,12,B4*12,-B2)" }],
+  "fin-nper": [{ row: 4, col: 1, formula: "=NPER(B3,0,-B2,B4)" }],
+  "fin-nper-pmt": [{ row: 4, col: 1, formula: "=NPER(B3/12,-B2,0,B4)" }],
 };
 
-test("registry — 32개 실습, 모듈 10개 전부 커버", () => {
-  assert.equal(ALL_LAB_EXERCISES.length, 32);
+test("registry — 72개 실습, 피벗·PQ lab은 늘리지 않음", () => {
+  assert.equal(ALL_LAB_EXERCISES.length, 72);
   const ids = new Set(ALL_LAB_EXERCISES.map((e) => e.id));
-  assert.equal(ids.size, 32);
+  assert.equal(ids.size, 72);
   for (const slug of MODULE_SLUGS) {
     assert.ok(getExercisesForModule(slug).length > 0, `missing labs for ${slug}`);
   }
   assert.equal(getExercisesForModule("nav").length, 1);
-  assert.equal(getExercisesForModule("basic-fn").length, 5);
-  assert.equal(getExercisesForModule("logic").length, 5);
-  assert.equal(getExercisesForModule("lookup").length, 4);
+  assert.equal(getExercisesForModule("basic-fn").length, 11);
+  assert.equal(getExercisesForModule("logic").length, 24);
+  assert.equal(getExercisesForModule("lookup").length, 7);
   assert.equal(getExercisesForModule("pivot").length, 1);
   assert.equal(getExercisesForModule("data-clean").length, 3);
-  assert.equal(getExercisesForModule("fin-fn").length, 5);
+  assert.equal(getExercisesForModule("fin-fn").length, 17);
   assert.equal(getExercisesForModule("model-structure").length, 2);
   assert.equal(getExercisesForModule("three-stmt").length, 3);
   assert.equal(getExercisesForModule("dcf-intro").length, 3);

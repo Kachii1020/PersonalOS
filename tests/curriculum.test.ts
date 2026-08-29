@@ -157,10 +157,10 @@ const QUIZ_PROMPTS = [
 
 const LAB_IDS = new Set(ALL_LAB_EXERCISES.map((ex) => ex.id));
 
-test("모듈 10개, 퀴즈 24개", () => {
+test("모듈 10개, 퀴즈 50개", () => {
   assert.equal(CURRICULUM.length, 3);
   assert.equal(allModules().length, 10);
-  assert.equal(allQuizzes().length, 24);
+  assert.equal(allQuizzes().length, 50);
   assert.deepEqual(
     allModules().map((m) => m.id),
     Object.keys(CONCEPT_COUNTS),
@@ -178,11 +178,30 @@ test("모듈별 개념 수는 기존 불릿과 같다", () => {
   }
 });
 
-test("퀴즈 문항 순서와 본문은 기존과 같다", () => {
-  assert.deepEqual(
-    allQuizzes().map((q) => q.q),
-    QUIZ_PROMPTS,
-  );
+test("기존 퀴즈는 각 모듈 앞에 그대로 있다", () => {
+  let offset = 0;
+  for (const mod of allModules()) {
+    const original = QUIZ_PROMPTS.slice(offset, offset + 2);
+    if (mod.id === "nav" || mod.id === "basic-fn" || mod.id === "logic" || mod.id === "lookup") {
+      const three = QUIZ_PROMPTS.slice(offset, offset + 3);
+      assert.deepEqual(mod.quizzes.slice(0, 3).map((q) => q.q), three, mod.id);
+      offset += 3;
+    } else {
+      assert.deepEqual(mod.quizzes.slice(0, 2).map((q) => q.q), original, mod.id);
+      offset += 2;
+    }
+  }
+  assert.equal(offset, 24);
+});
+
+test("AND/OR·AVERAGEIF·XLOOKUP은 grid로 뒤집혔다", () => {
+  const byId = new Map(allConcepts().map((c) => [c.id, c]));
+  for (const id of ["logic-and-or", "logic-averageif", "lookup-xlookup"]) {
+    const concept = byId.get(id);
+    assert.ok(concept, id);
+    assert.equal(concept.kind, "grid", id);
+    assert.ok(concept.labIds.length >= 1, id);
+  }
 });
 
 test("개념·퀴즈 id는 유일하다", () => {

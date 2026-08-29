@@ -1,5 +1,11 @@
 # 결정 로그
 
+## 2026-08-29 — 볼륨 실습은 기존 개념 ID에만 붙인다
+
+- **결정**: AND/OR, IFS, SUMIFS, AVERAGEIF, IFNA, XLOOKUP, MIN/MAX/SMALL, COUNTBLANK, SUMPRODUCT, XNPV/XIRR, IPMT/PPMT, NPER만 늘린다. 피벗·PQ lab은 1개 유지. XNPV 날짜는 일련번호, SUMPRODUCT는 숫자 배열만.
+- **이유**: HyperFormula XNPV는 DATE() 참조를 #VALUE!로 거절하고, 조건 배열 SUMPRODUCT는 범위 오류다. 없는 함수를 가르치면 실습이 거짓말이 된다.
+- **버린 대안**: AVERAGEIFS lab, 피벗 UI 클론, 멀티시트 3-Statement, 순환참조 엔진.
+
 ## 2026-08-29 — Learn 커리큘럼은 lib/learn 카드
 
 - **결정**: 페이즈·모듈·퀴즈를 LearnDashboard에서 빼고 `lib/learn`으로 옮긴다. 개념은 `grid` | `excel-only` 카드(왜/문법/함정/IB)와 `labIds`/`quizIds`다.

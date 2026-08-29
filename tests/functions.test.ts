@@ -8,6 +8,7 @@ import {
   innermostFunction,
   suggestFunctions,
 } from "@/lib/spreadsheet/functions";
+import { ALL_LAB_EXERCISES } from "@/lib/spreadsheet/exercises";
 
 test("catalog — 모든 이름이 HyperFormula enGB에 있다", () => {
   const registered = new Set(HyperFormula.getRegisteredFunctionNames("enGB"));
@@ -44,4 +45,24 @@ test("innermostFunction — 열린 괄호의 안쪽 함수", () => {
   assert.equal(innermostFunction("=IF(SUM("), "SUM");
   assert.equal(innermostFunction("=IF(SUM(B2:B4)"), "IF");
   assert.equal(innermostFunction("="), null);
+});
+
+test("자동완성 목록 ⊇ 실습이 요구하는 함수, AVERAGEIFS 없음", () => {
+  const catalog = new Set(LAB_FUNCTIONS.map((fn) => fn.name));
+  const used = new Set<string>();
+  for (const ex of ALL_LAB_EXERCISES) {
+    for (const v of ex.validations) {
+      const src = v.acceptFormula?.source ?? "";
+      const names = src.match(/[A-Z]{2,}/g) ?? [];
+      for (const name of names) used.add(name);
+    }
+  }
+  const missing = [...used].filter((name) => !catalog.has(name));
+  assert.deepEqual(missing, []);
+  assert.equal(
+    ALL_LAB_EXERCISES.some((ex) =>
+      ex.validations.some((v) => v.acceptFormula?.source.includes("AVERAGEIFS")),
+    ),
+    false,
+  );
 });
