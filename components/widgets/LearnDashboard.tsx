@@ -157,8 +157,10 @@ function ConceptCard({
           </h3>
         </div>
         <span
-          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
-            grid ? "bg-accent-soft text-accent" : "bg-line text-text-muted"
+          className={`shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
+            grid
+              ? "border-accent bg-accent-soft text-accent"
+              : "border-line bg-surface text-text-muted"
           }`}
         >
           {grid ? "실습" : "엑셀"}
