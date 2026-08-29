@@ -391,7 +391,7 @@ export const SpreadsheetGrid = forwardRef<SpreadsheetGridHandle, Props>(
                     return (
                       <td
                         key={col}
-                        className="relative p-0"
+                        className={`relative p-0 ${active ? "z-10" : ""}`}
                         data-sheet-row={row}
                         data-sheet-col={col}
                       >
