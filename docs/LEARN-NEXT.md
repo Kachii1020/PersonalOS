@@ -58,6 +58,6 @@
 
 그리드는 핵심 20만 채점한다. 단축키·피벗·PQ·5탭·순환·감도·작품은 `.xlsx` 제출 6개로 채점한다. HyperFormula에 피벗/순환/멀티시트를 넣지 않는다.
 
-슬라이스: (1) 뼈대+hands (2) pivot+pq+언락 (3) convention+contrast (4) capstone+출처.
+슬라이스: (1) 뼈대+hands **구현됨** (2) pivot+pq+언락 (3) convention+contrast (4) capstone+출처.
 
 하지 않음: 개념당 파일 31개, 제출 없는 체크박스 pass, 런타임 DART URL.

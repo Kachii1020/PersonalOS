@@ -1,5 +1,11 @@
 # 결정 로그
 
+## 2026-08-30 — 슬라이스 1 파서는 fflate + 정규식
+
+- **결정**: OOXML은 `fflate`로 풀고 workbook/worksheet는 정규식으로 읽는다. 슬라이스 1에 exceljs와 fast-xml-parser를 넣지 않는다.
+- **이유**: 시트 존재·캐시 값·수식 텍스트·이름 정의만 보면 된다. 새 SDK를 먼저 넣지 않는다는 스펙과 같다.
+- **버린 대안**: 처음부터 exceljs, 이번 슬라이스에 fast-xml-parser를 끼우기.
+
 ## 2026-08-30 — IB 빈칸은 엑셀 파일 채점이다
 
 - **결정**: excel-only 31개와 작품은 그리드가 아니라 스타터 `.xlsx` 6개를 제출해 채점한다. 값은 `Output` 시트, 피벗/쿼리/차트/반복계산은 OOXML 파트 존재로만 본다. 스펙은 `docs/LEARN-EXCEL.md`.

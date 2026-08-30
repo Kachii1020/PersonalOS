@@ -469,6 +469,33 @@ export type Database = {
         }
         Relationships: []
       }
+      workbook_submissions: {
+        Row: {
+          id: string
+          results: Json
+          status: string
+          storage_path: string
+          submitted_at: string
+          task_id: string
+        }
+        Insert: {
+          id?: string
+          results?: Json
+          status: string
+          storage_path: string
+          submitted_at?: string
+          task_id: string
+        }
+        Update: {
+          id?: string
+          results?: Json
+          status?: string
+          storage_path?: string
+          submitted_at?: string
+          task_id?: string
+        }
+        Relationships: []
+      }
       learn_modules: {
         Row: {
           concepts: string[]
