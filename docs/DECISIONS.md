@@ -1,5 +1,11 @@
 # 결정 로그
 
+## 2026-09-02 — 슬라이스 2 언락은 핵심 랩·팩을 본다
+
+- **결정**: `canSubmitXlsx(task, completions, submissions)`. phase1 핵심 9, phase2 핵심 5, packs 5. 피벗·PQ 정답 파일은 zip에 파트만 두고 Output 숫자로 채점한다.
+- **이유**: 스펙 §4.3·§7. 슬라이서 상태와 쿼리 본문은 파일에서 불안정하다.
+- **버린 대안**: unlock 문자열만 보기(슬라이스 1 스텁), 피벗 캐시 XML을 숫자 채점에 쓰기.
+
 ## 2026-08-30 — 슬라이스 1 파서는 fflate + 정규식
 
 - **결정**: OOXML은 `fflate`로 풀고 workbook/worksheet는 정규식으로 읽는다. 슬라이스 1에 exceljs와 fast-xml-parser를 넣지 않는다.

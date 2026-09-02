@@ -2,12 +2,12 @@
 
 import { revalidatePath } from "next/cache";
 import { recordAttempt } from "@/lib/repos/quiz";
-import { recordLabCompletion } from "@/lib/repos/learn";
-import { recordWorkbookSubmission } from "@/lib/repos/learn-workbooks";
+import { getLabCompletions, recordLabCompletion } from "@/lib/repos/learn";
+import { listWorkbookSubmissions, recordWorkbookSubmission } from "@/lib/repos/learn-workbooks";
 import { coreLabsForModule } from "@/lib/learn/core-track";
 import { allModules } from "@/lib/learn/curriculum";
 import { getXlsxTask, tasksForModule } from "@/lib/learn/xlsx-tasks";
-import { canSubmitTask } from "@/lib/learn/xlsx-unlock";
+import { canSubmitXlsx } from "@/lib/learn/xlsx-unlock";
 import { gradeWorkbook } from "@/lib/integrations/xlsx/grade";
 import { createClient } from "@/lib/supabase/server";
 import type { XlsxCheckResult } from "@/lib/learn/types";
@@ -162,7 +162,11 @@ export async function submitWorkbook(
 > {
   const task = getXlsxTask(taskId);
   if (!task) return { ok: false, error: "없는 과제입니다." };
-  if (!canSubmitTask(task)) {
+  const [labRows, submissions] = await Promise.all([
+    getLabCompletions(),
+    listWorkbookSubmissions(),
+  ]);
+  if (!canSubmitXlsx(task, labRows.map((row) => row.exercise_id), submissions)) {
     return { ok: false, error: "핵심 실습을 더 끝내면 제출할 수 있습니다." };
   }
 

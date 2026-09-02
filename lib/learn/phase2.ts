@@ -118,6 +118,7 @@ const pivot: Module = {
       ib: "실적 파일을 처음 열면 피벗으로 구조를 파악한다.",
       labIds: [],
       quizIds: ["pivot-q1"],
+      xlsxTaskId: "pivot",
     },
     {
       id: "pivot-areas",
@@ -128,6 +129,7 @@ const pivot: Module = {
       ib: "세그먼트×연도 매출.",
       labIds: [],
       quizIds: ["pivot-q1"],
+      xlsxTaskId: "pivot",
     },
     {
       id: "pivot-value",
@@ -138,6 +140,7 @@ const pivot: Module = {
       ib: "건수와 금액을 같이 본다.",
       labIds: [],
       quizIds: ["pivot-q2"],
+      xlsxTaskId: "pivot",
     },
     {
       id: "pivot-group",
@@ -148,6 +151,7 @@ const pivot: Module = {
       ib: "분기 실적 피벗.",
       labIds: [],
       quizIds: ["pivot-q1"],
+      xlsxTaskId: "pivot",
     },
     {
       id: "pivot-slicer",
@@ -158,6 +162,7 @@ const pivot: Module = {
       ib: "리뷰 파일의 시나리오 전환.",
       labIds: [],
       quizIds: ["pivot-q2"],
+      xlsxTaskId: "pivot",
     },
     {
       id: "pivot-chart",
@@ -168,6 +173,7 @@ const pivot: Module = {
       ib: "주간 리뷰 슬라이드.",
       labIds: [],
       quizIds: ["pivot-q2"],
+      xlsxTaskId: "pivot",
     },
     {
       id: "pivot-calc",
@@ -178,6 +184,7 @@ const pivot: Module = {
       ib: "매출 대비 원가.",
       labIds: [],
       quizIds: ["pivot-q2"],
+      xlsxTaskId: "pivot",
     },
   ],
 };
@@ -196,6 +203,7 @@ const dataClean: Module = {
       ib: "붙여넣은 CUSIP·티커 분리.",
       labIds: [],
       quizIds: ["data-clean-q2"],
+      xlsxTaskId: "pq",
     },
     {
       id: "clean-dedupe",
@@ -206,6 +214,7 @@ const dataClean: Module = {
       ib: "거래 목록 클린업.",
       labIds: [],
       quizIds: ["data-clean-q1"],
+      xlsxTaskId: "pq",
     },
     {
       id: "clean-trim",
@@ -238,6 +247,7 @@ const dataClean: Module = {
       ib: "월별 파일을 한 테이블로.",
       labIds: [],
       quizIds: ["data-clean-q1"],
+      xlsxTaskId: "pq",
     },
     {
       id: "clean-unpivot",
@@ -248,6 +258,7 @@ const dataClean: Module = {
       ib: "연도별 가로 실적 → 세로 시계열.",
       labIds: [],
       quizIds: ["data-clean-q1"],
+      xlsxTaskId: "pq",
     },
     {
       id: "clean-merge-append",
@@ -258,6 +269,7 @@ const dataClean: Module = {
       ib: "월별 시트를 쌓기.",
       labIds: [],
       quizIds: ["data-clean-q1"],
+      xlsxTaskId: "pq",
     },
   ],
 };

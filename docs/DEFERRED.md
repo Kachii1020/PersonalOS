@@ -5,7 +5,7 @@
 - **Coddy식 실습 볼륨** — 마이크로 드릴을 기본 경로에 넣지 않는다. extra 52개로 충분하다.
 - **호스티드 0013 lab_completions** — 마이그레이션은 리포에 있음. 호스티드 Supabase에 `db push`는 배포 시점에 적용.
 - **호스티드 0014 workbook_submissions** — 마이그레이션·버킷 `learn-workbooks`는 리포에 있음. 호스티드에 `db push`하기 전에는 엑셀 탭 조회가 빈 목록이고 제출은 저장 단계에서 실패한다. 적용했다고 주장하지 않음.
-- **엑셀 과제 슬라이스 2–4** — pivot, pq, convention, contrast, capstone과 언락 본문은 아직 없음. `excel-only` 23개는 `xlsxTaskId`가 비어 있다.
+- **엑셀 과제 슬라이스 3–4** — convention, contrast, capstone은 아직 없음. `excel-only` 11개(규약 7 + 작품 4)는 `xlsxTaskId`가 비어 있다.
 - **실습 한글 함수명** — HyperFormula는 영어 함수명만. IB 실무와 맞춰 영어 유지. 한글 별칭은 넣지 않음.
 - **Phase 3 순환참조·멀티시트 모델** — 실습은 단일 시트 계산만. 순환참조/복잡한 시트 구조는 기존 MCQ로 커버.
 - **실습 모바일 전용 레이아웃** — overflow-x + 수식 바 고정만. 좁은 화면에서 그리드 편집은 가능하지만 권장하지 않음.

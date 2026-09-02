@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { ErrorState } from "@/components/ui/error-state";
 import { SkeletonLines } from "@/components/ui/skeleton";
 import { XLSX_TASKS } from "@/lib/learn/xlsx-tasks";
-import { canSubmitTask } from "@/lib/learn/xlsx-unlock";
+import { canSubmitXlsx } from "@/lib/learn/xlsx-unlock";
 import type { WorkbookSubmission, XlsxCheckResult } from "@/lib/learn/types";
 
 const FOCUS =
@@ -15,11 +15,12 @@ const FOCUS =
 
 type Props = {
   submissions: WorkbookSubmission[];
+  completions: string[];
   focusTaskId?: string;
   onOpenLab?: () => void;
 };
 
-export function ExcelTasks({ submissions, focusTaskId, onOpenLab }: Props) {
+export function ExcelTasks({ submissions, completions, focusTaskId, onOpenLab }: Props) {
   const passed = submissions.filter((row) => row.status === "passed").length;
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export function ExcelTasks({ submissions, focusTaskId, onOpenLab }: Props) {
           title={task.title}
           file={task.file}
           instruction={task.instruction}
-          unlocked={canSubmitTask(task)}
+          unlocked={canSubmitXlsx(task, completions, submissions)}
           submission={submissions.find((row) => row.taskId === task.id)}
           focused={focusTaskId === task.id}
           onOpenLab={onOpenLab}

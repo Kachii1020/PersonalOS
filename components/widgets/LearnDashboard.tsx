@@ -527,6 +527,7 @@ export function LearnDashboard({
       {tab === "xlsx" && (
         <ExcelTasks
           submissions={workbookSubmissions}
+          completions={completedLabs}
           focusTaskId={xlsxFocus}
           onOpenLab={() => openLab()}
         />
