@@ -74,7 +74,9 @@ export function shuffleChoices(question: QuizQuestionRaw, random: () => number =
   const shuffled = [...question.choices];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
-    [shuffled[i], shuffled[j]!] = [shuffled[j]!, shuffled[i]!];
+    const atI = shuffled[i]!;
+    shuffled[i] = shuffled[j]!;
+    shuffled[j] = atI;
   }
 
   return { ...question, choices: shuffled, answer_index: shuffled.indexOf(answer) };
