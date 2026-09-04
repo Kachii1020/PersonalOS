@@ -1,5 +1,6 @@
 # 미룬 것들
 
+- **호스티드 IB Engineering 시드** — `supabase/seed-ib-engineering.sql`은 리포에 있음. 호스티드 SQL 에디터에 넣기 전에는 운영 DB가 비어 있다. `/quiz`의 「90문항 넣기」는 같은 은행을 세션으로 넣는다. 호스티드에 적용했다고 주장하지 않음.
 - **nav 개념에 셀 참조 카드** — `nav-cell-ref`는 핵심 랩이지만 nav 개념 7개는 단축키 excel-only라 카드가 없다. 개념 수를 바꾸지 않으려고 실습 탭으로만 둔다.
 - **핵심 없는 grid 개념용 랩** — AND/OR, AVERAGEIF, MIN/MAX, VLOOKUP 등은 extra만 있다. 핵심 20에 끼우거나 랩을 새로 만들지 않는다.
 - **Coddy식 실습 볼륨** — 마이크로 드릴을 기본 경로에 넣지 않는다. extra 52개로 충분하다.

@@ -30,7 +30,15 @@ export async function QuizSummary({ className }: { className?: string }) {
         <CardHeader>
           <CardTitle>오늘의 퀴즈</CardTitle>
         </CardHeader>
-        <EmptyState icon={HelpCircle} message="아직 생성된 문항이 없습니다. 퀴즈 잡이 하루 한 번 돌면 5문제가 올라옵니다." />
+        <EmptyState
+          icon={HelpCircle}
+          message="IB Engineering 시드를 적용하면 오늘 5문제가 올라옵니다."
+          action={
+            <Link href="/quiz" className={buttonClass({ className: "mt-1" })}>
+              경로 보기
+            </Link>
+          }
+        />
       </Card>
     );
   }

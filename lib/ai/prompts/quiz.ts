@@ -1,4 +1,11 @@
-export const QUIZ_DOMAINS = ["ib", "accounting", "macro", "ai_ml", "system_design", "japanese", "devops", "ai_engineering"] as const;
+export const QUIZ_DOMAINS = [
+  "ib_eng_markets",
+  "ib_eng_latency",
+  "ib_eng_concurrency",
+  "ib_eng_data",
+  "ib_eng_systems",
+  "ib_eng_ds",
+] as const;
 export type QuizDomain = (typeof QUIZ_DOMAINS)[number];
 
 export type QuizQuestionRaw = {
@@ -39,21 +46,19 @@ export const QUIZ_SCHEMA = {
   },
 } as const;
 
-export const QUIZ_SYSTEM = `당신은 투자은행·퀀트 취업과 일본 취업을 준비하는 학생의 학습 코치다.
-매일 푸는 4지선다 문제를 만든다.
+export const QUIZ_SYSTEM = `당신은 투자은행·마켓즈 테크(IB engineering) 면접을 준비하는 소프트웨어 엔지니어의 학습 코치다.
+매일 푸는 4지선다 문제를 만든다. 엑셀 모델링·DCF·회계 분개는 내지 않는다.
 
 규칙:
-- 출력 언어는 한국어다. 다만 업계 표준 용어(EBITDA, WACC, DCF 등)는 원어를 그대로 쓴다.
+- 출력 언어는 한국어다. FIX, OMS, GC, CAS, VWAP 같은 업계 표준 용어는 원어를 그대로 쓴다.
 - choices는 정확히 4개다. 정답은 하나뿐이고 answer_index는 0부터 센 위치다.
 - 오답 3개도 그럴듯해야 한다. 명백히 틀린 보기를 채우지 않는다.
 - explanation은 정답인 이유와 대표 오답이 왜 틀렸는지를 한 문단으로 쓴다.
 - difficulty는 1(개념 확인) / 2(적용) / 3(응용·함정) 중 하나다.
-- concept_hint는 이 문제가 다루는 핵심 개념을 2~3문장으로 설명한다. 문제의 정답을 직접 드러내지 않되, 무엇을 알아야 풀 수 있는지를 알려준다. 학생이 힌트를 읽고 개념을 떠올린 뒤 문제를 풀도록 유도한다.
-- 계산 문제는 암산으로 풀 수 있는 수준까지만 낸다. 문제에 필요한 수치는 문제 안에 전부 넣는다.
-- 사실관계가 불확실한 최신 통계나 특정 기업의 실적 수치를 묻지 않는다.
-- japanese 도메인: 문제와 보기에 일본어 원문을 포함한다. 경어(敬語) 구분, JLPT N1 수준 문법·어휘, 비즈니스 관용 표현, 한자 읽기를 출제한다. 설명(explanation)과 concept_hint는 한국어로 쓰되, 일본어 원문을 병기한다.
-- devops 도메인: Docker 컨테이너 격리 원리, Dockerfile 최적화, CI/CD 파이프라인 설계, AWS VPC 네트워크 흐름, Kubernetes 오브젝트(Pod·Service·Deployment) 역할, Blue/Green vs Canary 배포 차이를 출제한다. 클라우드 서비스 고유 명칭(VPC, ALB, HPA 등)은 원어를 그대로 쓴다.
-- ai_engineering 도메인: RAG 파이프라인(임베딩·청킹·검색 전략), RAGAS 평가 지표, LangGraph 상태 머신 기반 Agent 설계, MCP 프로토콜, 양자화 비트별 품질-속도 트레이드오프, vLLM PagedAttention 원리를 출제한다. 기술 용어(RAG, PEFT, LoRA, vLLM 등)는 원어를 그대로 쓴다.`;
+- concept_hint는 이 문제가 다루는 핵심 개념을 2~3문장으로 설명한다. 문제의 정답을 직접 드러내지 않는다.
+- 계산 문제는 암산으로 풀 수 있는 수준까지만 낸다. 필요한 수치는 문제 안에 전부 넣는다.
+- 사실관계가 불확실한 최신 통계, 특정 은행 내부 시스템 이름, 검증되지 않은 벤더 벤치마크를 묻지 않는다.
+- 시드 은행과 같은 주제를 반복해도 숫자·상황·함정은 다르게 낸다.`;
 
 /**
  * 보기 순서를 섞는다.
@@ -69,21 +74,42 @@ export function shuffleChoices(question: QuizQuestionRaw, random: () => number =
   const shuffled = [...question.choices];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!];
+    [shuffled[i], shuffled[j]!] = [shuffled[j]!, shuffled[i]!];
   }
 
   return { ...question, choices: shuffled, answer_index: shuffled.indexOf(answer) };
 }
 
-const DOMAIN_LABEL: Record<QuizDomain, string> = {
-  ib: "투자은행 (밸류에이션, M&A, 자본구조)",
-  accounting: "회계 (3대 재무제표, 회계처리)",
-  macro: "거시경제 (금리, 환율, 통화정책)",
-  ai_ml: "머신러닝 (모델, 학습, 평가지표)",
-  system_design: "시스템 설계 (확장성, 데이터 저장, 장애 대응)",
-  japanese: "일본어 (비즈니스 일본어, JLPT N1+, 경어, 한자)",
-  devops: "DevOps (컨테이너, CI/CD, 클라우드 인프라)",
-  ai_engineering: "AI 엔지니어링 (RAG, Agent 시스템, LLM 서빙)",
+export const DOMAIN_LABEL: Record<QuizDomain, string> = {
+  ib_eng_markets: "시장 배관 (FIX, OMS/EMS, 주문·체결)",
+  ib_eng_latency: "저지연 (GC, 캐시, 시계, 핫패스)",
+  ib_eng_concurrency: "동시성 (JMM, CAS, 단일 작성자)",
+  ib_eng_data: "포지션·리스크 데이터 (SQL, 대사, 창함수)",
+  ib_eng_systems: "거래 시스템 (멱등, kill switch, 저널)",
+  ib_eng_ds: "면접 자료구조 (호가창, VWAP, 힙)",
+};
+
+export function domainTitle(domain: string): string {
+  if (domain in DOMAIN_LABEL) return DOMAIN_LABEL[domain as QuizDomain];
+  return DOMAIN_SHORT[domain] ?? domain;
+}
+
+export const DOMAIN_SHORT: Record<string, string> = {
+  ib_eng_markets: "배관",
+  ib_eng_latency: "저지연",
+  ib_eng_concurrency: "동시성",
+  ib_eng_data: "데이터",
+  ib_eng_systems: "시스템",
+  ib_eng_ds: "자료구조",
+  ib: "IB",
+  accounting: "회계",
+  macro: "거시",
+  ai_ml: "ML",
+  system_design: "설계",
+  japanese: "日本語",
+  devops: "DevOps",
+  ai_engineering: "AI Eng",
+  excel_finance: "엑셀",
 };
 
 /**
@@ -98,6 +124,7 @@ export function buildQuizPrompt(count: number, avoid: string[]): string {
       : "";
 
   return `문제를 정확히 ${count}개 만들어라. 서로 다른 도메인이 최소 2개는 섞여야 한다.
+엑셀·회계 분개·DCF는 금지. IB engineering(마켓즈 테크)만.
 
 도메인:
 ${domains}${avoidBlock}`;
