@@ -40,7 +40,7 @@
 | npm run build | 종료 코드 0, /inbox·/approvals·/today 및 job routes 생성 |
 | supabase start (격리 스택) | 0001~0017 중 존재하는 15개 migration 실제 실행, seed 적용 |
 | supabase gen types typescript --local | 실제 schema 타입 생성 성공 |
-| supabase db reset --local | 실행했으나 실패. 아래 CLI/환경 제한 참조 |
+| supabase db reset --local | 초기 실패 후 2026-09-06 내장 native CLI로 성공. Phase 5A-only 및 0014 포함 순서 모두 exit 0 |
 | 브라우저 E2E | 375px 입력 → 별도 1440px 컨텍스트 승인 → /tasks → /today 확인 |
 | 화면 검사 | 3개 경로 × 375/1440px 가로 넘침 0, pageerror 0, 라이트/다크 스크린샷 검토 |
 | git diff --check | 통과 |
@@ -97,20 +97,29 @@
 - G4가 남긴 합성 budget probe와 추가 진단용 budget probe는 격리 DB에서 제거했다.
 - 검증 종료 후 테스트 서버를 정지하고 임시 복사한 연동 설정을 제거해 원래 테스트용 `.env.local`로 복원했다. 원본 저장소 설정은 변경하지 않았다.
 
-### CLI/환경 제한
+### CLI/환경 제한 및 2026-09-06 해결 결과
 
 - 기존 로컬 PersonalOS(54421/54422)는 수정하거나 reset하지 않았다. 전용 테스트 스택은 54621/54622다.
 - /private/tmp의 Colima 파일 공유 문제로 첫 기동이 실패했다. 공유 가능한 worktree 아래 `test-results/g5a-stack`으로 이동했다.
 - `supabase db reset`은 컨테이너 재생성 뒤 연결 시간 초과/초기화 오류로 실패했다. 직접 DB URL 및 agent 모드 변경 재시도도 성공하지 않았다.
 - Colima VM은 메모리 약 3.9GiB, 당시 가용 약 237MiB였다. 다른 프로젝트 컨테이너는 중지하지 않았다.
 - G5A에서 사용하지 않는 realtime/storage-api를 제외한 전용 스택을 새로 초기화해 migration 전체 실행과 DB 통합 검증을 완료했다. `--ignore-health-check`를 사용한 기동 종료 코드를 건강 상태의 증거로 쓰지 않았으며, 실제 인증·REST·SQL·E2E 응답으로 검증했다.
-- reset 성공, hosted DB push, 배포 환경 기능 검증, push 수신, 물리 iPhone 왕복은 **통과로 판정하지 않는다**.
+- **2026-09-06 후속 검증**: 설치된 `@supabase/cli-darwin-arm64/bin/supabase-go` 2.111.0을 직접 실행해 Phase 5A-only reset과 0014 포함 reset을 각각 종료 코드 0으로 완료했다. 두 번째는 테스트 설정에서 미사용 Realtime을 명시적으로 껐다. 일반 wrapper의 모든 환경에서 오류가 해결됐다고 일반화하지 않는다.
+- 0014 포함 reset 직후 첫 DB 게이트는 인증 서버 초기 시간 초과로 취소됐다. healthy 확인 후 동일 테스트를 다시 실행해 **10/10 통과, skip/cancel 0**을 확인했다. 구조 게이트 10/10, 단위 135/135, typecheck/lint도 통과했다.
+- 실제 운영 migration 목록은 0013까지다. 두 Learn PR의 0014 파일과 테스트 복사본은 같은 blob이다. 자세한 반영안과 원본 hash는 [migration preflight](PHASE5A-MIGRATION-PREFLIGHT.md), 실제 reset 로그와 DB 상태는 [ordered-reset.txt](g5a-evidence/ordered-reset.txt), [migration-compatibility.txt](g5a-evidence/migration-compatibility.txt), [ordered-db-gate.txt](g5a-evidence/ordered-db-gate.txt)에 있다.
+- 운영 DB push, 배포 환경 기능 검증, push 수신, 물리 iPhone 왕복은 **통과로 판정하지 않는다**.
+
+### 범위 확인 대기 (2026-09-06)
+
+G2의 실제 브라우저 검사에 필요한 Playwright 개발 의존성 추가가 최초 Learn/Quiz 변경 금지 범위를 이유로 자동 승인 검토에서 거부됐다. 패키지 파일과 기존 G2/G4 테스트는 변경하지 않았다.
+
+확인할 변경은 두 가지다: (1) 기존 두 Learn PR과 byte-identical한 0014 파일 하나를 #22의 선행 migration으로 포함, (2) Learn/Quiz 기능 코드 변경 없이 G2/G4 검증 코드와 필요한 개발 의존성 수정. 적용안을 준비했지만 아직 실행하지 않았다.
 
 ## 다음 운영 게이트
 
 - [x] 사용자 승인된 외부 설정으로 G1~G4 재검증 및 G5A 회귀 재실행
 - [ ] 기존 G2 화면 기대값, G4 본문 중복 소비와 캐시/예산 기대값을 해당 작업에서 별도 정리
-- [ ] 정상적인 CLI 환경에서 db reset 성공 확인
+- [x] 내장 native CLI에서 db reset 성공 확인 (Phase 5A-only / 0014 포함 각각)
 - [ ] 열린 Learn PR의 0014 merge/renumber 결정 (다른 PR은 변경하지 않음)
 - [ ] hosted migration 적용 및 배포 (이번 작업에서는 미실행)
 - [ ] 실제 iPhone/Mac PWA 왕복과 push 확인

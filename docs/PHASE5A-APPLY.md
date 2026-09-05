@@ -19,7 +19,7 @@ node scripts/setup-g5a-env.mjs
 npm run dev -- --hostname 127.0.0.1 --port 3055
 ```
 
-`--ignore-health-check`는 성공 증거가 아니다. 아래 검증의 실제 응답을 확인한다. 메모리가 충분한 환경에서는 제외 옵션 없이 전체 스택을 시작하고 다음 명령으로 reset까지 검증한다. 이번 머신에서 reset 명령은 실패했으며, 새 스택 초기화로 실행된 SQL과 실제 DB 테스트만 통과로 기록했다.
+`--ignore-health-check`는 성공 증거가 아니다. 아래 검증의 실제 응답을 확인한다. 메모리가 충분한 환경에서는 제외 옵션 없이 전체 스택을 시작하고 다음 명령으로 reset까지 검증한다. 초기 wrapper reset은 실패했지만, 2026-09-06 같은 머신의 내장 native CLI로 reset을 실제 완료했다. 검증된 macOS 명령과 0014 적용 순서는 [PHASE5A-MIGRATION-PREFLIGHT.md](PHASE5A-MIGRATION-PREFLIGHT.md)를 따른다.
 
 ```bash
 npx supabase db reset --local --workdir test-results/g5a-stack
