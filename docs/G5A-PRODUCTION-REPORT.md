@@ -1,7 +1,7 @@
 # G5A 운영 반영 보고서
 
 검증일: 2026-09-06 JST.
-**운영 DB·배포·Mac E2E·Mac 푸시 검증 완료. 실제 iPhone 확인 및 정기 cron 활성화 대기.**
+**G5A 기능·운영 인수 통과. 운영 DB·배포·기기 간 E2E·푸시 확인 및 정기 cron 활성화 완료. 첫 schedule-triggered 실행은 아직 미관측이다.**
 
 운영 주소: [Personal OS](https://personal-os-nine-rust.vercel.app).
 기계 판독 증거: [production-rollout.json](g5a-evidence/production-rollout.json).
@@ -67,17 +67,23 @@
 - [33975565219](https://github.com/Kachii1020/PersonalOS/actions/runs/33975565219): 재실행 세 job 모두 HTTP 200 / success.
 - [33975981882](https://github.com/Kachii1020/PersonalOS/actions/runs/33975981882): 검증 태스크 완료 후 brief 갱신 success.
 
-**정기 실행 변수는 아직 켜지 않았다.** 수동 workflow 성공은 예약 실행 활성화/첫 예약 실행의 증거가 아니다.
+**2026-09-06 01:10 JST에 `JARVIS_CRON_ENABLED=true`를 설정하고 GitHub API로 값을 재확인했다.**
+활성화 후 [33977008868](https://github.com/Kachii1020/PersonalOS/actions/runs/33977008868)을 수동 dispatch해 세 job의 HTTP 200과 workflow success를 확인했다. 재실행 뒤 iPhone 검증 task는 1행, audit는 기존 5행 그대로였다.
 
-## 남은 실기기 입력
+첫 schedule-triggered 실행은 아직 관측하지 않았다. 정기 설정 활성화, 수동 실행 검증, 실제 schedule 이벤트 실행은 서로 다른 증거이며 수동 실행을 예약 실행으로 기록하지 않는다.
 
-연결된 iPhone은 도구 조회에서 0대였고, 사용자에게 실제 기기 확인을 요청했으나 아직 결과를 받지 못했다.
-검증용 Mac 구독 제거 후 운영 구독 수는 0건이며 `G5A 아이폰 검증` 입력도 아직 관측되지 않았다.
+## iPhone 확인과 최종 인수
 
-1. iPhone에서 Safari로 운영 사이트를 열고 홈 화면에 추가한 앱으로 실행한다.
-2. [설정](https://personal-os-nine-rust.vercel.app/settings)에서 알림 구독을 허용한다.
-3. [Inbox](https://personal-os-nine-rust.vercel.app/inbox)에 `할 일: G5A 아이폰 검증`을 입력하고 승인 알림 수신을 확인한다.
-4. Mac에서 같은 항목 승인 → task 1건 → Today 반영을 확인한다.
-5. 기기 결과를 기록한 뒤 `JARVIS_CRON_ENABLED=true`를 설정하고 예약 실행 결과를 확인한다.
+초기에는 연결된 iPhone 0대, 사용자 응답 대기, 검증 입력/구독 0건이었다. 이후 사용자가 iPhone 알림 수신에 문제가 없다고 확인했고, 실제 입력 완료도 보고했다. 입력 안내 후 서버에서 일치하는 항목을 확인했다.
 
-실제 기기 결과 없이 G5A 완료나 정기 cron 활성화를 주장하지 않는다. Phase 5B는 시작하지 않았다.
+- iPhone 입력/알림 수신: **사용자 확인**. 운영 push subscription 1건 확인.
+- Inbox: `9354334a-0aed-4ede-8a8c-1e4fc98beb58`, act_now, 생성 2026-09-06 01:07:29 JST.
+- Approval: `b82c01de-f4a4-4396-9f94-9ab4ea8cf815`. **실제 Mac headed Chrome에서 승인 버튼 실행**.
+- Task: `ab7601b0-2213-4ed7-84b2-f66b4f06ee9e`, 정확히 한 건. /tasks와 /today 표시 관측.
+- Run completed / verified 및 requested → approved → executing → executed → verified audit 5건을 운영 DB에서 확인.
+- 활성화 후 worker 재실행에서도 task 1건과 audit 5건을 유지했다. 사용자가 만든 검증 태스크와 실제 푸시 구독은 삭제하지 않았다.
+
+최종 증거: [final-acceptance.json](g5a-evidence/final-acceptance.json).
+독립 검증자가 G5A 명세의 인수 조건 1~14와 증거 범위를 검토했다. 첫 schedule 실행 관측은 이 조건에 포함되지 않아 별도 운영 후속 관찰로 남긴다. 실제 iPhone 화면을 에이전트가 직접 원격 조작/촬영했다고 주장하지 않는다.
+
+Phase 5B는 시작하지 않았다.

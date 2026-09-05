@@ -2,7 +2,7 @@
 
 이 변경은 `main` SHA `1e0c013882dc9cbda248a2917d9623ba3aa31713`을 기준으로 작성했다.
 
-**운영 반영 상태:** 2026-09-06 PR #22 병합, hosted 0014~0017 및 운영 Mac 검증이 완료됐다. 아래 절차는 재현/운영 안내이며 이미 적용된 migration을 다시 실행하지 않는다. 현재 iPhone/cron 대기는 `G5A-PRODUCTION-REPORT.md`를 참고한다.
+**운영 반영 상태:** 2026-09-06 PR #22 병합, hosted 0014~0017, iPhone 입력/푸시 사용자 확인과 운영 Mac 왕복 및 cron 활성화가 완료됐다. 아래 절차는 재현/운영 안내이며 이미 적용된 migration을 다시 실행하지 않는다. 최초 예약 실행의 관찰 상태는 `G5A-PRODUCTION-REPORT.md`를 참고한다.
 
 ## 2026-09-05 통합 결과와 재현
 
@@ -151,7 +151,7 @@ curl -X POST "$APP_URL/api/jobs/generate-command-brief" \
 
 ## 7. cron 활성화
 
-`.github/workflows/jarvis.yml`에 job 세 개와 5분 schedule을 추가했다. 수동 dispatch는 운영에서 검증했다. 실제 iPhone end-to-end 확인 뒤 repository variable `JARVIS_CRON_ENABLED=true`로 정기 처리를 활성화한다. 변수 미설정 상태의 예약 job은 skip된다.
+`.github/workflows/jarvis.yml`에 job 세 개와 5분 schedule을 추가했다. 실제 iPhone 입력 확인과 Mac 승인·반영 검증 뒤 2026-09-06 01:10 JST에 repository variable `JARVIS_CRON_ENABLED=true`로 활성화했고 수동 dispatch도 성공했다. 변수 미설정/false 상태의 예약 job은 skip된다. 수동 dispatch와 실제 schedule 이벤트 결과는 구분해 기록한다.
 
 - `process-system-events`
 - `process-approved-actions`

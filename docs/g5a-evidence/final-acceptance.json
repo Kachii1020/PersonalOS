@@ -1,0 +1,76 @@
+{
+  "activatedAt": "2026-09-05T16:10:02.485Z",
+  "iphoneInputUserConfirmed": true,
+  "iphonePushReceiptUserConfirmed": true,
+  "iphoneCaptureId": "9354334a-0aed-4ede-8a8c-1e4fc98beb58",
+  "macApprovalBrowserExecuted": true,
+  "approvals": [
+    {
+      "id": "b82c01de-f4a4-4396-9f94-9ab4ea8cf815",
+      "status": "executed",
+      "agent_run_id": "d3970e8f-d66f-42b3-9aa7-1523e985e331"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "ab7601b0-2213-4ed7-84b2-f66b4f06ee9e",
+      "title": "G5A 아이폰 검증",
+      "status": "open",
+      "approval_request_id": "b82c01de-f4a4-4396-9f94-9ab4ea8cf815"
+    }
+  ],
+  "audit": [
+    {
+      "event": "requested",
+      "actor": "jarvis",
+      "created_at": "2026-09-05T16:07:33.747912+00:00"
+    },
+    {
+      "event": "approved",
+      "actor": "user",
+      "created_at": "2026-09-05T16:09:00.67311+00:00"
+    },
+    {
+      "event": "executing",
+      "actor": "worker",
+      "created_at": "2026-09-05T16:09:01.181782+00:00"
+    },
+    {
+      "event": "executed",
+      "actor": "worker",
+      "created_at": "2026-09-05T16:09:01.181782+00:00"
+    },
+    {
+      "event": "verified",
+      "actor": "worker",
+      "created_at": "2026-09-05T16:09:01.181782+00:00"
+    }
+  ],
+  "run": [
+    {
+      "id": "d3970e8f-d66f-42b3-9aa7-1523e985e331",
+      "status": "completed",
+      "current_step": "verified",
+      "trigger_event_id": "629e04ac-9beb-4141-89b5-1313dd038161"
+    }
+  ],
+  "pushSubscriptionCount": 1,
+  "cron": {
+    "name": "JARVIS_CRON_ENABLED",
+    "value": "true",
+    "schedule": "*/5 * * * *"
+  },
+  "activationManualRun": {
+    "id": 33977008868,
+    "event": "workflow_dispatch",
+    "conclusion": "success",
+    "httpStatuses": {
+      "process-system-events": 200,
+      "process-approved-actions": 200,
+      "generate-command-brief": 200
+    }
+  },
+  "taskCountAfterReplay": 1,
+  "auditCountAfterReplay": 5,
+  "firstScheduledRunVerified": false
+}

@@ -1,12 +1,12 @@
 # G5A 통합 검증 보고서
 
-**판정: 로컬 구현·DB·브라우저 검증 통과 / G5A 최종 운영 게이트 미통과**
+**판정: G5A 기능·운영 인수 조건 통과 (2026-09-06). 정기 cron 활성화 완료; 첫 schedule-triggered 실행은 아직 미관측.**
 **검증일: 2026-09-05 (JST)**
 
 **기준 main: `1e0c013882dc9cbda248a2917d9623ba3aa31713`**
 **브랜치: `codex/phase5a`**
 
-**최신 운영 상태 (2026-09-06):** PR #22 병합과 hosted 0014~0017 적용·운영 배포·Mac E2E/실제 푸시 수신을 완료했다. 실제 iPhone 결과는 아직 없으며 정기 cron 변수는 비활성이다. 상세 증거와 기존 검증 이력의 이후 결과는 [G5A-PRODUCTION-REPORT.md](G5A-PRODUCTION-REPORT.md)를 따른다.
+**최신 운영 상태 (2026-09-06):** PR #22 병합, hosted 0014~0017 적용, 운영 배포, 실제 iPhone 입력/푸시 사용자 확인, 일치하는 Mac 승인·태스크 1건·Today·audit 검증을 완료했다. `JARVIS_CRON_ENABLED=true` 설정·재조회 및 활성화 후 수동 실행이 성공했다. 첫 schedule 이벤트 실행과 수동 dispatch는 구분한다. 상세 증거는 [G5A-PRODUCTION-REPORT.md](G5A-PRODUCTION-REPORT.md), [최종 인수 증거](g5a-evidence/final-acceptance.json)를 따른다.
 
 ## 적용 및 구현
 
@@ -146,7 +146,8 @@
 - [x] 내장 native CLI에서 db reset 성공 확인 (Phase 5A-only / 0014 포함 각각)
 - [x] 공통 0014 원본을 현재 PR의 선행 migration으로 포함 (다른 Learn PR/기능 코드는 변경하지 않음)
 - [x] hosted 0014~0017 적용, main 병합 및 운영 배포 검증
-- [ ] 실제 iPhone/Mac PWA 왕복과 push 확인
-- [ ] 위 결과 확인 후 cron 연결, G5A 최종 판정
+- [x] 실제 iPhone 입력/푸시 사용자 확인 및 Mac 승인→태스크 1건→Today/audit 관측
+- [x] cron 변수 활성화·수동 실행 검증, G5A 인수 조건 통과
+- [ ] 운영 후속 관찰: 첫 schedule-triggered 실행 (인수 조건 1~14에는 없는 별도 관찰)
 
-위 체크 완료 전까지 Phase 5B와 cron 활성화를 진행하지 않는다.
+Phase 5B는 시작하지 않았다. 최초 schedule-triggered 실행은 실제 결과가 생긴 뒤 기록하며, 수동 dispatch를 예약 실행으로 간주하지 않는다.
