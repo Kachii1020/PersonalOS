@@ -2,6 +2,8 @@
 
 이 변경은 `main` SHA `1e0c013882dc9cbda248a2917d9623ba3aa31713`을 기준으로 작성했다.
 
+**운영 반영 상태:** 2026-09-06 PR #22 병합, hosted 0014~0017 및 운영 Mac 검증이 완료됐다. 아래 절차는 재현/운영 안내이며 이미 적용된 migration을 다시 실행하지 않는다. 현재 iPhone/cron 대기는 `G5A-PRODUCTION-REPORT.md`를 참고한다.
+
 ## 2026-09-05 통합 결과와 재현
 
 이 PR에는 번들 0015와 통합 보강 0016·0017이 함께 들어 있다. 원본 migration은 수정하지 않았다. 실제 DB 타입을 `lib/types/database.ts`에 합쳤고 임시 overlay는 제거했다. 실행 결과와 실패/미실행 구분은 [G5A-REPORT.md](G5A-REPORT.md)에 있다.
@@ -64,7 +66,7 @@ G1은 실제 iCloud에 테스트 일정을 만든다. 기존 G1 after-hook은 �
 
 ## 0. migration 번호 확인
 
-열린 Learn workbook PR들이 사용하는 동일한 `0014`를 사용자 승인 후 이 PR의 선행 migration으로 포함했다. Learn PR 전체를 병합하거나 내용을 변경하지 않는다. 운영에서는 repository 이력을 먼저 정렬한 후 `0014 → 0015 → 0016 → 0017` 순서로 적용한다. 실제 dry-run과 hosted 적용은 아직 수행하지 않았다. 세부 내용은 `PHASE5A-MIGRATION-PREFLIGHT.md`를 따른다.
+열린 Learn workbook PR들이 사용하는 동일한 `0014`를 사용자 승인 후 선행 migration으로 포함했다. Learn PR 전체는 병합하거나 변경하지 않았다. `0014 → 0015 → 0016 → 0017` dry-run과 hosted 적용을 실제 완료했으며 PR #22도 main에 병합됐다. 세부 증거는 `G5A-PRODUCTION-REPORT.md`를 따른다.
 
 ## 1. patch 적용
 
@@ -149,7 +151,7 @@ curl -X POST "$APP_URL/api/jobs/generate-command-brief" \
 
 ## 7. cron 활성화
 
-위 end-to-end가 통과한 뒤 `.github/workflows/cron.yml`에 작은 job 세 개를 추가한다. 먼저 5분 단위로 검증하고, 안정화 후 빈도를 낮춘다.
+`.github/workflows/jarvis.yml`에 job 세 개와 5분 schedule을 추가했다. 수동 dispatch는 운영에서 검증했다. 실제 iPhone end-to-end 확인 뒤 repository variable `JARVIS_CRON_ENABLED=true`로 정기 처리를 활성화한다. 변수 미설정 상태의 예약 job은 skip된다.
 
 - `process-system-events`
 - `process-approved-actions`

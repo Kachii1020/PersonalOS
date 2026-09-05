@@ -6,6 +6,8 @@
 **기준 main: `1e0c013882dc9cbda248a2917d9623ba3aa31713`**
 **브랜치: `codex/phase5a`**
 
+**최신 운영 상태 (2026-09-06):** PR #22 병합과 hosted 0014~0017 적용·운영 배포·Mac E2E/실제 푸시 수신을 완료했다. 실제 iPhone 결과는 아직 없으며 정기 cron 변수는 비활성이다. 상세 증거와 기존 검증 이력의 이후 결과는 [G5A-PRODUCTION-REPORT.md](G5A-PRODUCTION-REPORT.md)를 따른다.
+
 ## 적용 및 구현
 
 - 사용자 제공 `PersonalOS-Phase5A-bundle.zip`의 내부 SHA256SUMS 4건 모두 일치. 같은 main 기준 패치 33개 파일을 `git apply --check` 후 적용했다. 덮어쓰기를 위한 main 재설정은 하지 않았다.
@@ -143,7 +145,7 @@
 - [x] 사용자 승인 범위에서 G2/G4 검증 코드 수정 및 전체 자동 회귀 성공
 - [x] 내장 native CLI에서 db reset 성공 확인 (Phase 5A-only / 0014 포함 각각)
 - [x] 공통 0014 원본을 현재 PR의 선행 migration으로 포함 (다른 Learn PR/기능 코드는 변경하지 않음)
-- [ ] hosted migration 적용 및 배포 (이번 작업에서는 미실행)
+- [x] hosted 0014~0017 적용, main 병합 및 운영 배포 검증
 - [ ] 실제 iPhone/Mac PWA 왕복과 push 확인
 - [ ] 위 결과 확인 후 cron 연결, G5A 최종 판정
 
