@@ -1,0 +1,25 @@
+
+> personalos@1.0.0 test:g5a:local
+> node --import tsx --conditions=react-server --test tests/gates/g5a-local.test.ts
+
+▶ G5A local database and worker integration
+  ✔ G5A-2: inbox trigger emits exactly one deduplicated event (192.422834ms)
+  ✔ G5A-12: anon/non-allowlisted users cannot read data or invoke worker RPCs (37.005792ms)
+  ✔ G5A-3/4: two workers claim once and resume the persisted run step after lease expiry (50.003333ms)
+Evidence: approval 5c0de43a-970a-4980-aafb-4b948a8f96af, task 2e786424-4998-4bfb-b503-ab8a0672612d, exact audit order, replay count=1
+  ✔ G5A-6/7/13: no preapproval task; concurrent approval/execution and replay create one task and ordered audit (68.869791ms)
+  ✔ G5A-8: rejection leaves no side effect and records the decision (32.406958ms)
+  ✔ expired/stale leases cannot insert tasks; a recovered approval is executable once (44.741208ms)
+  ✔ execution transaction rolls back task and execution audit if a write fails (42.616375ms)
+  ✔ G5A-9: unsupported action is failed and auditable without a task (40.259916ms)
+  ✔ G5A-10/11: deterministic brief is persisted and contains at most three actions (49.340458ms)
+  ✔ job endpoints reject unauthorized calls and persist worker failures as HTTP 500 (150.321041ms)
+✔ G5A local database and worker integration (1060.125958ms)
+ℹ tests 10
+ℹ suites 1
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1309.856083

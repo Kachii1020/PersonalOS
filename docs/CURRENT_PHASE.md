@@ -1,4 +1,6 @@
-**Phase 4 종료.** G1·G2·G3 통과. G4는 7/8 통과 + 조건 8 운영자 면제 (2026-08-20) — 판정과 면제 사유는 `docs/G4-REPORT.md`. 다음 작업은 업그레이드 Tier 3 (실데이터 2주 후, `docs/DEFERRED.md`).
+**Phase 5A — JARVIS Core 통합 검증 중.** 범위는 `docs/JARVIS-SPEC.md` 1~11절, 실행 순서는 `docs/PHASE5A-APPLY.md`, 증거와 잔여 게이트는 `docs/G5A-REPORT.md`. Phase 5B는 시작하지 않는다.
+
+**이전 Phase 4 종료.** G1·G2·G3 통과. G4는 7/8 통과 + 조건 8 운영자 면제 (2026-08-20) — 판정과 면제 사유는 `docs/G4-REPORT.md`. 업그레이드 Tier 3는 `docs/DEFERRED.md` 참고.
 
 SPEC 완성 작업 중 (Phase 1·2·3은 G1·G2·G3 통과로 종료, 미구현 항목 해소 중)
 

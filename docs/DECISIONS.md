@@ -424,3 +424,15 @@ AGENTS.md에 인증 담당 에이전트가 없어서 ui-shell 범위로 넣었�
 - **결정**: `listApplications()`는 환경변수 없으면 에러 대신 `[]`를 돌려준다. 위키(`listWikiEntries`)는 에러를 던진다.
 - **이유**: 위키는 Phase 2 필수 기능이지만, 지원 파이프라인은 아직 테이블을 안 만든 사용자도 있다. 에러가 나면 `/apply` 페이지가 500이 된다.
 - **버린 대안**: 에러를 던지고 페이지에서 catch → 페이지마다 try/catch가 늘어난다.
+
+## 2026-09-05 — Phase 5A 저장형 승인·실행 루프
+
+- **결정**: 기존 PWA에 Inbox / Approvals / Today를 추가하고, deterministic 분류와 저장형 event/run 상태 머신으로 CREATE_TASK만 실행한다.
+- **이유**: 요청 중단·동시 worker·중복 승인에서도 같은 승인으로 태스크를 한 건만 생성하고 감사 이력을 검증할 수 있다.
+- **버린 대안**: 자유형 multi-agent, 새 모바일 앱, AI 판단과 외부 행동을 한 요청에서 실행하는 구조.
+
+## 2026-09-05 — 태스크 실행과 승인 준비를 DB 트랜잭션으로 보강
+
+- **결정**: 번들 0015는 유지하고 0016·0017을 추가했다. 실행 직전 승인·만료·lease를 검사하고 태스크/감사/run 완료를 원자적으로 기록한다. approval_request_id 연결은 executor만 변경한다.
+- **이유**: 부분 unique index와 PostgREST upsert 불일치, 완료 기록 실패 시 고아 태스크, 클라이언트의 승인 ID 선점 문제를 방지한다. 실제 SQL·동시성·브라우저 검증은 G5A-REPORT.md에 기록했다.
+- **버린 대안**: 기존 migration 수정, 태스크 생성과 실행 완료를 별도 REST 요청으로 처리, 임시 schema overlay 유지.

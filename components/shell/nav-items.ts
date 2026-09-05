@@ -1,16 +1,19 @@
 import {
   BookOpen,
+  Bot,
   BrainCircuit,
   CalendarDays,
   Ellipsis,
   FolderKanban,
   GraduationCap,
+  Inbox,
   GitGraph,
   LayoutDashboard,
   Library,
   ListTodo,
   Newspaper,
   Settings,
+  ShieldCheck,
   TrendingUp,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -24,6 +27,9 @@ export type NavItem = {
 /** SPEC.md 6.2의 전체 경로. */
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "대시보드", icon: LayoutDashboard },
+  { href: "/today", label: "JARVIS Today", icon: Bot },
+  { href: "/inbox", label: "JARVIS 인박스", icon: Inbox },
+  { href: "/approvals", label: "JARVIS 승인", icon: ShieldCheck },
   { href: "/calendar", label: "캘린더", icon: CalendarDays },
   { href: "/tasks", label: "마감·할 일", icon: ListTodo },
   { href: "/quiz", label: "퀴즈", icon: BrainCircuit },

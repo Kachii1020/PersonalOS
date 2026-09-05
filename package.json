@@ -16,7 +16,9 @@
     "test:g3": "node --import tsx --conditions=react-server --test tests/gates/g3.test.ts",
     "test:g4": "node --import tsx --conditions=react-server --test tests/gates/g4.test.ts",
     "test:unit": "node --import tsx --test tests/*.test.ts",
-    "test": "npm run test:unit && npm run test:g1 && npm run test:g2 && npm run test:g3 && npm run test:g4"
+    "test:g5a": "node --import tsx --conditions=react-server --test tests/gates/g5a.test.ts",
+    "test:g5a:local": "node --import tsx --conditions=react-server --test tests/gates/g5a-local.test.ts",
+    "test": "npm run test:unit && npm run test:g1 && npm run test:g2 && npm run test:g3 && npm run test:g4 && npm run test:g5a"
   },
   "keywords": [],
   "author": "",

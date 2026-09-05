@@ -1,0 +1,22 @@
+
+> personalos@1.0.0 test:g5a
+> node --import tsx --conditions=react-server --test tests/gates/g5a.test.ts
+
+✔ G5A-1: Phase 5 spec and constitution exist (1.123375ms)
+✔ G5A-2: migration has queue, run, approval, audit, brief and task extension (0.474125ms)
+✔ G5A-3: claims are atomic and expired leases can be recovered (0.151834ms)
+✔ G5A-4: policy fails closed (0.058125ms)
+✔ G5A-5: approval payload is immutable to the authenticated client (0.153916ms)
+✔ G5A-6: approved task execution is idempotent (0.52125ms)
+✔ G5A-7: command brief exposes at most three actions without AI (8.536041ms)
+✔ G5A-8: Today, Inbox and Approvals routes are present (0.684583ms)
+✔ G5A-9: external state change remains behind approval (1.168833ms)
+✔ G5A-10: job routes use cron auth and keep failures visible (0.539208ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 126.15925
