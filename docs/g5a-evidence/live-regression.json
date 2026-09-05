@@ -1,0 +1,164 @@
+{
+  "startedAt": "2026-09-05T14:51:26.028Z",
+  "commands": [
+    {
+      "script": "test",
+      "exitCode": 1,
+      "timedOut": false,
+      "file": "test-results/live-npm-test.log"
+    },
+    {
+      "script": "test:g3",
+      "exitCode": 0,
+      "timedOut": false,
+      "file": "test-results/live-g3.log"
+    },
+    {
+      "script": "test:g4",
+      "exitCode": 1,
+      "timedOut": false,
+      "file": "test-results/live-g4.log"
+    }
+  ],
+  "fetch-news": {
+    "status": 200,
+    "sources": 21,
+    "inserted": 312,
+    "failures": 0
+  },
+  "sync-calendar": {
+    "status": 200,
+    "calendars": 7,
+    "eventsUpserted": 82
+  },
+  "testEventCleanup": {
+    "created": 1,
+    "removed": 1,
+    "confirmedAbsent": true
+  },
+  "aiUsage": [
+    {
+      "purpose": "briefing",
+      "model": "claude-sonnet-5",
+      "cost_usd": 0.0381
+    },
+    {
+      "purpose": "quiz",
+      "model": "claude-sonnet-5",
+      "cost_usd": 0.0427
+    },
+    {
+      "purpose": "briefing",
+      "model": "claude-sonnet-5",
+      "cost_usd": 0.0385
+    },
+    {
+      "purpose": "weekly_review",
+      "model": "claude-sonnet-5",
+      "cost_usd": 0.0057
+    }
+  ],
+  "finishedAt": "2026-09-05T14:53:38.248Z",
+  "authorization": "User explicitly approved reusing existing Apple/Anthropic/Notion/GitHub settings after the initial approval-review rejection.",
+  "gates": {
+    "unit": {
+      "tests": 135,
+      "pass": 135,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "g1": {
+      "tests": 7,
+      "pass": 7,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "g2": {
+      "tests": 10,
+      "pass": 9,
+      "fail": 1,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "g3": {
+      "tests": 5,
+      "pass": 5,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "g4": {
+      "tests": 8,
+      "pass": 6,
+      "fail": 2,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "g5aStructural": {
+      "tests": 10,
+      "pass": 10,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    },
+    "g5aDatabase": {
+      "tests": 10,
+      "pass": 10,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0
+    }
+  },
+  "g2Diagnostic": {
+    "initialStage": "learning",
+    "afterClick": "quiz",
+    "firstQuestionHeading": "1.투자은행",
+    "firstQuestionReviewBadge": true,
+    "noAnswerSubmitted": true,
+    "originalTestStillFailing": true
+  },
+  "g4Diagnostic": {
+    "weeklyReadyRows": 1,
+    "weeklyUsageRows": 1,
+    "recordedCostUsd": 0.0057,
+    "budgetProbe": {
+      "httpStatus": 200,
+      "body": {
+        "weekStart": "2026-08-31",
+        "skipped": true
+      },
+      "aiUsageDelta": 0,
+      "newReadyRows": 0
+    },
+    "interpretation": "Supplemental observation only. Original G4 tests remain failing; cached review returns before budget guard."
+  },
+  "unchangedFiles": [
+    {
+      "path": "tests/gates/g2.test.ts",
+      "mainBlob": "caff1f6cfe955d8418bca94a74387d6031ae4b3b",
+      "branchBlob": "caff1f6cfe955d8418bca94a74387d6031ae4b3b",
+      "unchanged": true
+    },
+    {
+      "path": "tests/gates/g4.test.ts",
+      "mainBlob": "e22891e70f2b442269f60fc909bb5f16d75e62a5",
+      "branchBlob": "e22891e70f2b442269f60fc909bb5f16d75e62a5",
+      "unchanged": true
+    },
+    {
+      "path": "components/widgets/quiz-flow.tsx",
+      "mainBlob": "2cf0c778a551bd99e6243b951b98681e515a3a92",
+      "branchBlob": "2cf0c778a551bd99e6243b951b98681e515a3a92",
+      "unchanged": true
+    },
+    {
+      "path": "lib/repos/quiz.ts",
+      "mainBlob": "d231565625b89ca5d7fbe1ec7be64e2781ddfe85",
+      "branchBlob": "d231565625b89ca5d7fbe1ec7be64e2781ddfe85",
+      "unchanged": true
+    }
+  ],
+  "totalRecordedAiCostUsd": 0.125
+}

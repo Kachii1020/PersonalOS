@@ -14,7 +14,7 @@
 - 원본 0015 migration을 그대로 보존하고 0016·0017에 통합 결함을 수정했다.
 - 실제 로컬 PostgreSQL에서 생성한 타입을 기존 `lib/types/database.ts`에 추가했다. 임시 overlay와 전용 Supabase client는 제거했다.
 - Phase 5B 코드는 구현하지 않았다. 기존 Learn/Quiz 코드·테스트·migration은 변경하지 않았다.
-- cron과 hosted migration, 배포는 실행하지 않았다.
+- cron과 hosted migration, 수동 배포는 실행하지 않았다. PR 연결 Vercel 자동 검사에서는 deployment completed / SUCCESS가 보고됐지만 배포 환경의 G5A 기능 검증은 하지 않았다.
 
 ## 통합에서 수정한 결함
 
@@ -67,18 +67,35 @@
 
 스크린샷의 iCloud/AI 예산 배너는 앞선 회귀 테스트가 격리 DB에 만든 실패/예산 probe 상태다. 운영 계정의 상태를 의미하지 않는다.
 
-## 전체 회귀 실행 결과와 남은 제한
+## 사용자 승인 후 실제 외부 연동 회귀 (2026-09-05 23:51~23:54 JST)
 
-`npm test`를 실제 실행했다. unit 통과 후 G1 실패로 중단되어 G2, G3, G4를 각각 별도 실행했다. 테스트 조건을 약화하거나 기존 테스트 파일을 고치지 않았다.
+최초 격리 환경에서는 외부 설정 부재로 G1~G4가 실패/취소됐고, 설정 복사는 자동 승인 검토에서 거부됐다. 이후 사용자가 기존 Apple·Anthropic·Notion·GitHub 설정 재사용과 실연동 검증을 명시적으로 승인했다. 승인 후 해당 설정만 gitignored 테스트 환경에 복사했고, 운영 DB/푸시 설정은 복사하지 않았다.
 
-| 게이트 | 결과 | 원인/해석 |
+뉴스 수집 21개 소스 / 312건 / 실패 0건과 iCloud 동기화가 실제 HTTP 200을 반환했다. 이어 `npm test`를 다시 실행해 unit, G1, G2를 수행했다. G2 실패에서 중단되어 G3, G4, G5A 구조 및 DB 테스트를 각각 실행했다. 원본 테스트와 관련 Learn/Quiz 코드는 변경하지 않았다.
+
+기계 판독 증거: [live-regression.json](g5a-evidence/live-regression.json). 기존 G2/G4 테스트·Quiz 파일의 main/branch blob hash가 동일함도 포함한다.
+
+| 게이트 | 실제 결과 | 근거/남은 문제 |
 |---|---|---|
-| G1 | 1 pass / 6 fail | 격리 환경에 iCloud 인증/캘린더, 수집 뉴스, Anthropic 연동이 없어 실패 |
-| G2 | before hook 실패, 10 cancelled | NOTION_TOKEN 없음; 취소를 통과로 집계하지 않음 |
-| G3 | 4 pass / 1 fail | GITHUB_USERNAME 미설정. Notion 항목은 미설정 fallback 경로만 검사됨 |
-| G4 | 5 표기 / 3 fail | 앞의 5개에는 수동 확인 안내 3개와 단위 테스트 참조 2개가 포함됨. 실제 실기기 검증 아님. 뉴스/Anthropic 미설정 및 기존 테스트의 Response body 중복 읽기 오류 |
+| unit | 135/135 pass | 전체 단위 테스트 |
+| G1 | 7/7 pass | 실제 iCloud 생성·재동기화, AI 브리핑 5개 섹션, usage 1행, 예산 초과 HTTP 402, 실패 배너 |
+| G2 | 9 pass / 1 fail | PDF/PPTX·ICS·GPA·Notion 위키 포함 통과. 조건 3은 첫 HTML에서 복습 배지를 찾는 기존 테스트 실패 |
+| G3 | 5/5 pass | 시세 20건·환율·GitHub 수집/렌더 통과. NOTION_DB_APPLICATIONS는 원래 미설정이므로 조건 5는 fallback만 확인 |
+| G4 | 6 표기 / 2 fail | 조건 2 실제 브리핑 잡 통과. 나머지 5 표기에는 수동 안내 3개와 단위 참조 2개가 포함됨. 조건 6·8은 기존 테스트의 Response body 중복 읽기 오류 |
+| G5A 구조 / 실제 DB | 각각 10/10 pass | 실연동 회귀 이후 재실행, 취소·skip 0 |
 
-기존 저장소에는 관련 연동 설정이 있지만 이를 테스트 worktree로 복사하려는 작업이 **자동 승인 검토에서 거부**됐다. 사유는 Apple·Anthropic·Notion·GitHub 자격증명 이동과 이후 외부 서비스 호출에 대한 명시적 승인 부족이다. 해당 전송은 실행되지 않았다. 실제 연동 회귀를 재실행하려면 그 용도의 승인이 필요하다.
+### 남은 실패의 진단
+
+- **G2 조건 3**: 현재 `QuizFlow`는 학습 단계(step 0)에서 시작하므로 첫 HTML에 복습 배지가 없다. 실제 브라우저에서 `학습 완료, 퀴즈 시작` 클릭 후 첫 번째 `1.투자은행` 문항에 복습 배지가 표시되는 것을 확인했다. 답안은 제출하지 않았다. 이 보충 관찰을 원본 자동 테스트 통과로 바꾸지 않았다.
+- **G4 조건 6·8**: `tests/gates/g4.test.ts`가 성공 시에도 오류 메시지 인자에서 `response.text()`를 소비한 뒤 `response.json()`을 호출해 `Body is unusable`로 멈춘다. main과 동일한 기존 코드이며 수정하지 않았다.
+- **G4 보충 관찰**: 실제 weekly_reviews ready 1행과 weekly_review usage 1행($0.0057)이 저장됐다. 예산 probe 후 이미 ready인 리뷰 요청은 HTTP 200 / skipped=true를 반환했고 AI usage 및 ready 행 증가가 0이었다. 이는 캐시 분기가 예산 검사보다 먼저 실행되는 기존 동작이다. 원본 조건 8의 HTTP 402 기대값은 충족했다고 판정하지 않는다.
+
+### 비용과 정리
+
+- 기록된 실제 AI 호출 4회: briefing $0.0381, quiz $0.0427, briefing $0.0385, weekly_review $0.0057. DB 4자리 반올림 기준 총 **$0.1250**.
+- G1은 기존 after-hook에서 로컬 미러만 삭제하므로, 실행 전후 CalDAV 객체 URL을 비교해 이번 실행이 만든 검증 일정 **1건만 원격 삭제**했다. 재조회로 해당 객체가 사라진 것을 확인했다. 기존 일정은 삭제하지 않았다.
+- G4가 남긴 합성 budget probe와 추가 진단용 budget probe는 격리 DB에서 제거했다.
+- 검증 종료 후 테스트 서버를 정지하고 임시 복사한 연동 설정을 제거해 원래 테스트용 `.env.local`로 복원했다. 원본 저장소 설정은 변경하지 않았다.
 
 ### CLI/환경 제한
 
@@ -87,11 +104,12 @@
 - `supabase db reset`은 컨테이너 재생성 뒤 연결 시간 초과/초기화 오류로 실패했다. 직접 DB URL 및 agent 모드 변경 재시도도 성공하지 않았다.
 - Colima VM은 메모리 약 3.9GiB, 당시 가용 약 237MiB였다. 다른 프로젝트 컨테이너는 중지하지 않았다.
 - G5A에서 사용하지 않는 realtime/storage-api를 제외한 전용 스택을 새로 초기화해 migration 전체 실행과 DB 통합 검증을 완료했다. `--ignore-health-check`를 사용한 기동 종료 코드를 건강 상태의 증거로 쓰지 않았으며, 실제 인증·REST·SQL·E2E 응답으로 검증했다.
-- reset 성공, hosted DB push, deployment, push 수신, 물리 iPhone 왕복은 **통과로 판정하지 않는다**.
+- reset 성공, hosted DB push, 배포 환경 기능 검증, push 수신, 물리 iPhone 왕복은 **통과로 판정하지 않는다**.
 
 ## 다음 운영 게이트
 
-- [ ] 승인된 외부 연동 설정으로 G1~G4 재검증 및 기존 G4 테스트 결함 별도 처리
+- [x] 사용자 승인된 외부 설정으로 G1~G4 재검증 및 G5A 회귀 재실행
+- [ ] 기존 G2 화면 기대값, G4 본문 중복 소비와 캐시/예산 기대값을 해당 작업에서 별도 정리
 - [ ] 정상적인 CLI 환경에서 db reset 성공 확인
 - [ ] 열린 Learn PR의 0014 merge/renumber 결정 (다른 PR은 변경하지 않음)
 - [ ] hosted migration 적용 및 배포 (이번 작업에서는 미실행)
