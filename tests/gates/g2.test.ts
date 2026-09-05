@@ -19,6 +19,8 @@ import { after, before, describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { config } from "dotenv";
+import { chromium } from "playwright";
+import { assertIsolatedGateDatabase } from "./local-fixtures";
 
 config({ path: [".env.development.local", ".env.local"] });
 
@@ -99,6 +101,7 @@ describe("G2 — Phase 2 게이트", () => {
   let courseId = "";
 
   before(async () => {
+    assertIsolatedGateDatabase(SUPABASE_URL, APP);
     for (const [name, value] of Object.entries({
       CRON_SECRET: CRON,
       NEXT_PUBLIC_SUPABASE_URL: SUPABASE_URL,
@@ -170,22 +173,31 @@ describe("G2 — Phase 2 게이트", () => {
     });
     assert.equal(seed.ok, true, `복습 큐 주입 실패: ${await seed.text()}`);
 
-    const page = await fetch(`${APP}/quiz`, { headers: { Cookie: cookie } });
-    const html = await page.text();
-    assert.equal(page.status, 200, `/quiz가 ${page.status}를 반환했다`);
-
-    const first = html.indexOf("복습");
-    assert.ok(first > 0, "'복습' 배지가 화면에 없다");
-
-    // 첫 문항 카드 안에 배지가 있어야 1번 자리다. 카드 경계는 문항 번호로 잡는다.
-    const secondCard = html.indexOf("문제 2");
-    assert.ok(
-      secondCard === -1 || first < secondCard,
-      "복습 배지가 첫 문항 카드보다 뒤에 있다 (1번 자리가 아니다)",
-    );
-    // SSR은 JSX 보간을 텍스트 노드로 쪼개므로 "복습 1문제"를 통짜로 찾으면 안 잡힌다.
-    assert.match(html, /복습[\s\S]{0,60}?1[\s\S]{0,20}?문제/, "머리말의 복습 건수가 표시되지 않았다");
-    console.log(`   증거: GET /quiz → 200, '복습' 배지가 첫 문항 카드 안에 위치`);
+    // The product starts on its learning screen. Exercise that real transition
+    // before asserting the original requirement: the first question is review.
+    const browser = await chromium.launch({ channel: process.env.GATE_BROWSER_CHANNEL, headless: true });
+    try {
+      const context = await browser.newContext();
+      const separator = cookie.indexOf("=");
+      await context.addCookies([{
+        name: cookie.slice(0, separator),
+        value: decodeURIComponent(cookie.slice(separator + 1)),
+        url: APP,
+      }]);
+      const page = await context.newPage();
+      const response = await page.goto(`${APP}/quiz`);
+      assert.equal(response?.status(), 200);
+      await page.getByRole("button", { name: "학습 완료, 퀴즈 시작", exact: true }).click();
+      const firstHeading = page.locator("main").getByRole("heading", { level: 2 }).first();
+      await firstHeading.waitFor();
+      assert.match(await firstHeading.innerText(), /^1\./);
+      const firstHeader = firstHeading.locator("..");
+      assert.equal(await firstHeader.getByText("복습", { exact: true }).count(), 1);
+      assert.match(await page.locator("main").innerText(), /5문제\s*·\s*복습 1문제/);
+      console.log("   증거: /quiz → 학습 완료 클릭 → 첫 문항 헤더에 복습 배지, 복습 1문제; 답안 미제출");
+    } finally {
+      await browser.close();
+    }
   });
 
   // ---------- 강의자료 ----------

@@ -41,7 +41,20 @@ playwright-cli -s=g5a run-code --filename=scripts/g5a-browser-flow.js > test-res
 node scripts/g5a-evidence.mjs
 ```
 
-G1~G4는 별도로 실제 외부 연동과 기존 fixtures가 필요하다. G5A의 테스트용 환경만으로 전체 회귀가 통과한다고 주장하지 않는다. 이 PR은 기존 회귀 테스트를 수정하지 않았다.
+G1~G4는 별도로 실제 외부 연동과 기존 fixtures가 필요하다. G5A의 테스트용 환경만으로 전체 회귀가 통과한다고 주장하지 않는다. 2026-09-06 사용자 승인으로 G2/G4 검증 코드를 수정했다. G2는 Playwright로 실제 화면 전환을 검사하며, G4는 원래 리뷰를 복원하고 고유한 예산 probe만 제거한다. 실기기 및 별도 unit 참조 조건은 skip으로 명확하게 표시한다.
+
+G2/G4는 전용 로컬 테스트 스택임을 명시해야 한다. setup 스크립트는 새 테스트 환경에 `GATE_ISOLATED_DB=1`을 기록한다. 브라우저는 다음 중 하나를 준비한다.
+
+```bash
+# CI 또는 bundled Chromium을 사용할 환경
+npx playwright install chromium
+GATE_ISOLATED_DB=1 npm test
+
+# Chrome이 이미 설치된 이 macOS 머신에서 실제 사용한 설정
+GATE_ISOLATED_DB=1 GATE_BROWSER_CHANNEL=chrome npm test
+```
+
+G1은 실제 iCloud에 테스트 일정을 만든다. 기존 G1 after-hook은 로컬 미러만 지우므로, 이번 검증은 실행 전후 CalDAV URL을 비교해 새로 생긴 G1 테스트 객체만 원격 삭제하는 별도 실행 wrapper로 수행했다. 기존 일정은 삭제하지 않는다.
 
 ### 로컬 작업 정리 및 롤백
 
@@ -51,12 +64,7 @@ G1~G4는 별도로 실제 외부 연동과 기존 fixtures가 필요하다. G5A�
 
 ## 0. migration 번호 확인
 
-열린 Learn workbook PR들이 `0014`를 사용하고 있다. 다음 중 하나가 끝나기 전에는 hosted DB에 `0015_jarvis_core.sql`을 적용하지 않는다.
-
-1. `0014` PR을 먼저 merge하고 hosted DB에 적용한다.
-2. `0014` PR을 폐기하거나 다른 번호로 바꾼다.
-
-코드 review와 local test는 먼저 진행해도 된다.
+열린 Learn workbook PR들이 사용하는 동일한 `0014`를 사용자 승인 후 이 PR의 선행 migration으로 포함했다. Learn PR 전체를 병합하거나 내용을 변경하지 않는다. 운영에서는 repository 이력을 먼저 정렬한 후 `0014 → 0015 → 0016 → 0017` 순서로 적용한다. 실제 dry-run과 hosted 적용은 아직 수행하지 않았다. 세부 내용은 `PHASE5A-MIGRATION-PREFLIGHT.md`를 따른다.
 
 ## 1. patch 적용
 

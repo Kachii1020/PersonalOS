@@ -39,14 +39,14 @@ CLI의 `on branch main` 출력은 Supabase의 로컬 DB branch 표기이며 Git 
 
 일반 wrapper에서 실패했던 reset을 이 실행기로 완료했다. 재현용 G5A fixture에는 미사용 Realtime을 명시적으로 비활성화했다. 원래 production config는 변경하지 않았다.
 
-## 제안하는 운영 반영안 — 아직 미실행
+## 승인된 반영안 — 운영 DB 적용은 아직 미실행
 
-최초 요청의 “관련 없는 Learn/Quiz 작업을 수정하지 않는다”는 범위 때문에 다음 변경은 명시적 범위 확인 후 진행한다.
+2026-09-06 사용자가 공통 0014 파일 포함 및 G2/G4 검증 코드·Playwright 개발 의존성 수정을 명시적으로 승인했다. Learn/Quiz 기능 코드는 계속 변경하지 않는다.
 
-1. 기존 두 Learn PR을 그대로 두고, **위 blob과 일치하는 0014 파일 하나만** Phase 5A PR #22의 선행 migration으로 포함한다. Learn 기능 코드나 workbook 과제는 포함하지 않는다.
+1. 기존 두 Learn PR을 그대로 두고, **위 blob과 일치하는 0014 파일 하나만** Phase 5A PR #22의 선행 migration으로 포함했다. Learn 기능 코드나 workbook 과제는 포함하지 않았다.
 2. 해당 파일이 main의 정식 migration 이력에 포함되도록 PR을 검토한다. 운영에만 0014를 올리고 repository 이력에서 빼놓지 않는다.
 3. 최신 운영 migration 이력과 pending 목록을 다시 확인하고 0014, 0015, 0016, 0017만 대상으로 dry-run한다.
 4. 적용 전에 복구 가능한 schema/data 백업을 확인하고, 확인된 네 migration을 정해진 순서로 적용한다.
 5. 운영 RLS/권한 및 Inbox → Approval → Task → Today 확인을 수행한다. 실기기 확인 전 cron은 켜지 않는다.
 
-G2/G4의 기존 테스트 오류 수정도 별도 범위 확인이 필요하다. G2는 실제 학습→퀴즈 전환 후 첫 문항의 복습 표시를 검사하고, G4는 응답을 한 번만 읽으며 cached 반환과 새 생성의 예산 차단을 구분해 원래 402 조건을 보존해야 한다.
+승인된 G2는 실제 학습→퀴즈 전환 후 첫 문항의 복습 표시를 검사한다. G4는 응답을 한 번만 읽으며 cached 반환과 새 생성의 예산 차단을 구분해 원래 402 조건을 보존한다. 테스트는 명시적으로 격리된 loopback DB에서만 fixture를 변경한다.

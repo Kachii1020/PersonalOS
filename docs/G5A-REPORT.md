@@ -13,7 +13,7 @@
 - Inbox → event → 저장된 run 단계 → approval → CREATE_TASK → audit → Today 구현.
 - 원본 0015 migration을 그대로 보존하고 0016·0017에 통합 결함을 수정했다.
 - 실제 로컬 PostgreSQL에서 생성한 타입을 기존 `lib/types/database.ts`에 추가했다. 임시 overlay와 전용 Supabase client는 제거했다.
-- Phase 5B 코드는 구현하지 않았다. 기존 Learn/Quiz 코드·테스트·migration은 변경하지 않았다.
+- Phase 5B는 구현하지 않았다. Learn/Quiz 기능 코드는 유지했다. 2026-09-06 명시적 승인으로 공통 0014 원본 파일, 해당 generated type, G2/G4 검증 코드와 Playwright 개발 의존성만 추가·수정했다.
 - cron과 hosted migration, 수동 배포는 실행하지 않았다. PR 연결 Vercel 자동 검사에서는 deployment completed / SUCCESS가 보고됐지만 배포 환경의 G5A 기능 검증은 하지 않았다.
 
 ## 통합에서 수정한 결함
@@ -109,18 +109,40 @@
 - 실제 운영 migration 목록은 0013까지다. 두 Learn PR의 0014 파일과 테스트 복사본은 같은 blob이다. 자세한 반영안과 원본 hash는 [migration preflight](PHASE5A-MIGRATION-PREFLIGHT.md), 실제 reset 로그와 DB 상태는 [ordered-reset.txt](g5a-evidence/ordered-reset.txt), [migration-compatibility.txt](g5a-evidence/migration-compatibility.txt), [ordered-db-gate.txt](g5a-evidence/ordered-db-gate.txt)에 있다.
 - 운영 DB push, 배포 환경 기능 검증, push 수신, 물리 iPhone 왕복은 **통과로 판정하지 않는다**.
 
-### 범위 확인 대기 (2026-09-06)
+### 범위 승인 후 최종 자동 회귀 (2026-09-06 00:19~00:22 JST)
 
-G2의 실제 브라우저 검사에 필요한 Playwright 개발 의존성 추가가 최초 Learn/Quiz 변경 금지 범위를 이유로 자동 승인 검토에서 거부됐다. 패키지 파일과 기존 G2/G4 테스트는 변경하지 않았다.
+앞선 자동 승인 검토 거부 뒤 사용자가 공통 0014 포함 및 G2/G4 검증 코드·필요한 Playwright 개발 의존성 수정을 명시적으로 허용했다. 승인된 작업을 완료했다.
 
-확인할 변경은 두 가지다: (1) 기존 두 Learn PR과 byte-identical한 0014 파일 하나를 #22의 선행 migration으로 포함, (2) Learn/Quiz 기능 코드 변경 없이 G2/G4 검증 코드와 필요한 개발 의존성 수정. 적용안을 준비했지만 아직 실행하지 않았다.
+- 0014는 두 Learn PR과 같은 blob `e5fd3e3277bca4fb5ac49103085a84f8fa900608`이며 기능 코드나 기존 PR을 변경하지 않았다. 실제 DB에서 workbook_submissions 타입 27줄을 생성해 공통 타입에 합쳤다.
+- G2 조건 3은 Playwright로 학습 완료 버튼을 누른 뒤 첫 문항 헤더의 복습 배지와 복습 1문제 표시를 검사한다. 답안은 제출하지 않는다.
+- G4는 응답을 한 번만 소비한다. 새 생성은 실제 ready 1행·AI usage +1행, 예산 소진의 새 생성은 HTTP 402·신규 ready/usage 0행, 캐시는 별도 회귀에서 HTTP 200/skipped·변경 0건을 요구한다. 검증 조건을 완화하지 않았다.
+- 임시 리뷰는 전체 원본을 저장/복원하고, 예산 probe는 고유 marker로 제거한다. G2/G4 fixture 검증은 loopback URL과 `GATE_ISOLATED_DB=1`을 요구한다.
+- 독립 검증자가 최종 검사와 데이터 복원 경로를 재검토했고 차단 결함이나 조건 완화를 발견하지 않았다.
+
+실제 명령: `GATE_ISOLATED_DB=1 GATE_BROWSER_CHANNEL=chrome npm test` (원격 G1 테스트 일정 정리 wrapper 사용).
+**전체 npm test 종료 코드 0, 실패 0건**. [JSON 증거](g5a-evidence/approved-regression.json) · [검증 출력](g5a-evidence/approved-regression.txt).
+
+| 검사 | 최신 결과 |
+|---|---|
+| 단위 | 135/135 pass |
+| G1 | 7/7 pass |
+| G2 자동 조건 | 10/10 pass (G2 수동 조건 2는 이번 실행에 포함되지 않음) |
+| G3 | 5/5 pass (Notion Applications는 미설정 fallback) |
+| G4 | 실행 4/4 pass, skip 5: 실기기 조건 1·4·5 및 unit에서 별도 실행한 참조 3·7 |
+| G5A 구조 | 10/10 pass |
+| G5A 실제 DB 별도 재실행 | 10/10 pass, skip/cancel 0 |
+| typecheck / lint / 최종 production build | 모두 종료 코드 0 |
+
+이번 재실행의 기록된 AI 비용은 **$0.1348** (4회, DB 반올림 값)이다. 이전 $0.1250 실행과 다른 회차다. 새 iCloud G1 테스트 일정 1건은 원격 삭제 후 부재를 검증했다.
+
+이 자동 회귀 성공은 실기기·hosted migration·배포 환경 E2E 통과를 의미하지 않는다. 앞 절의 G2/G4 실패는 승인 전 실행 이력이며 이번 수정/재검증으로 해소됐다.
 
 ## 다음 운영 게이트
 
 - [x] 사용자 승인된 외부 설정으로 G1~G4 재검증 및 G5A 회귀 재실행
-- [ ] 기존 G2 화면 기대값, G4 본문 중복 소비와 캐시/예산 기대값을 해당 작업에서 별도 정리
+- [x] 사용자 승인 범위에서 G2/G4 검증 코드 수정 및 전체 자동 회귀 성공
 - [x] 내장 native CLI에서 db reset 성공 확인 (Phase 5A-only / 0014 포함 각각)
-- [ ] 열린 Learn PR의 0014 merge/renumber 결정 (다른 PR은 변경하지 않음)
+- [x] 공통 0014 원본을 현재 PR의 선행 migration으로 포함 (다른 Learn PR/기능 코드는 변경하지 않음)
 - [ ] hosted migration 적용 및 배포 (이번 작업에서는 미실행)
 - [ ] 실제 iPhone/Mac PWA 왕복과 push 확인
 - [ ] 위 결과 확인 후 cron 연결, G5A 최종 판정

@@ -48,5 +48,5 @@
 - ~~**G4 조건 8**~~ — 2026-08-20 운영자 면제. 사유·잔여 리스크는 `docs/G4-REPORT.md`. 첫 실제 예산 소진 달에 `job_runs`의 402 기록으로 자연 검증.
 
 - **Phase 5A 운영 게이트** — 로컬 DB/브라우저 흐름은 검증했다. 전체 회귀·CLI reset·hosted 반영·iPhone 실기기 결과와 남은 제한은 `docs/G5A-REPORT.md` 참고. G5A 최종 통과 전에는 5B를 시작하지 않는다.
-- **Phase 5A cron** — 열린 Learn PR의 0014 번호 결정, hosted 0015~0017 적용, 실기기 E2E 후에 세 JARVIS job의 schedule을 연결한다.
+- **Phase 5A cron** — 공통 0014 포함과 자동 회귀는 완료했다. hosted 0014~0017 적용, 실기기 E2E 후에 세 JARVIS job의 schedule을 연결한다.
 - **JARVIS 추가 executor / AI** — CalDAV·메일·GitHub 등은 policy 분류만 존재한다. 실제 executor는 CREATE_TASK만 지원하며 AI triage·AI brief·Phase 5B 구현은 별도 작업이다.

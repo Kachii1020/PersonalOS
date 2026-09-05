@@ -13,6 +13,7 @@ const env = {
   NEXT_PUBLIC_SUPABASE_ANON_KEY: values.ANON_KEY,
   SUPABASE_SERVICE_ROLE_KEY: values.SERVICE_ROLE_KEY,
   ALLOWED_EMAIL: "phase5a@example.test",
+  GATE_ISOLATED_DB: "1",
   CRON_SECRET: "g5a-local-test-only",
   AI_MONTHLY_BUDGET_USD: "10",
   G1_APP_URL: "http://localhost:3055",
