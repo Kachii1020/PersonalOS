@@ -1,0 +1,24 @@
+import { config } from "dotenv";
+import { createClient } from "@supabase/supabase-js";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import assert from "node:assert/strict";
+config({ path: ".env.local", quiet: true });
+assert.equal(process.env.NEXT_PUBLIC_SUPABASE_URL, "http://127.0.0.1:54621");
+const db = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+const browser = JSON.parse(readFileSync("test-results/g5a-browser.log", "utf8").split("### Result\n")[1].split("\n")[0]);
+async function get(query) { const r = await query; if (r.error) throw r.error; return r.data; }
+const inbox = await get(db.from("inbox_items").select("id,status").eq("raw_text", `할 일: ${browser.title}`));
+assert.equal(inbox.length, 1);
+const events = await get(db.from("system_events").select("id,status,dedupe_key").eq("source_id", inbox[0].id));
+assert.equal(events.length, 1);
+const runs = await get(db.from("agent_runs").select("id,status,current_step").eq("trigger_event_id", events[0].id));
+assert.equal(runs.length, 1);
+const approvals = await get(db.from("approval_requests").select("id,status").eq("agent_run_id", runs[0].id));
+assert.equal(approvals.length, 1);
+const tasks = await get(db.from("tasks").select("id,title,approval_request_id").eq("approval_request_id", approvals[0].id));
+assert.equal(tasks.length, 1);
+const audit = await get(db.from("action_audit_logs").select("event,actor,created_at").eq("approval_request_id", approvals[0].id).order("id"));
+assert.deepEqual(audit.map(r => r.event), ["requested", "approved", "executing", "executed", "verified"]);
+mkdirSync("docs/g5a-evidence", { recursive: true });
+writeFileSync("docs/g5a-evidence/local-e2e.json", JSON.stringify({ verifiedAt: new Date().toISOString(), deviceScope: "Two Chromium browser contexts, not physical iPhone/Mac PWA", inbox, events, runs, approvals, tasks, audit, browser }, null, 2) + "\n");
+console.log(`Verified one inbox/event/run/approval/task and exact audit sequence: ${tasks[0].id}`);

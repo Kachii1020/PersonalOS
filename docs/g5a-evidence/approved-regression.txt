@@ -1,0 +1,250 @@
+> personalos@1.0.0 test
+> npm run test:unit && npm run test:g1 && npm run test:g2 && npm run test:g3 && npm run test:g4 && npm run test:g5a
+> personalos@1.0.0 test:unit
+> node --import tsx --test tests/*.test.ts
+✔ 핵심 20개는 유일하고 레지스트리에 있다 (0.79ms)
+✔ 모듈 핵심 수는 LEARN-CORE 표와 같고 순서는 CORE_LAB_IDS 부분열 (0.812375ms)
+✔ 개념 「실습으로」는 핵심을 우선한다 (0.179417ms)
+✔ 핵심이 있는 grid 개념의 practiceLabId는 핵심이다 (0.351208ms)
+✔ 모듈 10개, 퀴즈 50개 (2.839ms)
+✔ 모듈별 개념 수는 기존 불릿과 같다 (0.13625ms)
+✔ 기존 퀴즈는 각 모듈 앞에 그대로 있다 (0.105542ms)
+✔ AND/OR·AVERAGEIF·XLOOKUP은 grid로 뒤집혔다 (0.107209ms)
+✔ 개념·퀴즈 id는 유일하다 (0.0645ms)
+✔ 단축키·피벗·PQ·순환참조는 excel-only이고 lab이 없다 (0.063167ms)
+✔ excel-only 개념은 labIds가 비어 있다 (0.062042ms)
+✔ grid 개념은 lab≥1, quiz≥1 (0.267667ms)
+✔ labId는 기존 실습 id이고 quizId는 같은 모듈에 있다 (0.315583ms)
+✔ insertRangeRef — =SUM( 뒤에 범위 (1.037ms)
+✔ insertRangeRef — 닫는 괄호가 있으면 범위만 교체 (0.147791ms)
+✔ insertRangeRef — 연산자 뒤 마지막 참조 교체 (0.044292ms)
+✔ insertRangeRef — = 만 있으면 단일 셀 (0.032542ms)
+✔ splitFormulaRef — 함수명만 있으면 통째로 prefix (0.825875ms)
+✔ rangeAddress — 방향과 무관하게 좌상:우하 (0.197083ms)
+✔ lockToAxis — 더 긴 축으로 고정 (0.108917ms)
+✔ cellsBetween — 축 구간 (0.117709ms)
+✔ isFormulaPointing — = 로 시작하고 수식바에 포커스일 때만 (0.110583ms)
+✔ fill — SUM을 B5에서 C5:D5로 끌면 상대참조 (31.517666ms)
+✔ fill — $C$1 절대참조는 유지 (6.935708ms)
+✔ catalog — 모든 이름이 HyperFormula enGB에 있다 (1.158875ms)
+✔ formulaFunctionQuery — =su 는 입력 중, =SUM( 는 목록 숨김 (0.379208ms)
+✔ suggestFunctions — su 접두면 SUM 계열 (7.707209ms)
+✔ completeFunction — 토큰을 NAME( 로 교체 (0.163ms)
+✔ innermostFunction — 열린 괄호의 안쪽 함수 (0.283333ms)
+✔ 자동완성 목록 ⊇ 실습이 요구하는 함수, AVERAGEIFS 없음 (0.290375ms)
+✔ GPA — 과목 3개, 수기 계산과 대조 (1.256125ms)
+✔ GPA — F는 0점으로 분모에 들어간다 (0.106875ms)
+✔ GPA — 성적 없는 과목은 분모에서 빠진다 (0.081333ms)
+✔ GPA — 성적이 하나도 없으면 null (0.00과 구분한다) (0.085375ms)
+✔ GPA — 소수 학점 (0.096542ms)
+✔ policy fails closed and separates internal, approval, denied actions (1.142459ms)
+✔ explicit task capture prepares a low-risk CREATE_TASK approval (0.573042ms)
+✔ URL is monitored instead of being promoted to an immediate action (0.247041ms)
+✔ learning capture goes to learn queue (0.228792ms)
+✔ CREATE_TASK payload validation rejects malformed or dangerous values (2.843708ms)
+✔ priority selection excludes deferred work and caps output at three (0.203916ms)
+✔ deterministic brief surfaces no more than three actions and approvals (12.618875ms)
+✔ 뉴스 정리 cutoff — 30일 전 (4.289292ms)
+✔ HTTP 410 구독은 삭제하고 잡은 계속된다 (4.87775ms)
+✔ 일반 발송 실패는 행을 지우지 않는다 (0.878208ms)
+✔ 주간 반복 — 1주일 범위에는 인스턴스가 1~2건만 생긴다 (5.463542ms)
+✔ 주간 반복 + EXDATE — 제외 날짜는 결과에 없다 (1.355916ms)
+✔ UNTIL — 종료일 이후 인스턴스는 없다 (0.51125ms)
+✔ rrule 없는 단건은 겹칠 때만 1건 (0.071875ms)
+✔ 잘못된 rrule은 마스터가 범위 안이면 그것만 돌려준다 (1.120583ms)
+✔ registry — 72개 실습, 피벗·PQ lab은 늘리지 않음 (0.845833ms)
+✔ SUM — =SUM(B2:B4) → 4300 (21.378459ms)
+✔ IF — =IF(B2>=70,"합격","불합격") → 합격 (5.727875ms)
+✔ PMT — ≈ 2684108 (4.032584ms)
+✔ 값만 입력하면 acceptFormula 실패 (3.932083ms)
+✔ 정답 수식 통과 — nav-cell-ref (4.679333ms)
+✔ 정답 수식 통과 — basic-fn-sum (3.640625ms)
+✔ 정답 수식 통과 — basic-fn-average (4.501958ms)
+✔ 정답 수식 통과 — basic-fn-count (3.978875ms)
+✔ 정답 수식 통과 — basic-fn-large (4.885542ms)
+✔ 정답 수식 통과 — basic-fn-mixed-ref (3.705542ms)
+✔ 정답 수식 통과 — logic-if (3.277042ms)
+✔ 정답 수식 통과 — logic-nested-if (3.829917ms)
+✔ 정답 수식 통과 — logic-iferror (3.090375ms)
+✔ 정답 수식 통과 — logic-sumif (4.224708ms)
+✔ 정답 수식 통과 — logic-countifs (3.920375ms)
+✔ 정답 수식 통과 — lookup-vlookup (3.418334ms)
+✔ 정답 수식 통과 — lookup-match (2.992375ms)
+✔ 정답 수식 통과 — lookup-index-match (3.226125ms)
+✔ 정답 수식 통과 — lookup-2d (3.600042ms)
+✔ 정답 수식 통과 — pivot-aggregate (3.11675ms)
+✔ 정답 수식 통과 — clean-trim (3.468917ms)
+✔ 정답 수식 통과 — clean-extract (3.733208ms)
+✔ 정답 수식 통과 — clean-substitute (4.372666ms)
+✔ 정답 수식 통과 — fin-npv (3.05675ms)
+✔ 정답 수식 통과 — fin-irr (3.138291ms)
+✔ 정답 수식 통과 — fin-pmt (3.558417ms)
+✔ 정답 수식 통과 — fin-pvfv (3.456416ms)
+✔ 정답 수식 통과 — fin-rate (3.447625ms)
+✔ 정답 수식 통과 — model-assumptions (3.320042ms)
+✔ 정답 수식 통과 — model-balance-check (4.342541ms)
+✔ 정답 수식 통과 — stmt-net-income (3.12475ms)
+✔ 정답 수식 통과 — stmt-cf-addback (2.695333ms)
+✔ 정답 수식 통과 — stmt-working-cap (2.939959ms)
+✔ 정답 수식 통과 — dcf-fcf (2.75425ms)
+✔ 정답 수식 통과 — dcf-discount (2.837583ms)
+✔ 정답 수식 통과 — dcf-ev-equity (3.005542ms)
+✔ 정답 수식 통과 — basic-fn-min (4.803834ms)
+✔ 정답 수식 통과 — basic-fn-max (2.675958ms)
+✔ 정답 수식 통과 — basic-fn-small (3.127208ms)
+✔ 정답 수식 통과 — basic-fn-small-k3 (2.827042ms)
+✔ 정답 수식 통과 — basic-fn-countblank (2.985125ms)
+✔ 정답 수식 통과 — basic-fn-countblank-mixed (2.903584ms)
+✔ 정답 수식 통과 — logic-and (3.585542ms)
+✔ 정답 수식 통과 — logic-or (4.459542ms)
+✔ 정답 수식 통과 — logic-and-or (2.876084ms)
+✔ 정답 수식 통과 — logic-not (2.904792ms)
+✔ 정답 수식 통과 — logic-and-3 (2.7285ms)
+✔ 정답 수식 통과 — logic-or-3 (2.654625ms)
+✔ 정답 수식 통과 — logic-ifs (2.8395ms)
+✔ 정답 수식 통과 — logic-ifs-flag (2.7055ms)
+✔ 정답 수식 통과 — logic-ifs-pass (3.247292ms)
+✔ 정답 수식 통과 — logic-ifna (3.72175ms)
+✔ 정답 수식 통과 — logic-ifna-hit (3.327791ms)
+✔ 정답 수식 통과 — logic-sumifs (3.381209ms)
+✔ 정답 수식 통과 — logic-sumifs-3 (3.7735ms)
+✔ 정답 수식 통과 — logic-sumifs-gte (3.31225ms)
+✔ 정답 수식 통과 — logic-averageif (3.342375ms)
+✔ 정답 수식 통과 — logic-averageif-gte (3.2345ms)
+✔ 정답 수식 통과 — logic-sumproduct (7.727583ms)
+✔ 정답 수식 통과 — logic-sumproduct-qty (3.02975ms)
+✔ 정답 수식 통과 — logic-countif (2.86325ms)
+✔ 정답 수식 통과 — lookup-xlookup (2.990208ms)
+✔ 정답 수식 통과 — lookup-xlookup-left (2.831209ms)
+✔ 정답 수식 통과 — lookup-xlookup-missing (2.618375ms)
+✔ 정답 수식 통과 — fin-xnpv (2.828125ms)
+✔ 정답 수식 통과 — fin-xnpv-uneven (3.023709ms)
+✔ 정답 수식 통과 — fin-xnpv-12 (2.707458ms)
+✔ 정답 수식 통과 — fin-xirr (2.873917ms)
+✔ 정답 수식 통과 — fin-xirr-uneven (2.756625ms)
+✔ 정답 수식 통과 — fin-ipmt (2.719334ms)
+✔ 정답 수식 통과 — fin-ipmt-12 (2.578375ms)
+✔ 정답 수식 통과 — fin-ipmt-last (2.904541ms)
+✔ 정답 수식 통과 — fin-ppmt (2.859166ms)
+✔ 정답 수식 통과 — fin-ppmt-12 (2.917583ms)
+✔ 정답 수식 통과 — fin-nper (3.568083ms)
+✔ 정답 수식 통과 — fin-nper-pmt (4.495625ms)
+✔ extractUid — 정상 ICS에서 UID를 읽는다 (0.996167ms)
+✔ parseEvent — EXDATE를 ISO로 보관한다 (2.555583ms)
+✔ extractUid — 파싱이 실패해도 UID 줄은 살린다 (0.13125ms)
+✔ extractUid — 접힌 UID 줄을 펼친다 (0.074042ms)
+✔ extractUid — UID가 없으면 null (0.052709ms)
+✔ 정답률 — 3/5 = 60.0, 2/3 = 66.7, 0회는 null (1.500083ms)
+✔ 주간 집계 — 퀴즈·태스크·커밋이 수기 계산과 일치 (7.5475ms)
+✔ 도메인별 정렬은 이름순 (0.687959ms)
+ℹ tests 135
+ℹ suites 0
+ℹ pass 135
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 741.668
+> personalos@1.0.0 test:g1
+> node --import tsx --conditions=react-server --test tests/gates/g1.test.ts
+▶ G1 — Phase 1 게이트
+  ✔ 1. iCloud 캘린더 목록이 저장되고 앱 전용 캘린더가 is_writable=true로 정확히 1개 (1833.026834ms)
+  ✔ 2. 연속 실행 시 두 번째는 ctag 비교로 이벤트를 0건 가져온다 (2817.03175ms)
+  ✔ 3. 앱에서 만든 이벤트가 iCloud에 PUT되고 재동기화 후 같은 uid로 존재 (3832.448709ms)
+  ✔ 4. 브리핑 잡 실행 시 오늘 날짜 행이 ready이고 섹션이 5건 이상 (39.928292ms)
+  ✔ 5. AI 호출 1회당 ai_usage에 정확히 1행 (3.60825ms)
+  ✔ 6. 이번 달 누적 비용이 예산 이상이면 다음 호출이 차단된다 (262.352125ms)
+  ✔ 7. iCloud 동기화가 실패한 상태에서도 대시보드가 500 없이 렌더되고 실패를 알린다 (1026.533416ms)
+✔ G1 — Phase 1 게이트 (35608.703292ms)
+ℹ tests 7
+ℹ suites 1
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 35713.398916
+> personalos@1.0.0 test:g2
+> node --import tsx --conditions=react-server --test tests/gates/g2.test.ts
+▶ G2 — Phase 2 게이트
+  ✔ 1. 퀴즈 잡이 5문제를 생성하고 도메인이 2개 이상 섞인다 (0.398ms)
+   증거: /quiz → 학습 완료 클릭 → 첫 문항 헤더에 복습 배지, 복습 1문제; 답안 미제출
+  ✔ 3. 오늘 날짜의 복습 문항이 오늘의 퀴즈에 우선 편입된다 (2582.103834ms)
+  ✔ 4. PDF와 PPTX를 업로드하면 extracted_text가 비어있지 않게 채워진다 (107.1185ms)
+  ✔ 5. 요약 버튼을 누르기 전에는 ai_usage에 행이 추가되지 않는다 (4.396958ms)
+  ✔ 6. MyWaseda ICS를 넣으면 source='waseda' 행이 생기고, 같은 내용 재실행 시 파싱을 건너뛴다 (36.278791ms)
+  ✔ 7. kind='ics'인 캘린더에 쓰기를 시도하면 DB check 제약으로 막힌다 (6.912959ms)
+  ✔ 8. 과목 코드가 매칭된 ICS 이벤트는 course_id가 채워지고, 실패 건수가 job_runs.meta에 남는다 (19.800375ms)
+  ✔ 9. 과목 상세 페이지에서 해당 과목의 다음 수업 일정이 표시된다 (71.281625ms)
+  ✔ 10. 과목 3개에 학점을 입력하면 GPA가 4.0 스케일로 정확히 계산된다 (73.559042ms)
+  ✔ 11. Notion 위키 항목이 앱에 표시되고, 앱에서 Notion을 수정하지 않는다 (812.294792ms)
+✔ G2 — Phase 2 게이트 (29760.549083ms)
+ℹ tests 10
+ℹ suites 1
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 30231.550917
+> personalos@1.0.0 test:g3
+> node --import tsx --conditions=react-server --test tests/gates/g3.test.ts
+▶ G3 — Phase 3 게이트
+  ✔ 1. 티커 20개의 시세를 1회 잡으로 가져오고 price_snapshots에 20행이 들어간다 (1922.497791ms)
+  ✔ 2. Yahoo 호출을 강제로 실패시켜도 위젯이 마지막 스냅샷과 갱신 실패 표시를 보여준다 (1292.399625ms)
+  ✔ 3. KRW/USD 병기가 fx_rates의 당일 환율로 계산된다 (373.382125ms)
+  ✔ 4. GitHub 공개 레포 전체가 수집되고 90일 커밋 잔디가 렌더된다 (868.167417ms)
+  ✔ 5. 지원 파이프라인이 Notion에서 읽히고 단계별로 그룹핑된다 (238.147917ms)
+✔ G3 — Phase 3 게이트 (4696.97825ms)
+ℹ tests 5
+ℹ suites 1
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4803.838
+> personalos@1.0.0 test:g4
+> node --import tsx --conditions=react-server --test tests/gates/g4.test.ts
+▶ G4 — Phase 4 게이트
+  ﹣ 1. 푸시 구독 왕복 (수동 — 실기기) (1.008666ms) # 실기기 /settings 구독 → DB 저장 → 테스트 알림 수신은 별도 확인
+  ✔ 2. 브리핑 ready 후 푸시 실패가 잡을 실패시키지 않는다 (26531.474375ms)
+  ﹣ 3. HTTP 410 구독 삭제는 tests/push.test.ts (0.440042ms) # npm run test:unit에서 별도 실행 — 이 항목만으로 통과 판정하지 않음
+  ﹣ 4. 오프라인 폴백 렌더 (수동) (0.12325ms) # 실제 오프라인 기기 검증은 별도 확인
+  ﹣ 5. 온라인 network-first (수동) (0.081625ms) # 실기기의 새로고침/서버 변경 반영은 별도 확인
+   증거: 새 주간 리뷰 ready 1행, weekly_review ai_usage 정확히 +1행; 원래 리뷰 복원
+  ✔ 6. 주간 리뷰를 새로 생성하면 ready 1행 + ai_usage weekly_review 1행 (4356.182583ms)
+  ﹣ 7. 집계 숫자는 tests/weekly-stats.test.ts 수기 대조 (0.224875ms) # npm run test:unit에서 별도 실행 — 이 항목만으로 통과 판정하지 않음
+   증거: cache 없는 새 생성 HTTP 402, ready 0행, AI 사용량 변화 없음; budget probe 제거
+  ✔ 8. 예산 소진 시 새 생성은 402, ready/AI 사용량을 추가하지 않는다 (48.996916ms)
+   증거: ready 캐시 HTTP 200/skipped, 리뷰·사용량 변화 없음 (실제 AI 생성과 구분)
+  ✔ 회귀: 이미 준비된 리뷰는 예산 소진 중에도 AI 호출 없이 캐시를 반환한다 (38.917709ms)
+✔ G4 — Phase 4 게이트 (30979.687792ms)
+ℹ tests 9
+ℹ suites 1
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 5
+ℹ todo 0
+ℹ duration_ms 31495.797834
+> personalos@1.0.0 test:g5a
+> node --import tsx --conditions=react-server --test tests/gates/g5a.test.ts
+✔ G5A-1: Phase 5 spec and constitution exist (0.947791ms)
+✔ G5A-2: migration has queue, run, approval, audit, brief and task extension (0.513083ms)
+✔ G5A-3: claims are atomic and expired leases can be recovered (0.134792ms)
+✔ G5A-4: policy fails closed (0.052084ms)
+✔ G5A-5: approval payload is immutable to the authenticated client (0.15975ms)
+✔ G5A-6: approved task execution is idempotent (0.460416ms)
+✔ G5A-7: command brief exposes at most three actions without AI (16.640125ms)
+✔ G5A-8: Today, Inbox and Approvals routes are present (0.249875ms)
+✔ G5A-9: external state change remains behind approval (0.356459ms)
+✔ G5A-10: job routes use cron auth and keep failures visible (0.41175ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 115.554417

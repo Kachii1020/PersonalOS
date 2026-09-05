@@ -1,0 +1,9 @@
+claim_approved_action_by_id|f|f|t
+claim_next_agent_run|f|f|t
+claim_next_approved_action|f|f|t
+claim_next_system_event|f|f|t
+complete_approval_execution|f|f|t
+decide_approval|f|t|f
+execute_approved_task|f|f|t
+fail_approval_execution|f|f|t
+prepare_jarvis_approval|f|f|t

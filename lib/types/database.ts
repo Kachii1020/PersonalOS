@@ -34,6 +34,100 @@ export type Database = {
   }
   public: {
     Tables: {
+      action_audit_logs: {
+        Row: {
+          actor: string
+          approval_request_id: string | null
+          created_at: string
+          detail: Json
+          event: string
+          id: number
+        }
+        Insert: {
+          actor: string
+          approval_request_id?: string | null
+          created_at?: string
+          detail?: Json
+          event: string
+          id?: number
+        }
+        Update: {
+          actor?: string
+          approval_request_id?: string | null
+          created_at?: string
+          detail?: Json
+          event?: string
+          id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "action_audit_logs_approval_request_id_fkey"
+            columns: ["approval_request_id"]
+            isOneToOne: false
+            referencedRelation: "approval_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_runs: {
+        Row: {
+          attempts: number
+          current_step: string
+          error: string | null
+          finished_at: string | null
+          id: string
+          locked_by: string | null
+          locked_until: string | null
+          output: Json | null
+          run_type: string
+          started_at: string
+          state: Json
+          status: string
+          trigger_event_id: string
+          updated_at: string
+        }
+        Insert: {
+          attempts?: number
+          current_step?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          locked_by?: string | null
+          locked_until?: string | null
+          output?: Json | null
+          run_type: string
+          started_at?: string
+          state?: Json
+          status?: string
+          trigger_event_id: string
+          updated_at?: string
+        }
+        Update: {
+          attempts?: number
+          current_step?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          locked_by?: string | null
+          locked_until?: string | null
+          output?: Json | null
+          run_type?: string
+          started_at?: string
+          state?: Json
+          status?: string
+          trigger_event_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_runs_trigger_event_id_fkey"
+            columns: ["trigger_event_id"]
+            isOneToOne: true
+            referencedRelation: "system_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_usage: {
         Row: {
           cost_usd: number
@@ -78,6 +172,77 @@ export type Database = {
           value?: string
         }
         Relationships: []
+      }
+      approval_requests: {
+        Row: {
+          action_type: string
+          agent_run_id: string | null
+          decided_at: string | null
+          decision_note: string | null
+          error: string | null
+          executed_at: string | null
+          expires_at: string | null
+          explanation: string
+          id: string
+          idempotency_key: string
+          locked_by: string | null
+          locked_until: string | null
+          payload: Json
+          requested_at: string
+          result: Json | null
+          risk_level: string
+          status: string
+          title: string
+        }
+        Insert: {
+          action_type: string
+          agent_run_id?: string | null
+          decided_at?: string | null
+          decision_note?: string | null
+          error?: string | null
+          executed_at?: string | null
+          expires_at?: string | null
+          explanation: string
+          id?: string
+          idempotency_key: string
+          locked_by?: string | null
+          locked_until?: string | null
+          payload: Json
+          requested_at?: string
+          result?: Json | null
+          risk_level?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          action_type?: string
+          agent_run_id?: string | null
+          decided_at?: string | null
+          decision_note?: string | null
+          error?: string | null
+          executed_at?: string | null
+          expires_at?: string | null
+          explanation?: string
+          id?: string
+          idempotency_key?: string
+          locked_by?: string | null
+          locked_until?: string | null
+          payload?: Json
+          requested_at?: string
+          result?: Json | null
+          risk_level?: string
+          status?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approval_requests_agent_run_id_fkey"
+            columns: ["agent_run_id"]
+            isOneToOne: false
+            referencedRelation: "agent_runs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       briefing_sections: {
         Row: {
@@ -186,6 +351,42 @@ export type Database = {
           kind?: string
           last_synced_at?: string | null
           source_url?: string
+        }
+        Relationships: []
+      }
+      command_briefs: {
+        Row: {
+          brief_date: string
+          generated_at: string
+          headline: string
+          id: string
+          postponed_items: Json
+          prepared_items: Json
+          source_snapshot: Json
+          top_actions: Json
+          warnings: Json
+        }
+        Insert: {
+          brief_date: string
+          generated_at?: string
+          headline: string
+          id?: string
+          postponed_items?: Json
+          prepared_items?: Json
+          source_snapshot?: Json
+          top_actions?: Json
+          warnings?: Json
+        }
+        Update: {
+          brief_date?: string
+          generated_at?: string
+          headline?: string
+          id?: string
+          postponed_items?: Json
+          prepared_items?: Json
+          source_snapshot?: Json
+          top_actions?: Json
+          warnings?: Json
         }
         Relationships: []
       }
@@ -415,6 +616,45 @@ export type Database = {
           language?: string | null
           pushed_at?: string | null
           stars?: number
+        }
+        Relationships: []
+      }
+      inbox_items: {
+        Row: {
+          attachment_path: string | null
+          classification_reason: string | null
+          created_at: string
+          id: string
+          kind: string
+          processed_at: string | null
+          raw_text: string | null
+          source_url: string | null
+          status: string
+          summary: string | null
+        }
+        Insert: {
+          attachment_path?: string | null
+          classification_reason?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          processed_at?: string | null
+          raw_text?: string | null
+          source_url?: string | null
+          status?: string
+          summary?: string | null
+        }
+        Update: {
+          attachment_path?: string | null
+          classification_reason?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          processed_at?: string | null
+          raw_text?: string | null
+          source_url?: string | null
+          status?: string
+          summary?: string | null
         }
         Relationships: []
       }
@@ -945,41 +1185,126 @@ export type Database = {
         }
         Relationships: []
       }
+      system_events: {
+        Row: {
+          attempts: number
+          available_at: string
+          created_at: string
+          dedupe_key: string
+          error: string | null
+          event_type: string
+          id: string
+          locked_by: string | null
+          locked_until: string | null
+          payload: Json
+          processed_at: string | null
+          source_id: string | null
+          source_type: string
+          status: string
+        }
+        Insert: {
+          attempts?: number
+          available_at?: string
+          created_at?: string
+          dedupe_key: string
+          error?: string | null
+          event_type: string
+          id?: string
+          locked_by?: string | null
+          locked_until?: string | null
+          payload?: Json
+          processed_at?: string | null
+          source_id?: string | null
+          source_type: string
+          status?: string
+        }
+        Update: {
+          attempts?: number
+          available_at?: string
+          created_at?: string
+          dedupe_key?: string
+          error?: string | null
+          event_type?: string
+          id?: string
+          locked_by?: string | null
+          locked_until?: string | null
+          payload?: Json
+          processed_at?: string | null
+          source_id?: string | null
+          source_type?: string
+          status?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
+          approval_request_id: string | null
           category: string | null
           completed_at: string | null
           course_id: string | null
           created_at: string
+          defer_until: string | null
           due_at: string | null
+          estimated_minutes: number | null
+          generated_by: string | null
           id: string
+          last_reviewed_at: string | null
           notes: string | null
+          priority: number | null
+          priority_reason: string | null
+          source_id: string | null
+          source_type: string | null
           status: string
           title: string
         }
         Insert: {
+          approval_request_id?: string | null
           category?: string | null
           completed_at?: string | null
           course_id?: string | null
           created_at?: string
+          defer_until?: string | null
           due_at?: string | null
+          estimated_minutes?: number | null
+          generated_by?: string | null
           id?: string
+          last_reviewed_at?: string | null
           notes?: string | null
+          priority?: number | null
+          priority_reason?: string | null
+          source_id?: string | null
+          source_type?: string | null
           status?: string
           title: string
         }
         Update: {
+          approval_request_id?: string | null
           category?: string | null
           completed_at?: string | null
           course_id?: string | null
           created_at?: string
+          defer_until?: string | null
           due_at?: string | null
+          estimated_minutes?: number | null
+          generated_by?: string | null
           id?: string
+          last_reviewed_at?: string | null
           notes?: string | null
+          priority?: number | null
+          priority_reason?: string | null
+          source_id?: string | null
+          source_type?: string | null
           status?: string
           title?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "tasks_approval_request_id_fkey"
+            columns: ["approval_request_id"]
+            isOneToOne: false
+            referencedRelation: "approval_requests"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "tasks_course_id_fkey"
             columns: ["course_id"]
@@ -1061,12 +1386,224 @@ export type Database = {
         }
         Relationships: []
       }
+      workbook_submissions: {
+        Row: {
+          id: string
+          results: Json
+          status: string
+          storage_path: string
+          submitted_at: string
+          task_id: string
+        }
+        Insert: {
+          id?: string
+          results?: Json
+          status: string
+          storage_path: string
+          submitted_at?: string
+          task_id: string
+        }
+        Update: {
+          id?: string
+          results?: Json
+          status?: string
+          storage_path?: string
+          submitted_at?: string
+          task_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      claim_approved_action_by_id: {
+        Args: {
+          p_approval_id: string
+          p_lease_seconds?: number
+          p_worker_id: string
+        }
+        Returns: {
+          action_type: string
+          agent_run_id: string | null
+          decided_at: string | null
+          decision_note: string | null
+          error: string | null
+          executed_at: string | null
+          expires_at: string | null
+          explanation: string
+          id: string
+          idempotency_key: string
+          locked_by: string | null
+          locked_until: string | null
+          payload: Json
+          requested_at: string
+          result: Json | null
+          risk_level: string
+          status: string
+          title: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "approval_requests"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      claim_next_agent_run: {
+        Args: { p_lease_seconds?: number; p_worker_id: string }
+        Returns: {
+          attempts: number
+          current_step: string
+          error: string | null
+          finished_at: string | null
+          id: string
+          locked_by: string | null
+          locked_until: string | null
+          output: Json | null
+          run_type: string
+          started_at: string
+          state: Json
+          status: string
+          trigger_event_id: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "agent_runs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      claim_next_approved_action: {
+        Args: { p_lease_seconds?: number; p_worker_id: string }
+        Returns: {
+          action_type: string
+          agent_run_id: string | null
+          decided_at: string | null
+          decision_note: string | null
+          error: string | null
+          executed_at: string | null
+          expires_at: string | null
+          explanation: string
+          id: string
+          idempotency_key: string
+          locked_by: string | null
+          locked_until: string | null
+          payload: Json
+          requested_at: string
+          result: Json | null
+          risk_level: string
+          status: string
+          title: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "approval_requests"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      claim_next_system_event: {
+        Args: { p_lease_seconds?: number; p_worker_id: string }
+        Returns: {
+          attempts: number
+          available_at: string
+          created_at: string
+          dedupe_key: string
+          error: string | null
+          event_type: string
+          id: string
+          locked_by: string | null
+          locked_until: string | null
+          payload: Json
+          processed_at: string | null
+          source_id: string | null
+          source_type: string
+          status: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "system_events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      complete_approval_execution: {
+        Args: { p_approval_id: string; p_result: Json; p_worker_id: string }
+        Returns: undefined
+      }
+      decide_approval: {
+        Args: { p_approval_id: string; p_decision: string; p_note?: string }
+        Returns: {
+          action_type: string
+          agent_run_id: string | null
+          decided_at: string | null
+          decision_note: string | null
+          error: string | null
+          executed_at: string | null
+          expires_at: string | null
+          explanation: string
+          id: string
+          idempotency_key: string
+          locked_by: string | null
+          locked_until: string | null
+          payload: Json
+          requested_at: string
+          result: Json | null
+          risk_level: string
+          status: string
+          title: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "approval_requests"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      execute_approved_task: {
+        Args: { p_approval_id: string; p_worker_id: string }
+        Returns: {
+          id: string
+          title: string
+        }[]
+      }
+      fail_approval_execution: {
+        Args: { p_approval_id: string; p_error: string; p_worker_id: string }
+        Returns: undefined
+      }
       is_allowed_user: { Args: never; Returns: boolean }
+      prepare_jarvis_approval: {
+        Args: { p_proposal: Json; p_run_id: string; p_worker_id: string }
+        Returns: {
+          action_type: string
+          agent_run_id: string | null
+          decided_at: string | null
+          decision_note: string | null
+          error: string | null
+          executed_at: string | null
+          expires_at: string | null
+          explanation: string
+          id: string
+          idempotency_key: string
+          locked_by: string | null
+          locked_until: string | null
+          payload: Json
+          requested_at: string
+          result: Json | null
+          risk_level: string
+          status: string
+          title: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "approval_requests"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
     }
     Enums: {
       [_ in never]: never
@@ -1202,4 +1739,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

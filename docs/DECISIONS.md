@@ -424,3 +424,21 @@ AGENTS.md에 인증 담당 에이전트가 없어서 ui-shell 범위로 넣었�
 - **결정**: `listApplications()`는 환경변수 없으면 에러 대신 `[]`를 돌려준다. 위키(`listWikiEntries`)는 에러를 던진다.
 - **이유**: 위키는 Phase 2 필수 기능이지만, 지원 파이프라인은 아직 테이블을 안 만든 사용자도 있다. 에러가 나면 `/apply` 페이지가 500이 된다.
 - **버린 대안**: 에러를 던지고 페이지에서 catch → 페이지마다 try/catch가 늘어난다.
+
+## 2026-09-05 — Phase 5A 저장형 승인·실행 루프
+
+- **결정**: 기존 PWA에 Inbox / Approvals / Today를 추가하고, deterministic 분류와 저장형 event/run 상태 머신으로 CREATE_TASK만 실행한다.
+- **이유**: 요청 중단·동시 worker·중복 승인에서도 같은 승인으로 태스크를 한 건만 생성하고 감사 이력을 검증할 수 있다.
+- **버린 대안**: 자유형 multi-agent, 새 모바일 앱, AI 판단과 외부 행동을 한 요청에서 실행하는 구조.
+
+## 2026-09-05 — 태스크 실행과 승인 준비를 DB 트랜잭션으로 보강
+
+- **결정**: 번들 0015는 유지하고 0016·0017을 추가했다. 실행 직전 승인·만료·lease를 검사하고 태스크/감사/run 완료를 원자적으로 기록한다. approval_request_id 연결은 executor만 변경한다.
+- **이유**: 부분 unique index와 PostgREST upsert 불일치, 완료 기록 실패 시 고아 태스크, 클라이언트의 승인 ID 선점 문제를 방지한다. 실제 SQL·동시성·브라우저 검증은 G5A-REPORT.md에 기록했다.
+- **버린 대안**: 기존 migration 수정, 태스크 생성과 실행 완료를 별도 REST 요청으로 처리, 임시 schema overlay 유지.
+
+## 2026-09-06 — 공통 migration과 검증 harness의 승인된 통합
+
+- **결정**: 사용자 승인으로 두 Learn PR과 동일한 0014 파일만 Phase 5A의 선행 migration으로 포함하고, G2/G4 검증 코드를 수정한다. Learn/Quiz 기능 코드는 유지한다.
+- **이유**: 운영 migration 이력을 연속적으로 반영하고, 실제 학습→퀴즈 전환과 새 생성/캐시별 예산 규칙을 구분해 검사하기 위해서다. 격리 fixture 원본 복원과 명시적인 manual skip으로 증거의 범위를 지킨다.
+- **버린 대안**: Learn PR 전체 병합, 기존 테스트를 우회하거나 402 조건 완화, 운영 DB에만 migration을 적용하고 repository 이력에서 제외하는 방식.

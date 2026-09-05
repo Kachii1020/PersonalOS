@@ -1,16 +1,13 @@
 /**
- * G4 게이트 (SPEC.md 7절 Phase 4).
- *
- * 조건 1·4·5는 실기기/브라우저라 여기서 자동 검증하지 않는다 (G2 조건 2 전례).
- * 조건 3·7은 tests/push.test.ts, tests/weekly-stats.test.ts 단위 테스트.
- *
- * 실행:
- *   npm run test:g4
+ * G4 gate: real job calls against an explicitly isolated local stack.
+ * Manual/device and separately executed unit conditions are reported as skipped.
+ * Run serially with the app using the same database and AI budget configuration.
  */
-
-import { describe, it } from "node:test";
+import { before, describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { config } from "dotenv";
+import type { Database } from "../../lib/types/database";
+import { assertIsolatedGateDatabase } from "./local-fixtures";
 
 config({ path: [".env.development.local", ".env.local"] });
 
@@ -18,6 +15,8 @@ const APP = process.env.G4_APP_URL ?? "http://localhost:3000";
 const CRON = process.env.CRON_SECRET;
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const live = Boolean(CRON && SUPABASE_URL && SERVICE_KEY);
+type Review = Database["public"]["Tables"]["weekly_reviews"]["Row"];
 
 async function db(path: string, init: RequestInit = {}): Promise<Response> {
   return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
@@ -32,125 +31,144 @@ async function db(path: string, init: RequestInit = {}): Promise<Response> {
   });
 }
 
-async function job(name: string): Promise<{ status: number; body: Record<string, unknown> }> {
+/** Assertion message arguments are evaluated eagerly: consume the body once. */
+async function rows<T = { id: number }>(response: Promise<Response>): Promise<T[]> {
+  const res = await response;
+  const text = await res.text();
+  assert.equal(res.ok, true, `DB request failed: ${res.status} ${text}`);
+  return text ? JSON.parse(text) as T[] : [];
+}
+
+async function job(name: string) {
   const res = await fetch(`${APP}/api/jobs/${name}`, {
     method: "POST",
     headers: { "x-cron-secret": CRON! },
   });
   const text = await res.text();
-  let body: Record<string, unknown>;
-  try {
-    body = JSON.parse(text) as Record<string, unknown>;
-  } catch {
-    body = { raw: text };
-  }
-  return { status: res.status, body };
+  return { status: res.status, body: JSON.parse(text) as Record<string, unknown> };
 }
 
-const live = Boolean(CRON && SUPABASE_URL && SERVICE_KEY);
+function resultWeekStart(): string {
+  const jst = new Date(Date.now() + 9 * 3600_000);
+  const day = jst.getUTCDay();
+  jst.setUTCDate(jst.getUTCDate() - (day === 0 ? 6 : day - 1));
+  return jst.toISOString().slice(0, 10);
+}
 
-describe("G4 — Phase 4 게이트", () => {
-  it("1. 푸시 구독 왕복 (수동 — 실기기)", () => {
-    console.log("   수동: /settings에서 구독 → push_subscriptions 1행 → 테스트 알림 수신");
+/** Protect pre-existing review contents/IDs on success and on assertion failure. */
+async function withReviewFixture(run: (weekStart: string) => Promise<void>) {
+  const weekStart = resultWeekStart();
+  const path = `weekly_reviews?week_start=eq.${weekStart}`;
+  const saved = await rows<Review>(db(`${path}&select=*`));
+  try {
+    await rows(db(path, { method: "DELETE" }));
+    await run(weekStart);
+  } finally {
+    await rows(db(path, { method: "DELETE" }));
+    if (saved.length) await rows(db("weekly_reviews", { method: "POST", body: JSON.stringify(saved) }));
+    assert.deepEqual(await rows<Review>(db(`${path}&select=*`)), saved, "Review fixture restoration failed");
+  }
+}
+
+async function withExhaustedBudget(run: (probeId: number) => Promise<void>) {
+  const budget = Number(process.env.AI_MONTHLY_BUDGET_USD);
+  assert.ok(Number.isFinite(budget) && budget > 0, "AI_MONTHLY_BUDGET_USD must match the running app and be positive");
+  const marker = `g4-budget-probe:${crypto.randomUUID()}`;
+  try {
+    const [probe] = await rows(db("ai_usage", {
+      method: "POST",
+      body: JSON.stringify({
+        purpose: "weekly_review", model: marker,
+        input_token: 0, output_token: 0, cost_usd: Math.max(budget, 1),
+      }),
+    }));
+    assert.ok(probe, "Budget probe was not created");
+    await run(probe.id);
+  } finally {
+    // The unique marker also covers a committed insert whose response was lost.
+    await rows(db(`ai_usage?model=eq.${marker}`, { method: "DELETE" }));
+    assert.equal((await rows(db(`ai_usage?model=eq.${marker}`))).length, 0);
+  }
+}
+
+describe("G4 — Phase 4 게이트", { concurrency: false }, () => {
+  before(() => {
+    if (live) assertIsolatedGateDatabase(SUPABASE_URL, APP);
+  });
+
+  it("1. 푸시 구독 왕복 (수동 — 실기기)", (t) => {
+    t.skip("실기기 /settings 구독 → DB 저장 → 테스트 알림 수신은 별도 확인");
   });
 
   it("2. 브리핑 ready 후 푸시 실패가 잡을 실패시키지 않는다", async (t) => {
-    if (!live) {
-      t.skip("로컬 Supabase/앱 없음");
-      return;
-    }
+    if (!live) return t.skip("로컬 Supabase/앱 없음");
     const result = await job("generate-briefing");
-    assert.ok(
-      result.status === 200 || result.status === 402,
-      `브리핑 잡이 푸시 때문에 죽으면 안 된다: ${result.status} ${JSON.stringify(result.body)}`,
-    );
+    assert.ok(result.status === 200 || result.status === 402, JSON.stringify(result));
   });
 
-  it("3. HTTP 410 구독 삭제는 tests/push.test.ts", () => {
-    assert.ok(true);
+  it("3. HTTP 410 구독 삭제는 tests/push.test.ts", (t) => {
+    t.skip("npm run test:unit에서 별도 실행 — 이 항목만으로 통과 판정하지 않음");
   });
 
-  it("4. 오프라인 폴백 렌더 (수동)", () => {
-    console.log("   수동: 온라인 방문 후 네트워크 차단 → 대시보드 + 오프라인 표시");
+  it("4. 오프라인 폴백 렌더 (수동)", (t) => {
+    t.skip("실제 오프라인 기기 검증은 별도 확인");
   });
 
-  it("5. 온라인 network-first (수동)", () => {
-    console.log("   수동: 온라인에서 서버 변경이 새로고침에 즉시 반영");
+  it("5. 온라인 network-first (수동)", (t) => {
+    t.skip("실기기의 새로고침/서버 변경 반영은 별도 확인");
   });
 
-  it("6. 주간 리뷰 잡 — ready 1행 + ai_usage weekly_review 1행", async (t) => {
-    if (!live) {
-      t.skip("로컬 Supabase/앱 없음");
-      return;
-    }
-    const before = await db("ai_usage?purpose=eq.weekly_review&select=id");
-    const beforeRows = before.ok ? ((await before.json()) as unknown[]) : [];
-
-    const result = await job("generate-weekly-review");
-    if (result.status === 402) {
-      t.skip("월 AI 예산 소진");
-      return;
-    }
-    assert.equal(result.status, 200, `generate-weekly-review 실패: ${JSON.stringify(result.body)}`);
-
-    const reviews = await db("weekly_reviews?status=eq.ready&select=id,week_start");
-    assert.equal(reviews.ok, true, await reviews.text());
-    const reviewRows = (await reviews.json()) as unknown[];
-    assert.ok(reviewRows.length >= 1, "weekly_reviews ready 행이 없다");
-
-    const after = await db("ai_usage?purpose=eq.weekly_review&select=id");
-    const afterRows = after.ok ? ((await after.json()) as unknown[]) : [];
-    if (result.body.skipped) {
-      assert.equal(afterRows.length, beforeRows.length, "skipped인데 ai_usage가 늘었다");
-    } else {
-      assert.equal(afterRows.length, beforeRows.length + 1, `ai_usage weekly_review ${beforeRows.length} → ${afterRows.length}`);
-    }
-  });
-
-  it("7. 집계 숫자는 tests/weekly-stats.test.ts 수기 대조", () => {
-    assert.ok(true);
-  });
-
-  it("8. 예산 소진 시 402, ready 행을 남기지 않는다", async (t) => {
-    if (!live) {
-      t.skip("로컬 Supabase/앱 없음");
-      return;
-    }
-    const weekStart = resultWeekStart();
-    const existing = await db(`weekly_reviews?week_start=eq.${weekStart}&select=id,status`);
-    const existingRows = existing.ok ? ((await existing.json()) as { id: string; status: string }[]) : [];
-    const readyBefore = existingRows.filter((r) => r.status === "ready").length;
-
-    const seed = await db("ai_usage", {
-      method: "POST",
-      body: JSON.stringify({
-        purpose: "weekly_review",
-        model: "g4-budget-probe",
-        input_token: 1,
-        output_token: 1,
-        cost_usd: 10,
-      }),
+  it("6. 주간 리뷰를 새로 생성하면 ready 1행 + ai_usage weekly_review 1행", async (t) => {
+    if (!live) return t.skip("로컬 Supabase/앱 없음");
+    await withReviewFixture(async (weekStart) => {
+      const beforeRows = await rows(db("ai_usage?purpose=eq.weekly_review&select=id"));
+      const result = await job("generate-weekly-review");
+      if (result.status === 402) return t.skip("월 AI 예산 소진 — 새 생성 미검증");
+      assert.equal(result.status, 200, JSON.stringify(result));
+      assert.equal(result.body.skipped, false, "Fresh-generation gate must not accept cached success");
+      const reviews = await rows<Review>(db(`weekly_reviews?week_start=eq.${weekStart}&status=eq.ready&select=*`));
+      assert.equal(reviews.length, 1);
+      const afterRows = await rows(db("ai_usage?purpose=eq.weekly_review&select=id"));
+      assert.equal(afterRows.length, beforeRows.length + 1);
+      console.log("   증거: 새 주간 리뷰 ready 1행, weekly_review ai_usage 정확히 +1행; 원래 리뷰 복원");
     });
-    assert.equal(seed.ok, true, `ai_usage 주입 실패: ${await seed.text()}`);
-    const seeded = (await seed.json()) as { id: number }[];
+  });
 
-    const result = await job("generate-weekly-review");
-    if (seeded[0]?.id) {
-      await db(`ai_usage?id=eq.${seeded[0].id}`, { method: "DELETE" });
-    }
-    assert.equal(result.status, 402, `예산 소진인데 ${result.status}: ${JSON.stringify(result.body)}`);
+  it("7. 집계 숫자는 tests/weekly-stats.test.ts 수기 대조", (t) => {
+    t.skip("npm run test:unit에서 별도 실행 — 이 항목만으로 통과 판정하지 않음");
+  });
 
-    const after = await db(`weekly_reviews?week_start=eq.${weekStart}&status=eq.ready&select=id`);
-    const afterRows = after.ok ? ((await after.json()) as unknown[]) : [];
-    assert.equal(afterRows.length, readyBefore, "402인데 ready 행이 늘었다");
+  it("8. 예산 소진 시 새 생성은 402, ready/AI 사용량을 추가하지 않는다", async (t) => {
+    if (!live) return t.skip("로컬 Supabase/앱 없음");
+    await withReviewFixture(async (weekStart) => {
+      await withExhaustedBudget(async () => {
+        const beforeRows = await rows(db("ai_usage?select=id"));
+        const result = await job("generate-weekly-review");
+        assert.equal(result.status, 402, JSON.stringify(result));
+        assert.equal(result.body.kind, "BudgetExceededError");
+        assert.equal((await rows(db(`weekly_reviews?week_start=eq.${weekStart}&status=eq.ready&select=id`))).length, 0);
+        assert.deepEqual(await rows(db("ai_usage?select=id&order=id")), [...beforeRows].sort((a, b) => a.id - b.id));
+        console.log("   증거: cache 없는 새 생성 HTTP 402, ready 0행, AI 사용량 변화 없음; budget probe 제거");
+      });
+    });
+  });
+
+  it("회귀: 이미 준비된 리뷰는 예산 소진 중에도 AI 호출 없이 캐시를 반환한다", async (t) => {
+    if (!live) return t.skip("로컬 Supabase/앱 없음");
+    await withReviewFixture(async (weekStart) => {
+      const cached = await rows<Review>(db("weekly_reviews", {
+        method: "POST",
+        body: JSON.stringify({ week_start: weekStart, status: "ready", content: { stats: {}, narrative: {}, upcoming: {} } }),
+      }));
+      await withExhaustedBudget(async () => {
+        const beforeRows = await rows(db("ai_usage?select=id&order=id"));
+        const result = await job("generate-weekly-review");
+        assert.equal(result.status, 200, JSON.stringify(result));
+        assert.equal(result.body.skipped, true);
+        assert.deepEqual(await rows<Review>(db(`weekly_reviews?week_start=eq.${weekStart}&select=*`)), cached);
+        assert.deepEqual(await rows(db("ai_usage?select=id&order=id")), beforeRows);
+        console.log("   증거: ready 캐시 HTTP 200/skipped, 리뷰·사용량 변화 없음 (실제 AI 생성과 구분)");
+      });
+    });
   });
 });
-
-function resultWeekStart(): string {
-  const now = new Date();
-  const jst = new Date(now.getTime() + 9 * 3600_000);
-  const day = jst.getUTCDay();
-  const fromMonday = day === 0 ? 6 : day - 1;
-  jst.setUTCDate(jst.getUTCDate() - fromMonday);
-  return jst.toISOString().slice(0, 10);
-}
