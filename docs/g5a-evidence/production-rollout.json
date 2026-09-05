@@ -1,0 +1,267 @@
+{
+  "verifiedAt": "2026-09-05T15:51:13.763Z",
+  "origin": "https://personal-os-nine-rust.vercel.app",
+  "mainMergeCommit": "1eb2218212dcf405705d5627d29be05b6eabe4fd",
+  "deployment": {
+    "id": "dpl_G1teYcAFDP6dEb9ysTcVuroEnqHL",
+    "url": "https://personal-qtcr0jt27-circle-connect123.vercel.app",
+    "target": "production",
+    "status": "Ready"
+  },
+  "backups": [
+    {
+      "file": "schema-before-phase5a.sql",
+      "bytes": 44170,
+      "sha256": "470a0985e5efd8395aa4605ded5aa472dbc09109d4a767233ad6186b4158ac12"
+    },
+    {
+      "file": "public-data-before-phase5a.sql",
+      "bytes": 6006525,
+      "sha256": "f25c8f77ac3f1c403cfbc0972dfec051c0ccc4805f329338e5902ec4bd81ad31"
+    }
+  ],
+  "backupRestoreTested": false,
+  "schema": {
+    "migration_versions": [
+      "0001",
+      "0002",
+      "0003",
+      "0004",
+      "0005",
+      "0006",
+      "0007",
+      "0009",
+      "0010",
+      "0011",
+      "0012",
+      "0013",
+      "0014",
+      "0015",
+      "0016",
+      "0017"
+    ],
+    "push_subscription_count": 0,
+    "rls": {
+      "action_audit_logs": true,
+      "agent_runs": true,
+      "approval_requests": true,
+      "command_briefs": true,
+      "inbox_items": true,
+      "system_events": true,
+      "workbook_submissions": true
+    },
+    "rpc_access": [
+      {
+        "anon": false,
+        "authenticated": false,
+        "name": "claim_approved_action_by_id",
+        "service_role": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "name": "claim_next_agent_run",
+        "service_role": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "name": "claim_next_approved_action",
+        "service_role": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "name": "claim_next_system_event",
+        "service_role": true
+      },
+      {
+        "anon": false,
+        "authenticated": true,
+        "name": "decide_approval",
+        "service_role": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "name": "execute_approved_task",
+        "service_role": true
+      },
+      {
+        "anon": false,
+        "authenticated": false,
+        "name": "prepare_jarvis_approval",
+        "service_role": true
+      }
+    ],
+    "task_approval_unique_full": true
+  },
+  "e2e": {
+    "checkedAt": "2026-09-05T15:41:44.406Z",
+    "origin": "https://personal-os-nine-rust.vercel.app",
+    "browser": {
+      "title": "G5A 운영 검증 20260906",
+      "approvalId": "274c1d5d-d348-4ce4-987d-87df5fe7ef3c",
+      "inboxCaptured": true,
+      "approvalExecuted": true,
+      "taskOccurrences": 1,
+      "todayVisible": true,
+      "scrollOverflow": false,
+      "pageErrors": []
+    },
+    "inbox": [
+      {
+        "id": "92c837c2-4948-4e7b-ac76-6336deff0976",
+        "status": "act_now"
+      }
+    ],
+    "events": [
+      {
+        "id": "d88508a7-7553-4d36-bda1-02b7dfda9788",
+        "status": "processed",
+        "source_id": "92c837c2-4948-4e7b-ac76-6336deff0976"
+      }
+    ],
+    "runs": [
+      {
+        "id": "09e4d516-8b3b-4f4b-a257-42e4ff9a23a8",
+        "status": "completed",
+        "current_step": "verified",
+        "trigger_event_id": "d88508a7-7553-4d36-bda1-02b7dfda9788"
+      }
+    ],
+    "approvals": [
+      {
+        "id": "274c1d5d-d348-4ce4-987d-87df5fe7ef3c",
+        "agent_run_id": "09e4d516-8b3b-4f4b-a257-42e4ff9a23a8",
+        "status": "executed"
+      }
+    ],
+    "tasks": [
+      {
+        "id": "49a2f7b2-c9f7-4f42-8d8e-9c4c3039b86a",
+        "title": "G5A 운영 검증 20260906",
+        "status": "open",
+        "approval_request_id": "274c1d5d-d348-4ce4-987d-87df5fe7ef3c"
+      }
+    ],
+    "audit": [
+      {
+        "event": "requested",
+        "actor": "jarvis",
+        "created_at": "2026-09-05T15:40:04.761549+00:00"
+      },
+      {
+        "event": "approved",
+        "actor": "user",
+        "created_at": "2026-09-05T15:40:09.918806+00:00"
+      },
+      {
+        "event": "executing",
+        "actor": "worker",
+        "created_at": "2026-09-05T15:40:10.886288+00:00"
+      },
+      {
+        "event": "executed",
+        "actor": "worker",
+        "created_at": "2026-09-05T15:40:10.886288+00:00"
+      },
+      {
+        "event": "verified",
+        "actor": "worker",
+        "created_at": "2026-09-05T15:40:10.886288+00:00"
+      }
+    ],
+    "anonymousReads": {
+      "inbox_items": {
+        "denied": true,
+        "visibleRows": 0
+      },
+      "system_events": {
+        "denied": false,
+        "visibleRows": 0
+      },
+      "agent_runs": {
+        "denied": false,
+        "visibleRows": 0
+      },
+      "approval_requests": {
+        "denied": false,
+        "visibleRows": 0
+      },
+      "action_audit_logs": {
+        "denied": false,
+        "visibleRows": 0
+      },
+      "command_briefs": {
+        "denied": false,
+        "visibleRows": 0
+      }
+    },
+    "pushSubscriptions": 0,
+    "iphoneCaptureCount": 0,
+    "physicalIphoneReceipt": "awaiting user confirmation",
+    "cronAutomatic": "disabled pending device gate"
+  },
+  "macPush": {
+    "platform": "real Mac Chrome persistent profile",
+    "before": 0,
+    "received": [
+      {
+        "title": "테스트 알림",
+        "body": "Personal OS 푸시가 이 기기에 도달했습니다.",
+        "url": "/settings"
+      }
+    ],
+    "serverMessage": "알림 1건을 보냈습니다."
+  },
+  "offlineObservation": {
+    "initialBannerCheck": "timed out; not passed",
+    "beforeOnline": false,
+    "afterOnline": true,
+    "status": 200,
+    "fromServiceWorker": true,
+    "todayHeading": 0,
+    "offlineBanner": 0
+  },
+  "manualWorkflowRuns": [
+    {
+      "id": 33975444921,
+      "result": "success",
+      "jobs": {
+        "process-system-events": 200,
+        "process-approved-actions": 200,
+        "generate-command-brief": 200
+      }
+    },
+    {
+      "id": 33975565219,
+      "result": "success",
+      "jobs": {
+        "process-system-events": 200,
+        "process-approved-actions": 200,
+        "generate-command-brief": 200
+      }
+    }
+  ],
+  "cleanup": {
+    "testBrowserSubscriptionRemoved": true,
+    "testTaskMarkedDone": {
+      "id": "49a2f7b2-c9f7-4f42-8d8e-9c4c3039b86a",
+      "status": "done"
+    },
+    "auditPreserved": true,
+    "remainingPushSubscriptions": 0
+  },
+  "deviceGate": {
+    "connectedIphones": 0,
+    "userReceiptConfirmation": false,
+    "iphoneCaptureObserved": false
+  },
+  "cron": {
+    "expression": "*/5 * * * *",
+    "flag": "JARVIS_CRON_ENABLED",
+    "automaticEnabled": false,
+    "reason": "Waiting for actual iPhone capture and push receipt confirmation"
+  }
+}

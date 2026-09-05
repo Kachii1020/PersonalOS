@@ -2,6 +2,8 @@
 
 점검일: 2026-09-06 JST. 운영 DB는 조회만 수행했다.
 
+**후속 실행 완료:** 같은 날 승인된 hosted 0014~0017 적용과 PR #22 main 병합·운영 Mac 검증을 완료했다. 이 문서의 아래 목록은 적용 전 점검 기록이며, 최신 결과는 `G5A-PRODUCTION-REPORT.md`에 있다.
+
 ## 실제 운영 이력
 
 `supabase migration list --linked --workdir /Users/ichika/personalOS`를 실제 실행했다.
@@ -39,7 +41,7 @@ CLI의 `on branch main` 출력은 Supabase의 로컬 DB branch 표기이며 Git 
 
 일반 wrapper에서 실패했던 reset을 이 실행기로 완료했다. 재현용 G5A fixture에는 미사용 Realtime을 명시적으로 비활성화했다. 원래 production config는 변경하지 않았다.
 
-## 승인된 반영안 — 운영 DB 적용은 아직 미실행
+## 승인된 반영안 — 이후 운영 DB 적용 완료
 
 2026-09-06 사용자가 공통 0014 파일 포함 및 G2/G4 검증 코드·Playwright 개발 의존성 수정을 명시적으로 승인했다. Learn/Quiz 기능 코드는 계속 변경하지 않는다.
 
