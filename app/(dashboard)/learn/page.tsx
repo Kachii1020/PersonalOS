@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { LearnDashboard } from "@/components/widgets/LearnDashboard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getLabCompletions } from "@/lib/repos/learn";
+import { listWorkbookSubmissions } from "@/lib/repos/learn-workbooks";
 import { createClient } from "@/lib/supabase/server";
 
 export const metadata = { title: "Learn — Personal OS" };
@@ -57,13 +58,17 @@ async function LearnData() {
   const questionIdMap = await fetchQuestionIdMap();
   const allIds = Object.values(questionIdMap).flat();
   const existingAttempts = await fetchExistingAttempts(allIds);
-  const labRows = await getLabCompletions();
+  const [labRows, workbookSubmissions] = await Promise.all([
+    getLabCompletions(),
+    listWorkbookSubmissions(),
+  ]);
 
   return (
     <LearnDashboard
       questionIdMap={questionIdMap}
       existingAttempts={existingAttempts}
       labCompletions={labRows.map((row) => row.exercise_id)}
+      workbookSubmissions={workbookSubmissions}
     />
   );
 }
