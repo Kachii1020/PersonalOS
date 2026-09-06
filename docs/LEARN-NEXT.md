@@ -51,3 +51,19 @@
 3. 핵심을 다 끝내면 퀴즈. `learn_progress`도 핵심만 센다 → verify: 논리 모듈 칩이 24가 아니라 3
 
 하지 않음: 랩 추가, Coddy식 볼륨, SPEC.md 재작성.
+
+---
+
+## 6. IB & Finance 트랙 (구현됨)
+
+`supabase/seed-ib-finance.sql` + 체크리스트 UI. Excel 트랙 동작은 그대로.
+
+하지 않음: 스키마 변경, IB 랩, 토픽 완료 테이블.
+
+---
+
+## 6. IB & Finance 트랙 (구현됨)
+
+`supabase/seed-ib-finance.sql` + 체크리스트 UI. Excel 트랙 동작은 그대로.
+
+하지 않음: 스키마 변경, IB 랩, 토픽 완료 테이블.
