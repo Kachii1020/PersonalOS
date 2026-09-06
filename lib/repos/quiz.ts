@@ -1,7 +1,9 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
-import type { QuizDomain, QuizQuestionRaw } from "@/lib/ai/prompts/quiz";
+import { QUIZ_DOMAINS, type QuizDomain, type QuizQuestionRaw } from "@/lib/ai/prompts/quiz";
+import { IB_ENG_LESSONS, IB_ENG_QUESTIONS, ibEngModuleSlug } from "@/lib/quiz/ib-eng";
+import { pickDailySet, type DailyCandidate } from "@/lib/quiz/pick-daily";
 import { addDays, todayStart, ymd } from "@/lib/time";
 
 export type QuizQuestion = {
@@ -26,6 +28,7 @@ type QuestionSelect = {
   explanation: string;
   concept_hint: string | null;
   difficulty: number;
+  module_slug?: string | null;
 };
 
 function toQuestion(row: QuestionSelect, isReview: boolean): QuizQuestion {
@@ -42,7 +45,8 @@ function toQuestion(row: QuestionSelect, isReview: boolean): QuizQuestion {
   };
 }
 
-const FIELDS = "id, domain, question, choices, answer_index, explanation, concept_hint, difficulty";
+const FIELDS =
+  "id, domain, question, choices, answer_index, explanation, concept_hint, difficulty, module_slug";
 
 /** 잡 전용. 오늘까지 복습 예정인 문항 id. 중복은 제거한다. */
 export async function dueReviewQuestionIdsForJob(now: Date = new Date()): Promise<string[]> {
@@ -95,10 +99,14 @@ export async function insertQuizQuestions(questions: QuizQuestionRaw[]): Promise
 /**
  * 오늘의 퀴즈 (UI용).
  *
- * 복습 예정 문항을 먼저 채우고 모자란 만큼 최신 문항으로 채운다
- * (G2 조건: 오늘 날짜의 복습 문항이 오늘의 퀴즈에 우선 편입).
+ * 복습 예정 → 미응시 시드 → 나머지. 엑셀/옛 도메인은 넣지 않는다.
+ * G2: 오늘 날짜의 복습 문항이 우선 편입된다.
  */
-export async function todaysQuiz(size = 5, now: Date = new Date()): Promise<QuizQuestion[]> {
+export async function todaysQuiz(
+  size = 5,
+  now: Date = new Date(),
+  domain?: QuizDomain,
+): Promise<QuizQuestion[]> {
   const supabase = await createClient();
 
   const { data: dueRows, error: dueError } = await supabase
@@ -106,32 +114,87 @@ export async function todaysQuiz(size = 5, now: Date = new Date()): Promise<Quiz
     .select("question_id")
     .lte("due_on", ymd(now));
   if (dueError) throw new Error(`복습 큐 조회 실패: ${dueError.message}`);
+  const dueIds = [...new Set((dueRows ?? []).map((r) => r.question_id))];
 
-  const dueIds = [...new Set((dueRows ?? []).map((r) => r.question_id))].slice(0, size);
-
-  const review: QuizQuestion[] = [];
-  if (dueIds.length > 0) {
-    const { data, error } = await supabase.from("quiz_questions").select(FIELDS).in("id", dueIds);
-    if (error) throw new Error(`복습 문항 조회 실패: ${error.message}`);
-    review.push(...(data ?? []).map((r) => toQuestion(r, true)));
-  }
-
-  if (review.length >= size) return review.slice(0, size);
-
-  const { data: fresh, error } = await supabase
+  const { data: bank, error: bankError } = await supabase
     .from("quiz_questions")
     .select(FIELDS)
-    .order("created_at", { ascending: false })
-    .limit(size * 3);
-  if (error) throw new Error(`퀴즈 조회 실패: ${error.message}`);
+    .in("domain", [...QUIZ_DOMAINS]);
+  if (bankError) throw new Error(`퀴즈 조회 실패: ${bankError.message}`);
+  const rows = bank ?? [];
+  if (rows.length === 0) return [];
 
-  const seen = new Set(review.map((q) => q.id));
-  for (const row of fresh ?? []) {
-    if (review.length >= size) break;
-    if (seen.has(row.id)) continue;
-    review.push(toQuestion(row, false));
+  const { data: attemptRows, error: attemptError } = await supabase
+    .from("quiz_attempts")
+    .select("question_id");
+  if (attemptError) throw new Error(`응시 이력 조회 실패: ${attemptError.message}`);
+  const attemptedIds = new Set((attemptRows ?? []).map((row) => row.question_id));
+
+  const candidates: DailyCandidate[] = rows.map((row) => ({
+    id: row.id,
+    domain: row.domain,
+    curated: Boolean(row.module_slug?.startsWith("ib_eng")),
+  }));
+  const picked = pickDailySet({ size, dueIds, questions: candidates, attemptedIds, domain });
+  const dueSet = new Set(dueIds);
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  return picked.flatMap((id) => {
+    const row = byId.get(id);
+    return row ? [toQuestion(row, dueSet.has(id))] : [];
+  });
+}
+
+export type DomainProgress = {
+  domain: QuizDomain;
+  total: number;
+  attempted: number;
+  correct: number;
+};
+
+/** 코드 은행 분모 + DB 응시. 시드 전이면 시도 0. */
+export async function ibEngProgress(): Promise<DomainProgress[]> {
+  const totals = new Map<QuizDomain, number>();
+  for (const q of IB_ENG_QUESTIONS) {
+    totals.set(q.domain, (totals.get(q.domain) ?? 0) + 1);
   }
-  return review;
+
+  const supabase = await createClient();
+  const { data: bank, error: bankError } = await supabase
+    .from("quiz_questions")
+    .select("id, domain")
+    .in("domain", [...QUIZ_DOMAINS]);
+  if (bankError) throw new Error(`퀴즈 조회 실패: ${bankError.message}`);
+
+  const idToDomain = new Map((bank ?? []).map((row) => [row.id, row.domain as QuizDomain]));
+  const latest = new Map<string, boolean>();
+  if (idToDomain.size > 0) {
+    const { data: attempts, error: attemptError } = await supabase
+      .from("quiz_attempts")
+      .select("question_id, is_correct, attempted_at")
+      .in("question_id", [...idToDomain.keys()])
+      .order("attempted_at", { ascending: false });
+    if (attemptError) throw new Error(`응시 이력 조회 실패: ${attemptError.message}`);
+    for (const row of attempts ?? []) {
+      if (!latest.has(row.question_id)) latest.set(row.question_id, row.is_correct);
+    }
+  }
+
+  const attempted = new Map<QuizDomain, { n: number; ok: number }>();
+  for (const [id, ok] of latest) {
+    const domain = idToDomain.get(id);
+    if (!domain) continue;
+    const bucket = attempted.get(domain) ?? { n: 0, ok: 0 };
+    bucket.n += 1;
+    if (ok) bucket.ok += 1;
+    attempted.set(domain, bucket);
+  }
+
+  return QUIZ_DOMAINS.map((domain) => ({
+    domain,
+    total: totals.get(domain) ?? 0,
+    attempted: attempted.get(domain)?.n ?? 0,
+    correct: attempted.get(domain)?.ok ?? 0,
+  }));
 }
 
 export type QuizProgress = { total: number; answered: number; correct: number; review: number };
@@ -296,8 +359,66 @@ export type DomainLesson = {
   keyTerms: string[];
 };
 
-/** 생성된 도메인 레슨을 전부 반환한다. */
-export async function allDomainLessons(): Promise<DomainLesson[]> {
+function lessonFromCode(domain: QuizDomain): DomainLesson | undefined {
+  const row = IB_ENG_LESSONS.find((lesson) => lesson.domain === domain);
+  if (!row) return undefined;
+  return { domain: row.domain, title: row.title, content: row.content, keyTerms: row.keyTerms };
+}
+
+/**
+ * 코드 은행을 DB에 넣는다. 읽기 경로에서는 부르지 않는다.
+ * 호스티드 시드가 없어도 /quiz 빈 칸의 「90문항 넣기」로 같은 행이 생긴다.
+ */
+export async function ensureIbEngBank(): Promise<{ questions: number; lessons: number }> {
+  const supabase = await createClient();
+
+  const { error: lessonErr } = await supabase.from("quiz_domain_lessons").upsert(
+    IB_ENG_LESSONS.map((lesson) => ({
+      domain: lesson.domain,
+      title: lesson.title,
+      content: lesson.content,
+      key_terms: lesson.keyTerms,
+    })),
+    { onConflict: "domain" },
+  );
+  if (lessonErr) throw new Error(`IB eng 레슨 저장 실패: ${lessonErr.message}`);
+
+  const { data: existing, error: existingErr } = await supabase
+    .from("quiz_questions")
+    .select("module_slug, question")
+    .like("domain", "ib_eng_%");
+  if (existingErr) throw new Error(`IB eng 은행 조회 실패: ${existingErr.message}`);
+
+  const haveSlug = new Set(
+    (existing ?? []).map((row) => row.module_slug).filter((slug): slug is string => Boolean(slug)),
+  );
+  const haveQuestion = new Set((existing ?? []).map((row) => row.question));
+  const missing = IB_ENG_QUESTIONS.filter(
+    (q) => !haveSlug.has(ibEngModuleSlug(q.id)) && !haveQuestion.has(q.question),
+  );
+
+  if (missing.length === 0) {
+    return { questions: 0, lessons: IB_ENG_LESSONS.length };
+  }
+
+  const { error: qErr } = await supabase.from("quiz_questions").insert(
+    missing.map((q) => ({
+      domain: q.domain,
+      question: q.question,
+      choices: [...q.choices],
+      answer_index: q.answer,
+      explanation: q.explanation,
+      concept_hint: q.hint,
+      difficulty: q.difficulty,
+      module_slug: ibEngModuleSlug(q.id),
+    })),
+  );
+  if (qErr) throw new Error(`IB eng 문항 저장 실패: ${qErr.message}`);
+
+  return { questions: missing.length, lessons: IB_ENG_LESSONS.length };
+}
+
+export async function listStoredDomainLessons(): Promise<DomainLesson[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("quiz_domain_lessons")
@@ -311,6 +432,15 @@ export async function allDomainLessons(): Promise<DomainLesson[]> {
     content: r.content,
     keyTerms: r.key_terms,
   }));
+}
+
+/** IB eng 6도메인. DB가 비면 코드 레슨으로 채운다. */
+export async function allDomainLessons(): Promise<DomainLesson[]> {
+  const stored = await listStoredDomainLessons();
+  const byDomain = new Map(stored.filter((row) => QUIZ_DOMAINS.includes(row.domain)).map((row) => [row.domain, row]));
+  return QUIZ_DOMAINS.map((domain) => byDomain.get(domain) ?? lessonFromCode(domain)).filter(
+    (row): row is DomainLesson => Boolean(row),
+  );
 }
 
 /** 특정 도메인의 레슨을 반환한다. */
