@@ -64,6 +64,8 @@ export type StructuredCallOptions = {
   effort?: "low" | "medium" | "high" | "xhigh" | "max";
   /** 파싱 실패 시 재시도 횟수. SPEC.md 5.5는 1회만 허용한다. */
   retries?: number;
+  /** Bounded worker calls disable SDK transport retries within this timeout. */
+  timeoutMs?: number;
 };
 
 function model(): string {
@@ -119,7 +121,7 @@ export async function callStructured<T>(options: StructuredCallOptions): Promise
         format: { type: "json_schema", schema: options.schema },
       },
       messages: [{ role: "user", content: options.userMessage }],
-    });
+    }, options.timeoutMs === undefined ? undefined : { timeout: options.timeoutMs, maxRetries: 0 });
 
     const spent = costUsd(response.model, response.usage);
     await recordUsage({

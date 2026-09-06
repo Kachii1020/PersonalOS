@@ -50,3 +50,4 @@
 - ~~**Phase 5A 운영 게이트**~~ — 2026-09-06 iPhone 입력/푸시 사용자 확인, 운영 Mac 왕복과 전체 증거로 G5A 인수 조건 통과. Phase 5B는 별도 요청 전까지 미착수.
 - **JARVIS 최초 예약 실행 관찰** — `JARVIS_CRON_ENABLED=true`로 5분 cron을 활성화했고 수동 실행은 성공했다. 첫 schedule-triggered 실행은 아직 미관측이며 수동 결과로 대체하지 않는다. 증거는 `docs/G5A-PRODUCTION-REPORT.md`.
 - **JARVIS 추가 executor / AI** — CalDAV·메일·GitHub 등은 policy 분류만 존재한다. 실제 executor는 CREATE_TASK만 지원하며 AI triage·AI brief·Phase 5B 구현은 별도 작업이다.
+- **Phase 5B 운영 반영** — 2026-09-06 명시 승인 후 로컬 DB G5B 11개, G5A DB 10개, 전체 회귀 209개(기존 G4 5개 skip), 두 브라우저 왕복과 실제 공개 원문 AI 경로를 검증했다. Hosted 0018·배포·실기기·career cron 활성화는 미실행이며 별도 운영 승인·검증이 필요하다. G5B-REPORT.md 참조. Phase 6 및 추가 외부 executor는 미착수.

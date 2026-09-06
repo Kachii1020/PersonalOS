@@ -1,4 +1,4 @@
-**Phase 5A — 기능·운영 인수 완료.** PR #22 병합, hosted 0014~0017 적용, iPhone 입력/푸시 사용자 확인과 Mac 승인·태스크·Today/audit 검증 완료. 5분 cron 활성화 및 수동 실행 성공; 첫 schedule-triggered 실행은 후속 관찰이다. 증거는 `docs/G5A-PRODUCTION-REPORT.md`. Phase 5B는 미착수다.
+**Phase 5B — Career Secretary 로컬 구현·검증 완료, 운영 인수 대기.** 사용자가 Phase 5B 개발과 격리 로컬 DB 검증을 명시 승인했다. 실제 결과·실패 이력은 `docs/G5B-REPORT.md`, 범위는 `docs/JARVIS-SPEC.md` §12와 `docs/PHASE5B-PLAN.md`. 운영 DB·배포·career cron은 미반영이다. Phase 5A 운영 증거와 Learn/Quiz 기능 코드를 유지하며 Phase 6는 시작하지 않는다.
 
 **이전 Phase 4 종료.** G1·G2·G3 통과. G4는 7/8 통과 + 조건 8 운영자 면제 (2026-08-20) — 판정과 면제 사유는 `docs/G4-REPORT.md`. 업그레이드 Tier 3는 `docs/DEFERRED.md` 참고.
 
