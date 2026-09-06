@@ -1,5 +1,6 @@
 import "server-only";
 import { classifyCapture } from "./capture";
+import { isCareerEvent, processCareerRun } from "@/lib/career/orchestrator";
 import { sendPush } from "@/lib/integrations/push/send";
 import type { CaptureClassification, JsonValue } from "./types";
 import { createApprovalForJob } from "@/lib/repos/jarvis-approvals";
@@ -15,7 +16,7 @@ import {
 } from "@/lib/repos/jarvis-queue";
 
 export type JarvisStepResult = {
-  kind: "idle" | "run_started" | "classified" | "approval_prepared" | "completed" | "failed";
+  kind: "idle" | "run_started" | "classified" | "approval_prepared" | "completed" | "failed" | "career_step";
   runId?: string;
   eventId?: string;
   approvalId?: string;
@@ -34,7 +35,7 @@ function asRunState(value: JsonValue): RunState {
   return value as RunState;
 }
 
-export async function processJarvisStep(workerId: string): Promise<JarvisStepResult> {
+export async function processJarvisStep(workerId: string, allowCareer = true): Promise<JarvisStepResult> {
   const run = await claimNextAgentRunForJob(workerId);
   if (!run) {
     const event = await claimNextSystemEventForJob(workerId);
@@ -53,6 +54,13 @@ export async function processJarvisStep(workerId: string): Promise<JarvisStepRes
   try {
     if (run.currentStep === "classify") {
       const state = asRunState(run.state);
+      if (isCareerEvent(state.eventType)) {
+        if (!allowCareer) {
+          await advanceAgentRunForJob({ runId: run.id, workerId, expectedStep: "classify", status: "queued", nextStep: "classify" });
+          return { kind: "career_step", runId: run.id, message: "커리어 작업은 예약 worker에서 처리합니다." };
+        }
+        return await processCareerRun(run, workerId);
+      }
       if (state.eventType !== "inbox.created" || !state.sourceId) {
         throw new Error(`지원하지 않는 trigger: ${state.eventType ?? "unknown"}`);
       }
@@ -123,13 +131,14 @@ export async function processJarvisStep(workerId: string): Promise<JarvisStepRes
 export async function processJarvisSteps(input: {
   workerId: string;
   maxSteps?: number;
+  allowCareer?: boolean;
 }): Promise<JarvisStepResult[]> {
   const maxSteps = Math.max(1, Math.min(input.maxSteps ?? 3, 10));
   const results: JarvisStepResult[] = [];
   for (let index = 0; index < maxSteps; index++) {
-    const result = await processJarvisStep(input.workerId);
+    const result = await processJarvisStep(input.workerId, input.allowCareer ?? true);
     results.push(result);
-    if (result.kind === "idle" || result.kind === "failed" || result.kind === "approval_prepared") break;
+    if (result.kind === "idle" || result.kind === "failed" || result.kind === "approval_prepared" || result.kind === "career_step") break;
   }
   return results;
 }

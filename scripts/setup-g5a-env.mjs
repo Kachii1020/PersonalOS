@@ -5,7 +5,7 @@ import { parse } from "dotenv";
 
 if (existsSync(".env.local")) throw new Error("Refusing to overwrite .env.local");
 const values = parse(execFileSync("./node_modules/.bin/supabase", [
-  "status", "--workdir", "test-results/g5a-stack", "-o", "env",
+  "status", "--workdir", process.argv[2] ?? "test-results/g5a-stack", "-o", "env",
 ], { encoding: "utf8" }));
 if (values.API_URL !== "http://127.0.0.1:54621") throw new Error("Expected isolated G5A API on 54621");
 const env = {
@@ -21,6 +21,7 @@ const env = {
   G3_APP_URL: "http://localhost:3055",
   G4_APP_URL: "http://localhost:3055",
   G5A_APP_URL: "http://localhost:3055",
+  G5B_APP_URL: "http://localhost:3055",
 };
 for (const [key, value] of Object.entries(env)) if (!value) throw new Error(`Missing ${key}`);
 writeFileSync(".env.local", Object.entries(env).map(([k, v]) => `${k}=${JSON.stringify(v)}`).join("\n") + "\n", { mode: 0o600 });
