@@ -70,7 +70,7 @@ The complete regression ran `2026-09-06T02:11:43.569Z`–`02:13:59.360Z`, with n
 
 ## Release boundary
 
-The remaining delivery action is the separate draft PR. Hosted 0018, deployment, physical-device checks and career cron activation are **not executed**. `JARVIS_CAREER_ENABLED` remains unset/false; existing main is unchanged. Follow `PHASE5B-VERIFY.md` for explicit production authority, backup, schema-first rollout and forward recovery. Phase 6 is not started.
+Draft [PR #25](https://github.com/Kachii1020/PersonalOS/pull/25) was created from the separate Phase 5B branch. Hosted 0018, deployment, physical-device checks and career cron activation are **not executed**. A read-only GitHub check confirmed `JARVIS_CAREER_ENABLED` was not set; main is unchanged. Temporary integration settings were restored to synthetic local values and the test app was stopped. Follow `PHASE5B-VERIFY.md` for explicit production authority, backup, schema-first rollout and forward recovery. Phase 6 is not started.
 
 Learning status: **LEARNING_PENDING**; safety boundaries were explained, but no user teach-back or exercise was assessed. No learning ledger was created. The migration is additive; production recovery would disable career monitoring and use a forward fix, not delete existing application/source records.
 
