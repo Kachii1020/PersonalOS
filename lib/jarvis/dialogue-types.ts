@@ -11,6 +11,12 @@ export type DialogueIntent = {
   time: InputQuote | null;
   duration: InputQuote | null;
 };
+export type DialogueReadFilters = {
+  taskStatus?: "open" | "done" | "all";
+  order?: "due" | "priority";
+  keyword?: string;
+  eligibility?: "confirmed_eligible" | "possibly_eligible" | "not_eligible" | "next_cycle";
+};
 export type DialogueGrounding = {
   kind: DialogueKind;
   message: string;
@@ -21,6 +27,7 @@ export type DialogueGrounding = {
   endsAt: string | null;
   queryDate: string | null;
   evidence: InputQuote[];
+  readFilters?: DialogueReadFilters;
 };
 export type DialogueFact = { id: string; title: string; detail: string; href: string; observedAt: string };
 export type DialogueDraft = {

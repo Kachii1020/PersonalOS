@@ -97,11 +97,14 @@ export function JarvisConversation() {
     if (busy.current || !input.trim()) return;
     if (input.length > 2000) { setError("한 번에 2,000자까지 입력할 수 있습니다."); return; }
     const message = input.trim();
+    // A retained UI target must not survive a cancellation into a later slot reply.
+    const clearSelection = /취소|하지\s*마|만들지\s*마|그만/.test(message);
+    if (clearSelection) setSelectedEvent(null);
     const history: ChatMessage[] = turns.flatMap((turn) => [{ role: "user" as const, content: turn.input.slice(0, 2000) }, { role: "assistant" as const, content: turn.reply.message.slice(0, 2000) }]);
     const messages = [...history, { role: "user" as const, content: message }].slice(-6);
     busy.current = true; setPending(true); setError(null); setSentInput(message);
     try {
-      const reply = readReply(await postJson("/api/jarvis/chat", { messages, ...(selectedEvent ? { selectedSourceId: selectedEvent.id } : {}) }));
+      const reply = readReply(await postJson("/api/jarvis/chat", { messages, ...(selectedEvent && !clearSelection ? { selectedSourceId: selectedEvent.id } : {}) }));
       setTurns((current) => [...current, { id: crypto.randomUUID(), input: message, reply }].slice(-3));
       setInput("");
     } catch (failure) { setError(failure instanceof Error ? failure.message : "응답을 받지 못했습니다. 입력을 유지했으니 다시 시도해 주세요."); }

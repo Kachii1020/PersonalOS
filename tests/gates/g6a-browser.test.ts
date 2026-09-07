@@ -17,7 +17,7 @@ const marker = `G6A-${crypto.randomUUID()}`;
 function ok(error: { message: string } | null) { if (error) throw new Error(error.message); }
 
 test("G6A live AI browser: facts → explicit proposal → pending approval → one task", { timeout: 240_000 }, async (t) => {
-  assertIsolatedGateDatabase(url, app); assert.equal(url, "http://127.0.0.1:54621"); assert.equal(process.env.ALLOWED_EMAIL, "phase5a@example.test");
+  assertIsolatedGateDatabase(url, app); assert.ok(["http://127.0.0.1:54621", "http://127.0.0.1:54721"].includes(url)); assert.equal(process.env.ALLOWED_EMAIL, "phase5a@example.test");
   assert.ok(process.env.ANTHROPIC_API_KEY, "This is the live AI gate, not a mocked pass");
   const db = createClient<Database>(url, key, { auth: { persistSession: false } });
   // The live provider receives artificial test messages/records only. Refuse

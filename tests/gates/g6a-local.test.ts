@@ -98,7 +98,7 @@ async function draftIds() { return rows(`dialogue_action_drafts?owner_id=eq.${ow
 describe("G6A real local DB gate (no model or CalDAV network)", { concurrency: false }, () => {
   before(async () => {
     assert.equal(process.env.GATE_ISOLATED_DB, "1");
-    assert.equal(url, "http://127.0.0.1:54621", "Only the isolated local stack is permitted");
+    assert.ok(["http://127.0.0.1:54621", "http://127.0.0.1:54721"].includes(url), "Only the dedicated G6/evaluation stacks are permitted");
     assert.equal(process.env.ALLOWED_EMAIL, "phase5a@example.test");
     assert.ok(anon && service); guarded = true;
     const auth = await login(process.env.ALLOWED_EMAIL!); token = auth.token; ownerId = auth.id;

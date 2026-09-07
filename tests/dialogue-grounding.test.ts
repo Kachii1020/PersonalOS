@@ -20,7 +20,7 @@ test("read replies use server messages and preserve optional explicit query date
     assert.equal(result.startsAt, null);
   }
   assert.equal(groundDialogueIntent(intent({ kind: "read_calendar", date: quote("내일") }), user("내일 일정 보여줘"), now, []).queryDate, "2026-09-08");
-  assert.equal(groundDialogueIntent(intent({ kind: "read_calendar" }), user("내일 일정 보여줘"), now, []).needsClarification, true);
+  assert.equal(groundDialogueIntent(intent({ kind: "read_calendar" }), user("내일 일정 보여줘"), now, []).queryDate, "2026-09-08");
 });
 
 test("calendar creation fields are exact user quotes and deterministic JST instants", () => {
@@ -175,15 +175,75 @@ test("calendar reads with multiple dates clarify instead of selecting one", () =
   assert.equal(result.queryDate, null);
 });
 
+test("calendar reads reject user constraints even when the model omits them", () => {
+  const incompleteModel = intent({ kind: "read_calendar", date: quote("내일") });
+  for (const content of ['내일 제목에 "면접"이 들어간 일정만 보여줘', "내일 빈 시간만 알려주세요", "내일 우선순위 높은 순으로 일정 보여줘", "내일 한 시간 이상인 일정 보여줘", "내일 참석자 있는 일정만 보여줘", "내일 취소된 일정만 보여줘"]) {
+    const result = groundDialogueIntent(incompleteModel, user(content), now, []);
+    assert.equal(result.needsClarification, true, content);
+    assert.equal(result.queryDate, null);
+  }
+  for (const content of ["내일 캘린더에 있는 일정을 알려주세요", "내일 일정 목록을 확인해 줘", "내일 일본 시간 기준 일정 보여줘"]) {
+    const result = groundDialogueIntent(incompleteModel, user(content), now, []);
+    assert.equal(result.needsClarification, false, content);
+    assert.equal(result.queryDate, "2026-09-08");
+  }
+});
+
 test("task and career list reads never silently discard unsupported modifiers", () => {
   for (const kind of ["read_tasks", "read_career"] as const) {
     const noun = kind === "read_tasks" ? "할 일" : "커리어 기회";
-    for (const modifier of ["오늘", "14:30", "오후", "완료한", "우선순위 높은", "이번 주 마감", "Python 관련", "일본 지역", "상위 3개"]) {
+    for (const modifier of ["오늘", "14:30", "오후", "우선순위 높은", "이번 주 마감", "Python 관련", "일본 지역", "상위 3개"]) {
       const result = groundDialogueIntent(intent({ kind }), user(`${modifier} ${noun} 보여줘`), now, []);
       assert.equal(result.needsClarification, true, `${kind}: ${modifier}`);
     }
     assert.equal(groundDialogueIntent(intent({ kind }), user(`현재 ${noun} 목록 보여줘`), now, []).needsClarification, false);
   }
+});
+
+test("task read filters are user-derived with explicit deadline dates and no model filter fields", () => {
+  const result = groundDialogueIntent(intent({ kind: "read_tasks" }), user('2032-02-29 마감인 남은 태스크 중 제목에 "장학금"이 포함된 것만 마감이 가까운 순으로 확인해 주세요.'), now, []);
+  assert.equal(result.needsClarification, false);
+  assert.equal(result.queryDate, "2032-02-29");
+  assert.deepEqual(result.readFilters, { taskStatus: "open", keyword: "장학금", order: "due" });
+  const literalDate = groundDialogueIntent(intent({ kind: "read_tasks" }), user('제목에 "2032-02-29"가 들어간 할 일 보여줘'), now, []);
+  assert.equal(literalDate.queryDate, null);
+  assert.deepEqual(literalDate.readFilters, { keyword: "2032-02-29" });
+});
+
+test("a complete latest correction replaces prior slots but a partial correction still clarifies", () => {
+  const messages: ChatMessage[] = [...user("내일 09:00 운동 1시간 일정 추가해"), { role: "assistant", content: "초안입니다." }, { role: "user", content: "정정할게. 2031-07-22 18:45 실험 준비 25분 일정 추가해" }];
+  const corrected = eventIntent({ title: quote("실험 준비", 2), date: quote("2031-07-22", 2), time: quote("18:45", 2), duration: quote("25분", 2) });
+  const result = groundDialogueIntent(corrected, messages, now, []);
+  assert.equal(result.needsClarification, false);
+  assert.equal(result.startsAt, "2031-07-22T18:45:00+09:00");
+  assert.equal(result.title, "실험 준비");
+  const switched: ChatMessage[] = [...messages.slice(0, 2), { role: "user", content: "그 일정 말고 논문 확인 할 일을 마감 없이 추가해" }];
+  assert.equal(groundDialogueIntent(intent({ kind: "create_task", title: quote("논문 확인", 2) }), switched, now, []).needsClarification, false);
+  assert.equal(groundDialogueIntent({ ...corrected, title: quote("운동") }, messages, now, []).needsClarification, true);
+});
+
+test("older quotes cannot cross cancellation, a new read, or a separate action", () => {
+  for (const barrier of ["취소해", "할 일 목록 보여줘", "모레 10:00 독서 30분 일정 추가해", "다른 면접 일정을 수정해"]) {
+    const messages: ChatMessage[] = [...user(request), { role: "user", content: barrier }, { role: "user", content: "18:00 40분으로 변경해" }];
+    const stale = eventIntent({ time: quote("18:00", 2), duration: quote("40분", 2) });
+    assert.equal(groundDialogueIntent(stale, messages, now, []).needsClarification, true, barrier);
+  }
+});
+
+test("nounless new requests cannot carry an old task title into a different action", () => {
+  const prior: ChatMessage[] = [{ role: "user", content: "독서 할 일 추가해" }, { role: "assistant", content: "독서 초안입니다" }];
+  const stale = intent({ kind: "create_task", title: quote("독서") });
+  for (const content of ["요가 추가해", "번역도 만들어줘", "수영을 넣어줘", "마감 없이 음악 감상 추가해"]) {
+    assert.equal(groundDialogueIntent(stale, [...prior, { role: "user", content }], now, []).needsClarification, true, content);
+  }
+  const noDeadline = groundDialogueIntent(stale, [...prior, { role: "user", content: "마감 없이 추가해 줘" }], now, []);
+  assert.equal(noDeadline.needsClarification, false);
+  assert.equal(noDeadline.title, "독서");
+  assert.equal(noDeadline.startsAt, null);
+  const deadline = groundDialogueIntent({ ...stale, date: quote("모레", 2), time: quote("10:30", 2) }, [...prior, { role: "user", content: "모레 10:30 마감으로 추가해 줘" }], now, []);
+  assert.equal(deadline.needsClarification, false);
+  assert.equal(deadline.title, "독서");
+  assert.equal(deadline.startsAt, "2026-09-09T10:30:00+09:00");
 });
 
 test("update requires allowed source and supports server-preserved title only", () => {
@@ -216,6 +276,35 @@ test("prompt validates explicit selection against supplied records", () => {
   assert.equal(JSON.parse(buildDialoguePrompt(user("내일 오후 3시 1시간"), sources, now, "calendar:1")).selectedSourceId, "calendar:1");
   assert.throws(() => buildDialoguePrompt(user("내일 오후 3시 1시간"), sources, now, "calendar:unknown"));
   assert.match(DIALOGUE_SYSTEM, /explicit USER interface selection/);
+});
+
+test("read title echoes are accepted only when they equal the latest deterministic literal keyword", () => {
+  const content = '제목에 "양자 연구"가 들어간 커리어 기회 보여줘';
+  const echoed = intent({ kind: "read_career", title: quote("양자 연구") });
+  const result = groundDialogueIntent(echoed, user(content), now, []);
+  assert.equal(result.needsClarification, false);
+  assert.deepEqual(result.readFilters, { keyword: "양자 연구" });
+  assert.equal(result.title, null);
+  assert.equal(groundDialogueIntent({ ...echoed, title: quote("양자") }, user(content), now, []).needsClarification, true);
+  assert.equal(groundDialogueIntent(echoed, user("양자 연구 커리어 기회 보여줘"), now, []).needsClarification, true);
+  assert.equal(groundDialogueIntent(echoed, [...user(content), { role: "user", content }], now, []).needsClarification, true);
+});
+
+test("retained selected target cannot revive a canceled update from fresh slot-only text", () => {
+  const messages: ChatMessage[] = [{ role: "user", content: "선택한 일정 변경해" }, { role: "assistant", content: "시간을 입력해 주세요." }, { role: "user", content: "그 요청 취소해" }, { role: "assistant", content: "다시 실행하겠습니다." }, { role: "user", content: "내일 17:20 35분" }];
+  const update = intent({ kind: "update_calendar", sourceId: "calendar:heldout", date: quote("내일", 4), time: quote("17:20", 4), duration: quote("35분", 4) });
+  assert.equal(groundDialogueIntent(update, messages, now, ["calendar:heldout"], "calendar:heldout").needsClarification, true);
+  const renewed: ChatMessage[] = [...messages.slice(0, 4), { role: "user", content: "선택한 일정 다시 수정해" }, { role: "user", content: "내일 17:20 35분" }];
+  const newQuotes = { ...update, date: quote("내일", 5), time: quote("17:20", 5), duration: quote("35분", 5) };
+  assert.equal(groundDialogueIntent(newQuotes, renewed, now, ["calendar:heldout"], "calendar:heldout").needsClarification, false);
+});
+
+test("polite read interruptions block old write quotes across every supported request form", () => {
+  for (const read of ["할 일 보여주세요", "할 일 알려주세요", "일정 조회해줘", "기회 목록 확인해 주세요"]) {
+    const messages: ChatMessage[] = [...user(request), { role: "user", content: read }, { role: "user", content: "18:00 40분으로 변경해" }];
+    const stale = eventIntent({ time: quote("18:00", 2), duration: quote("40분", 2) });
+    assert.equal(groundDialogueIntent(stale, messages, now, []).needsClarification, true, read);
+  }
 });
 
 test("intent schema rejects fabricated keys, malformed quotes and unsupported actions", () => {
