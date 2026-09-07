@@ -47,6 +47,6 @@ Status: local implementation and G5B verification complete; draft PR #25 created
 - [x] T006 US1/US2/US3/US6: profile/opportunity/company/case UI + Today selection.
 - [x] T007 all: local DB gate, regression, browser verification and G5B report.
 - [x] T008 all: reviewed draft PR using observed results only — https://github.com/Kachii1020/PersonalOS/pull/25.
-- [ ] T009 all: separately authorized hosted migration, deployment, device checks and career monitoring activation.
+- [x] T009 all: separately authorized hosted 0018, production deployment and career monitoring activation; authenticated production browser checks passed. Repeated physical-device checks were waived, not claimed passed. See G5B-PRODUCTION-REPORT.md.
 
 The initial authorization blocker was resolved by the user's explicit Phase 5B/local DB approval. Actual results, failures/retries and unexecuted production steps are recorded in G5B-REPORT.md. Queries paginate rather than silently dropping the 201st record; the explicit 10,000-row safety boundary fails visibly. University, opportunity/source classes, watch rationale and source transition metadata implement the corresponding §12 fields.
