@@ -7,7 +7,9 @@ import { createServerClient } from "@supabase/ssr";
  * `/api/jobs`는 크론이 x-cron-secret 헤더로 인증한다. 세션이 없다고 리다이렉트하면
  * 잡이 로그인 페이지 HTML을 받게 된다.
  */
-const PUBLIC_PATHS = ["/login", "/auth/callback", "/api/jobs"];
+// Dialogue endpoints enforce owner authentication themselves and must return
+// JSON 401/403, rather than an HTML login redirect, to the chat client.
+const PUBLIC_PATHS = ["/login", "/auth/callback", "/api/jobs", "/api/jarvis/"];
 
 /**
  * 세션 쿠키를 갱신하고, 미인증 요청을 /login으로 돌린다.

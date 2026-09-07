@@ -1,6 +1,7 @@
 import "server-only";
 import { parseCreateTaskPayload } from "./action-payload";
 import { policyForAction } from "./policy";
+import { executeCalendarForApprovalForJob, isCalendarExecutorEnabled } from "@/lib/repos/jarvis-calendar-actions";
 import type { ApprovalRequest } from "./db-types";
 import type { JsonValue } from "./types";
 import {
@@ -30,7 +31,14 @@ async function executeClaimedApproval(approval: ApprovalRequest, workerId: strin
       return { kind: "executed", approvalId: approval.id, result };
     }
 
-    throw new Error(`Phase 5A에서 구현되지 않은 action입니다: ${approval.actionType}`);
+    if (approval.actionType === "CREATE_CALENDAR_EVENT" || approval.actionType === "UPDATE_CALENDAR_EVENT") {
+      if (!isCalendarExecutorEnabled()) throw new Error("캘린더 실행 연결이 비활성화되어 있습니다.");
+      const calendar = await executeCalendarForApprovalForJob(approval, workerId);
+      if (calendar.kind === "verified") return { kind: "executed", approvalId: approval.id, result: { eventId: calendar.eventId, uid: calendar.uid, href: calendar.href } };
+      return { kind: "failed", approvalId: approval.id, message: calendar.message };
+    }
+
+    throw new Error(`구현되지 않은 action입니다: ${approval.actionType}`);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await failApprovalForJob(approval.id, workerId, message);

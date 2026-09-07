@@ -10,7 +10,7 @@ on:
         required: true
         default: all
         type: choice
-        options: [all, monitor-career-sources, process-system-events, process-approved-actions, generate-command-brief]
+        options: [all, prune-dialogue-drafts, monitor-career-sources, process-system-events, process-approved-actions, generate-command-brief]
 
 permissions:
   contents: read
@@ -33,6 +33,7 @@ jobs:
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           REQUESTED_JOB: ${{ inputs.job }}
           CAREER_MONITOR_ENABLED: ${{ vars.JARVIS_CAREER_ENABLED }}
+          DIALOGUE_ENABLED: ${{ vars.JARVIS_DIALOGUE_ENABLED }}
         run: |
           set -euo pipefail
           APP_URL="${APP_URL%/}"
@@ -47,8 +48,9 @@ jobs:
           case "${REQUESTED_JOB:-all}" in
             all)
               jobs="process-system-events process-approved-actions generate-command-brief"
-              if [ "$CAREER_MONITOR_ENABLED" = "true" ]; then jobs="monitor-career-sources $jobs"; fi ;;
-            monitor-career-sources|process-system-events|process-approved-actions|generate-command-brief) jobs="$REQUESTED_JOB" ;;
+              if [ "$CAREER_MONITOR_ENABLED" = "true" ]; then jobs="monitor-career-sources $jobs"; fi
+              if [ "$DIALOGUE_ENABLED" = "true" ]; then jobs="prune-dialogue-drafts $jobs"; fi ;;
+            prune-dialogue-drafts|monitor-career-sources|process-system-events|process-approved-actions|generate-command-brief) jobs="$REQUESTED_JOB" ;;
             *) echo "::error::Unknown JARVIS job"; exit 1 ;;
           esac
           for job in $jobs; do

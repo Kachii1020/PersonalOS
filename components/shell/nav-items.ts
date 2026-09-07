@@ -28,6 +28,7 @@ export type NavItem = {
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "대시보드", icon: LayoutDashboard },
   { href: "/today", label: "JARVIS Today", icon: Bot },
+  { href: "/jarvis", label: "자비스와 대화", icon: Bot },
   { href: "/inbox", label: "JARVIS 인박스", icon: Inbox },
   { href: "/approvals", label: "JARVIS 승인", icon: ShieldCheck },
   { href: "/career", label: "커리어 비서", icon: FolderKanban },

@@ -3,13 +3,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import type { ApprovalRequest } from "@/lib/jarvis/db-types";
-import { parseCreateTaskPayload } from "@/lib/jarvis/action-payload";
 import { listApprovalRequests } from "@/lib/repos/jarvis-approvals";
-import { decideApprovalAction } from "./actions";
+import { listCalendarReconciliationIdsForOwner } from "@/lib/repos/jarvis-calendar-actions";
+import { PayloadPreview } from "@/components/jarvis-chat/display";
+import { decideApprovalAction, reconcileCalendarAction } from "./actions";
 import { JarvisActionForm } from "@/components/widgets/jarvis-action-form";
 import { ErrorState } from "@/components/ui/error-state";
 
 export const metadata = { title: "JARVIS 승인 · Personal OS" };
+export const maxDuration = 120;
 
 const STATUS_LABEL: Record<ApprovalRequest["status"], string> = {
   pending: "승인 대기",
@@ -38,26 +40,13 @@ function formatDate(value: string): string {
   }).format(new Date(value));
 }
 
-function payloadLines(request: ApprovalRequest): string[] {
-  if (request.actionType === "CREATE_TASK") {
-    try {
-      const task = parseCreateTaskPayload(request.payload);
-      return [
-        `제목: ${task.title}`,
-        task.dueAt ? `마감: ${formatDate(task.dueAt)}` : "마감: 없음",
-        task.estimatedMinutes ? `예상 시간: ${task.estimatedMinutes}분` : "예상 시간: 미지정",
-      ];
-    } catch {
-      return ["payload 형식을 확인할 수 없습니다."];
-    }
-  }
-  return [`행동 유형: ${request.actionType}`];
-}
-
 export default async function ApprovalsPage() {
   let requests;
+  let reconcileIds: string[] = [];
   try {
     requests = await listApprovalRequests(50);
+    const calendarIds = requests.filter((request) => ["CREATE_CALENDAR_EVENT", "UPDATE_CALENDAR_EVENT"].includes(request.actionType)).map((request) => request.id);
+    if (calendarIds.length) reconcileIds = await listCalendarReconciliationIdsForOwner(calendarIds);
   } catch (error) {
     console.error(error);
     return (
@@ -95,7 +84,7 @@ export default async function ApprovalsPage() {
             <Card key={request.id}>
               <CardHeader>
                 <div className="flex min-w-0 items-center gap-2">
-                  <Badge tone={tone(request.status)}>{STATUS_LABEL[request.status]}</Badge>
+                  <Badge tone={tone(request.status)}>{reconcileIds.includes(request.id) ? "실행 결과 확인 필요" : STATUS_LABEL[request.status]}</Badge>
                   <Badge>{request.riskLevel} risk</Badge>
                 </div>
                 <CardHint>{formatDate(request.requestedAt)}</CardHint>
@@ -103,11 +92,7 @@ export default async function ApprovalsPage() {
 
               <CardTitle>{request.title}</CardTitle>
               <p className="mt-2 text-sm leading-6 text-text-muted">{request.explanation}</p>
-              <ul className="mt-3 space-y-1 rounded-xl bg-bg p-3 text-xs text-text-muted">
-                {payloadLines(request).map((line) => (
-                  <li key={line}>{line}</li>
-                ))}
-              </ul>
+              <div className="mt-3 rounded-xl bg-bg p-3"><PayloadPreview payload={request.payload} /></div>
 
               {request.status === "pending" ? (
                 <JarvisActionForm action={decideApprovalAction} className="mt-4 space-y-3">
@@ -142,6 +127,11 @@ export default async function ApprovalsPage() {
 
               {request.decisionNote && <p className="mt-2 text-xs text-text-muted">메모: {request.decisionNote}</p>}
               {request.error && <p className="mt-2 text-xs text-negative">{request.error}</p>}
+              {reconcileIds.includes(request.id) && <JarvisActionForm action={reconcileCalendarAction} className="mt-3">
+                <input type="hidden" name="approvalId" value={request.id} />
+                <p className="text-xs text-text-muted">원격 결과만 다시 확인합니다. 이 버튼은 일정을 새로 쓰거나 변경하지 않습니다.</p>
+                <Button type="submit" variant="secondary">실행 결과 다시 확인</Button>
+              </JarvisActionForm>}
             </Card>
           ))
         )}

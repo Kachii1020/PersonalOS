@@ -20,6 +20,9 @@
     "test:g5a:local": "node --import tsx --conditions=react-server --test tests/gates/g5a-local.test.ts",
     "test:g5b:local": "node --import tsx --conditions=react-server --test tests/gates/g5b-local.test.ts",
     "test:g5b:browser": "node --import tsx --conditions=react-server --test tests/gates/g5b-browser.test.ts",
+    "test:g6a:local": "node --import tsx --conditions=react-server --test tests/gates/g6a-local.test.ts",
+    "test:g6a:browser": "node --import tsx --conditions=react-server --test tests/gates/g6a-browser.test.ts",
+    "test:g6b:local": "node --import tsx --conditions=react-server --test tests/gates/g6b-local.test.ts",
     "test": "npm run test:unit && npm run test:g1 && npm run test:g2 && npm run test:g3 && npm run test:g4 && npm run test:g5a"
   },
   "keywords": [],

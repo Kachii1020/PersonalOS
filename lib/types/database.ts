@@ -371,6 +371,106 @@ export type Database = {
         }
         Relationships: []
       }
+      calendar_execution_receipts: {
+        Row: {
+          action_type: string
+          approval_id: string
+          attempted_at: string | null
+          calendar_id: string
+          calendar_source_url: string
+          claim_mode: string | null
+          claim_token: string | null
+          created_at: string
+          draft_id: string
+          href: string
+          last_error: string | null
+          locked_by: string | null
+          locked_until: string | null
+          mirror_event_id: string | null
+          owner_id: string
+          payload: Json
+          payload_hash: string
+          remote_etag: string | null
+          state: string
+          uid: string
+          updated_at: string
+          verified_at: string | null
+          write_attempts: number
+        }
+        Insert: {
+          action_type: string
+          approval_id: string
+          attempted_at?: string | null
+          calendar_id: string
+          calendar_source_url: string
+          claim_mode?: string | null
+          claim_token?: string | null
+          created_at?: string
+          draft_id: string
+          href: string
+          last_error?: string | null
+          locked_by?: string | null
+          locked_until?: string | null
+          mirror_event_id?: string | null
+          owner_id: string
+          payload: Json
+          payload_hash: string
+          remote_etag?: string | null
+          state?: string
+          uid: string
+          updated_at?: string
+          verified_at?: string | null
+          write_attempts?: number
+        }
+        Update: {
+          action_type?: string
+          approval_id?: string
+          attempted_at?: string | null
+          calendar_id?: string
+          calendar_source_url?: string
+          claim_mode?: string | null
+          claim_token?: string | null
+          created_at?: string
+          draft_id?: string
+          href?: string
+          last_error?: string | null
+          locked_by?: string | null
+          locked_until?: string | null
+          mirror_event_id?: string | null
+          owner_id?: string
+          payload?: Json
+          payload_hash?: string
+          remote_etag?: string | null
+          state?: string
+          uid?: string
+          updated_at?: string
+          verified_at?: string | null
+          write_attempts?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_execution_receipts_approval_id_fkey"
+            columns: ["approval_id"]
+            isOneToOne: true
+            referencedRelation: "approval_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_execution_receipts_calendar_id_fkey"
+            columns: ["calendar_id"]
+            isOneToOne: false
+            referencedRelation: "calendars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_execution_receipts_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: true
+            referencedRelation: "dialogue_action_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calendars: {
         Row: {
           color: string | null
@@ -581,6 +681,56 @@ export type Database = {
             columns: ["semester_id"]
             isOneToOne: false
             referencedRelation: "semesters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dialogue_action_drafts: {
+        Row: {
+          action_type: string
+          approval_request_id: string | null
+          created_at: string
+          executable: boolean
+          expires_at: string
+          explanation: string
+          id: string
+          owner_id: string
+          payload: Json
+          source_snapshot: Json
+          title: string
+        }
+        Insert: {
+          action_type: string
+          approval_request_id?: string | null
+          created_at?: string
+          executable?: boolean
+          expires_at?: string
+          explanation: string
+          id?: string
+          owner_id: string
+          payload: Json
+          source_snapshot?: Json
+          title: string
+        }
+        Update: {
+          action_type?: string
+          approval_request_id?: string | null
+          created_at?: string
+          executable?: boolean
+          expires_at?: string
+          explanation?: string
+          id?: string
+          owner_id?: string
+          payload?: Json
+          source_snapshot?: Json
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dialogue_action_drafts_approval_request_id_fkey"
+            columns: ["approval_request_id"]
+            isOneToOne: true
+            referencedRelation: "approval_requests"
             referencedColumns: ["id"]
           },
         ]
@@ -1756,9 +1906,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      before_calendar_write: {
+        Args: {
+          p_approval_id: string
+          p_claim_token: string
+          p_worker_id: string
+        }
+        Returns: undefined
+      }
+      begin_calendar_execution: {
+        Args: { p_approval_id: string; p_worker_id: string }
+        Returns: Json
+      }
       career_mutate: {
         Args: { p_action: string; p_id?: string; p_input?: Json }
         Returns: string
+      }
+      check_calendar_receipt: {
+        Args: {
+          p_before_write: boolean
+          r: Database["public"]["Tables"]["calendar_execution_receipts"]["Row"]
+        }
+        Returns: undefined
       }
       claim_approved_action_by_id: {
         Args: {
@@ -1792,6 +1961,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      claim_calendar_reconciliation: {
+        Args: { p_approval_id: string; p_owner_id: string; p_worker_id: string }
+        Returns: Json
       }
       claim_next_agent_run: {
         Args: { p_lease_seconds?: number; p_worker_id: string }
@@ -1927,6 +2100,25 @@ export type Database = {
         Args: { p_approval_id: string; p_error: string; p_worker_id: string }
         Returns: undefined
       }
+      fail_calendar_execution: {
+        Args: {
+          p_approval_id: string
+          p_claim_token: string
+          p_error: string
+          p_state: string
+          p_worker_id: string
+        }
+        Returns: undefined
+      }
+      finish_calendar_execution: {
+        Args: {
+          p_approval_id: string
+          p_claim_token: string
+          p_proof: Json
+          p_worker_id: string
+        }
+        Returns: Json
+      }
       is_allowed_user: { Args: never; Returns: boolean }
       prepare_jarvis_approval: {
         Args: { p_proposal: Json; p_run_id: string; p_worker_id: string }
@@ -1957,7 +2149,12 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      prune_dialogue_drafts: { Args: never; Returns: number }
       queue_due_career_sources: { Args: { p_limit?: number }; Returns: number }
+      request_dialogue_approval: {
+        Args: { p_draft_id: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
