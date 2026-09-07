@@ -1,4 +1,4 @@
-**Phase 6 — 대화형 JARVIS + 승인 기반 캘린더 실행 로컬 검증 완료, 운영 전환 대기.** `docs/PHASE6-SPEC.md`·`docs/PHASE6-PLAN.md` 범위의 구현과 실제 DB/브라우저/iCloud/복구 검증 증거는 `docs/PHASE6-REPORT.md`에 기록했다. 초안 PR #27이며 신규 0019–0021·executor·초안 정리 cron은 운영에 적용하지 않았다. 5B 운영 전환 증거는 `docs/G5B-PRODUCTION-REPORT.md`. Learn/Quiz와 기존 데이터는 유지한다.
+**Phase 6 — 대화형 JARVIS + 승인 기반 캘린더 실행 운영 반영 완료, 새 자동 예약 실행 관찰 대기.** PR #27 병합, 운영 0019–0021·플래그 포함 Ready 배포·초안 정리 활성화와 5개 작업 수동 HTTP 200을 확인했다. 실제 수치와 남은 자동 예약 실행 구분은 `docs/G6-PRODUCTION-REPORT.md`, 로컬 DB/브라우저/iCloud/복구 검증은 `docs/PHASE6-REPORT.md`. Learn/Quiz와 기존 데이터는 유지하며 다음 Phase 기능은 아직 시작하지 않았다.
 
 **이전 Phase 4 종료.** G1·G2·G3 통과. G4는 7/8 통과 + 조건 8 운영자 면제 (2026-08-20) — 판정과 면제 사유는 `docs/G4-REPORT.md`. 업그레이드 Tier 3는 `docs/DEFERRED.md` 참고.
 
