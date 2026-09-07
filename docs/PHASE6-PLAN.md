@@ -1,6 +1,6 @@
 # Phase 6 implementation plan
 
-Status: conversation and calendar execution implemented locally; final regression/release pending on `codex/phase6-conversation-actions`. Started from main `e6d4c9f22665be364e0b522d926bb01f18e7c440` (Phase 5B merge). Scope: PHASE6-SPEC.md.
+Status: conversation and calendar execution locally verified and deployed through PR #27; first new schedule-triggered run remains unobserved. Production evidence: G6-PRODUCTION-REPORT.md. Started from main `e6d4c9f22665be364e0b522d926bb01f18e7c440` (Phase 5B merge). Scope: PHASE6-SPEC.md.
 The branch was fast-forwarded to main `47d5447` (production-evidence PR #26) before implementation.
 
 ## Design
@@ -41,6 +41,6 @@ Independent review reproduced precision loss in installed `ical-generator`: a su
 - [x] T606 G6A: real local DB + browser flow and historical regression, independent review/report (existing manual skips remain explicit).
 - [x] T607 FR-607–611: CalDAV create/reconcile/update adapter and execution receipts; fault-injection tests and executor wiring verified locally.
 - [x] T608 G6B: concurrency/replay/response-loss/412, actual target-lock expiry, dedicated-calendar round trip and owner-cookie read-only recovery; independent review/report.
-- [ ] T609: separate reviewed PR/release; expose deployment and unexecuted checks honestly.
+- [x] T609: PR #27 merged and operational release verified; separate automatic-schedule observation and waived/unexecuted physical checks remain explicit in G6-PRODUCTION-REPORT.md.
 
 Do not confuse completed contract tests with completed conversation or calendar execution. Raw chat retention, email, invitations, recurrence edits, payments, finance operations, native apps and file/device control remain out of scope.

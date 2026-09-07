@@ -1,5 +1,7 @@
 # Phase 6 implementation evidence
 
+Operational follow-up: the user subsequently authorized production rollout. Actual hosted migrations, flag-bearing READY deployment and cron activation evidence are in G6-PRODUCTION-REPORT.md. The local-increment deployment statements below describe the earlier verification boundary, not the current operational state.
+
 2026-09-07 JST. **Conversation and approval-gated calendar execution implemented and locally verified; production rollout remains pending.** Branch `codex/phase6-conversation-actions`, draft PR #27. Latest main checked at `47d5447`; no incoming main changes or migration-number collision at final fetch.
 
 ## Implemented scope
