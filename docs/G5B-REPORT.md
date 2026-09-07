@@ -1,6 +1,7 @@
 # G5B — implementation and verification evidence
 
 Status: **Local G5B gate passed; production release pending.** 2026-09-06 JST.
+Follow-up 2026-09-07: production rollout completed; see G5B-PRODUCTION-REPORT.md. The release-pending statements below describe the original local handoff, not the current deployment state.
 **DELIVERY_COMPLETE** for the approved development/local-verification scope; this does not claim hosted rollout or physical-device acceptance.
 
 Branch: `codex/phase5b-career-secretary`, created from main `0c0ac2173bcf1468f909c305367f8afc6aef990d`.
