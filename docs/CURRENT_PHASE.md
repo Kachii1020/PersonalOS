@@ -1,4 +1,4 @@
-**Phase 5B — Career Secretary 운영 전환 완료.** 0018·운영 배포·career cron 활성화와 실제 확인 결과는 `docs/G5B-PRODUCTION-REPORT.md`. 로컬 증거는 `docs/G5B-REPORT.md`. 사용자는 후속 Phase 6에 대화형 JARVIS와 승인 기반 캘린더 생성·수정을 모두 지정했다. 후속 작업은 별도 브랜치/명세로 진행하며 Learn/Quiz와 기존 데이터는 유지한다.
+**Phase 6 — 대화형 JARVIS + 승인 기반 캘린더 실행 착수.** 사용자가 두 범위를 모두 지정했다. `docs/PHASE6-SPEC.md`와 `docs/PHASE6-PLAN.md`를 따르며 6A 대화·제안, 6B 캘린더 생성·수정을 순서대로 검증한다. 5B 운영 전환 증거는 `docs/G5B-PRODUCTION-REPORT.md`. Learn/Quiz와 기존 데이터는 유지하고, 검증 전 신규 executor를 운영에서 활성화하지 않는다.
 
 **이전 Phase 4 종료.** G1·G2·G3 통과. G4는 7/8 통과 + 조건 8 운영자 면제 (2026-08-20) — 판정과 면제 사유는 `docs/G4-REPORT.md`. 업그레이드 Tier 3는 `docs/DEFERRED.md` 참고.
 
