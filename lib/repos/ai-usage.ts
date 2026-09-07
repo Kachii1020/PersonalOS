@@ -1,7 +1,7 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-export type AiPurpose = "briefing" | "quiz" | "material_summary" | "domain_lesson" | "weekly_review" | "career_extraction";
+export type AiPurpose = "briefing" | "quiz" | "material_summary" | "domain_lesson" | "weekly_review" | "career_extraction" | "dialogue";
 
 export type UsageRecord = {
   purpose: AiPurpose;

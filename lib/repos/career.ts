@@ -109,6 +109,9 @@ async function readCareer(client: Client, opportunityId?: string): Promise<{ das
 export async function getCareerDashboard(): Promise<CareerDashboard> {
   return (await readCareer(await createClient())).dashboard;
 }
+export async function getCareerDashboardForClient(client: Client): Promise<CareerDashboard> {
+  return (await readCareer(client)).dashboard;
+}
 export async function getCareerWorkForJob(id: string) {
   const { dashboard, rows } = await readCareer(createAdminClient(), id);
   const opportunity = dashboard.opportunities[0];

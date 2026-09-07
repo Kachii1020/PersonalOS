@@ -28,11 +28,11 @@ function uuid(value: unknown, field: string): string {
   return value.toLowerCase();
 }
 
-function text(value: unknown, field: string, max: number, optional = false): string | null {
+function text(value: unknown, field: string, max: number, optional = false, preserve = false): string | null {
   if (optional && (value === null || value === undefined)) return null;
   if (typeof value !== "string" || value.length > max || (!optional && !value.trim())) throw new Error(`${field}: ${max}자 이내의 문자열이 필요합니다.`);
   if (Array.from(value).some((character) => character.charCodeAt(0) === 0 || (character.charCodeAt(0) < 32 && (field !== "description" || ![9, 10, 13].includes(character.charCodeAt(0)))))) throw new Error(`${field}: 제어 문자는 사용할 수 없습니다.`);
-  return value.trim() || null;
+  return preserve ? value : value.trim() || null;
 }
 
 function instant(value: unknown, field: string): { value: string; milliseconds: number } {
@@ -60,10 +60,11 @@ export function parseCalendarActionPayload(type: CalendarActionType, input: unkn
   const start = instant(record.startsAt, "startsAt");
   const end = instant(record.endsAt, "endsAt");
   if (end.milliseconds <= start.milliseconds || end.milliseconds - start.milliseconds > MAX_DURATION) throw new Error("종료는 시작 이후여야 하며 일정 길이는 7일 이하여야 합니다.");
+  const preserveText = type === "UPDATE_CALENDAR_EVENT";
   const common: CreateCalendarActionPayload = {
     version: 1, calendarId: uuid(record.calendarId, "calendarId"),
-    summary: text(record.summary, "summary", 300)!, startsAt: start.value, endsAt: end.value,
-    timezone: "Asia/Tokyo", description: text(record.description, "description", 4000, true), location: text(record.location, "location", 300, true),
+    summary: text(record.summary, "summary", 300, false, preserveText)!, startsAt: start.value, endsAt: end.value,
+    timezone: "Asia/Tokyo", description: text(record.description, "description", 4000, true, preserveText), location: text(record.location, "location", 300, true, preserveText),
   };
   if (type === "CREATE_CALENDAR_EVENT") return common;
   text(record.expectedUid, "expectedUid", 255);

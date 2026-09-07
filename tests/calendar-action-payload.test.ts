@@ -32,6 +32,21 @@ test("update requires a complete immutable target and strong ETag snapshot", () 
   assert.equal(parseCalendarActionPayload("UPDATE_CALENDAR_EVENT", update({ expectedUid: " original-uid " })).expectedUid, " original-uid ");
 });
 
+test("UPDATE preserves exact existing text while CREATE keeps normalization", () => {
+  for (const texts of [{ summary: "  Existing meeting  ", description: "  line one\nline two  ", location: "  Room A  " }, { summary: "Meeting", description: "", location: "" }, { summary: "Meeting", description: " ", location: "  " }]) {
+    const parsed = parseCalendarActionPayload("UPDATE_CALENDAR_EVENT", update(texts));
+    assert.equal(parsed.summary, texts.summary);
+    assert.equal(parsed.description, texts.description);
+    assert.equal(parsed.location, texts.location);
+  }
+  assert.throws(() => parseCalendarActionPayload("UPDATE_CALENDAR_EVENT", update({ summary: "  " })));
+  assert.throws(() => parseCalendarActionPayload("UPDATE_CALENDAR_EVENT", update({ location: "Room\nB" })));
+  const created = parseCalendarActionPayload("CREATE_CALENDAR_EVENT", create({ summary: "  Meeting  ", description: "", location: "  " }));
+  assert.equal(created.summary, "Meeting");
+  assert.equal(created.description, null);
+  assert.equal(created.location, null);
+});
+
 test("unknown fields and unsupported actions cannot expand the approval", () => {
   for (const key of ["href", "url", "attendees", "rrule", "allDay", "uid", "expectedUid", "calendarSourceUrl", "approved", "idempotencyKey"]) assert.throws(() => parseCalendarActionPayload("CREATE_CALENDAR_EVENT", create({ [key]: null })));
   for (const key of ["href", "url", "attendees", "rrule", "allDay"]) assert.throws(() => parseCalendarActionPayload("UPDATE_CALENDAR_EVENT", update({ [key]: null })));

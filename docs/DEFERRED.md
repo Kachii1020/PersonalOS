@@ -51,3 +51,6 @@
 - **JARVIS 최초 예약 실행 관찰** — `JARVIS_CRON_ENABLED=true`로 5분 cron을 활성화했고 수동 실행은 성공했다. 첫 schedule-triggered 실행은 아직 미관측이며 수동 결과로 대체하지 않는다. 증거는 `docs/G5A-PRODUCTION-REPORT.md`.
 - **JARVIS 추가 executor / AI** — CalDAV·메일·GitHub 등은 policy 분류만 존재한다. 실제 executor는 CREATE_TASK만 지원하며 AI triage·AI brief·Phase 5B 구현은 별도 작업이다.
 - **Phase 5B 운영 반영** — 2026-09-06 명시 승인 후 로컬 DB G5B 11개, G5A DB 10개, 전체 회귀 209개(기존 G4 5개 skip), 두 브라우저 왕복과 실제 공개 원문 AI 경로를 검증했다. Hosted 0018·배포·실기기·career cron 활성화는 미실행이며 별도 운영 승인·검증이 필요하다. G5B-REPORT.md 참조. Phase 6 및 추가 외부 executor는 미착수.
+
+- **2026-09-07 상태 갱신** — 위 Phase 5B 운영 미실행 기록은 당시 상태다. 실제 전환은 G5B-PRODUCTION-REPORT.md, Phase 6 대화·캘린더 구현/검증은 PHASE6-REPORT.md를 따른다.
+- **Phase 6 잔여 범위** — 무제한 자유 대화·장기 원문 기억·복잡한 할 일/커리어 필터·자율 승인·메일/지원 제출·반복/종일/초대 일정·기기 제어는 구현하지 않는다. 운영 활성화와 미실행 검증 항목은 PHASE6-REPORT.md에 별도 표시한다.
