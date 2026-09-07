@@ -173,6 +173,59 @@ export type Database = {
         }
         Relationships: []
       }
+      application_cases: {
+        Row: {
+          contact: string
+          created_at: string
+          decision_reason: string
+          documents: string
+          due_at: string | null
+          id: string
+          interviews: string
+          next_action: string
+          opportunity_id: string
+          result: string
+          stage: string
+          updated_at: string
+        }
+        Insert: {
+          contact?: string
+          created_at?: string
+          decision_reason?: string
+          documents?: string
+          due_at?: string | null
+          id?: string
+          interviews?: string
+          next_action: string
+          opportunity_id: string
+          result?: string
+          stage?: string
+          updated_at?: string
+        }
+        Update: {
+          contact?: string
+          created_at?: string
+          decision_reason?: string
+          documents?: string
+          due_at?: string | null
+          id?: string
+          interviews?: string
+          next_action?: string
+          opportunity_id?: string
+          result?: string
+          stage?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_cases_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: true
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       approval_requests: {
         Row: {
           action_type: string
@@ -354,6 +407,27 @@ export type Database = {
         }
         Relationships: []
       }
+      career_profile: {
+        Row: {
+          facts: Json
+          revision: number
+          singleton: boolean
+          updated_at: string
+        }
+        Insert: {
+          facts?: Json
+          revision?: number
+          singleton?: boolean
+          updated_at?: string
+        }
+        Update: {
+          facts?: Json
+          revision?: number
+          singleton?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       command_briefs: {
         Row: {
           brief_date: string
@@ -387,6 +461,42 @@ export type Database = {
           source_snapshot?: Json
           top_actions?: Json
           warnings?: Json
+        }
+        Relationships: []
+      }
+      company_watchlist: {
+        Row: {
+          enabled: boolean
+          id: string
+          name: string
+          official_prefixes: Json
+          reason: string
+          tier: number
+          verified_at: string
+          window_end: string | null
+          window_start: string | null
+        }
+        Insert: {
+          enabled?: boolean
+          id?: string
+          name: string
+          official_prefixes: Json
+          reason?: string
+          tier?: number
+          verified_at?: string
+          window_end?: string | null
+          window_start?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          id?: string
+          name?: string
+          official_prefixes?: Json
+          reason?: string
+          tier?: number
+          verified_at?: string
+          window_end?: string | null
+          window_start?: string | null
         }
         Relationships: []
       }
@@ -907,6 +1017,234 @@ export type Database = {
         }
         Relationships: []
       }
+      opportunities: {
+        Row: {
+          canonical_url: string
+          company_id: string
+          created_at: string
+          current_source_id: string | null
+          deadline: string | null
+          decision: string
+          decision_history: Json
+          decision_reason: string | null
+          defer_until: string | null
+          deliverable_key: string | null
+          effort: number
+          etag: string | null
+          extracted_source_id: string | null
+          fit: number
+          id: string
+          last_checked_at: string | null
+          last_error: string | null
+          last_meaningful_change_at: string | null
+          last_modified: string | null
+          lifecycle: string
+          location: string | null
+          next_check_at: string
+          opportunity_type: string
+          requirements_complete: boolean
+          revision: number
+          source_available: boolean
+          source_class: string
+          source_reviewed: boolean
+          title: string
+          value: number
+          work_mode: string | null
+        }
+        Insert: {
+          canonical_url: string
+          company_id: string
+          created_at?: string
+          current_source_id?: string | null
+          deadline?: string | null
+          decision?: string
+          decision_history?: Json
+          decision_reason?: string | null
+          defer_until?: string | null
+          deliverable_key?: string | null
+          effort?: number
+          etag?: string | null
+          extracted_source_id?: string | null
+          fit?: number
+          id?: string
+          last_checked_at?: string | null
+          last_error?: string | null
+          last_meaningful_change_at?: string | null
+          last_modified?: string | null
+          lifecycle?: string
+          location?: string | null
+          next_check_at?: string
+          opportunity_type?: string
+          requirements_complete?: boolean
+          revision?: number
+          source_available?: boolean
+          source_class?: string
+          source_reviewed?: boolean
+          title: string
+          value?: number
+          work_mode?: string | null
+        }
+        Update: {
+          canonical_url?: string
+          company_id?: string
+          created_at?: string
+          current_source_id?: string | null
+          deadline?: string | null
+          decision?: string
+          decision_history?: Json
+          decision_reason?: string | null
+          defer_until?: string | null
+          deliverable_key?: string | null
+          effort?: number
+          etag?: string | null
+          extracted_source_id?: string | null
+          fit?: number
+          id?: string
+          last_checked_at?: string | null
+          last_error?: string | null
+          last_meaningful_change_at?: string | null
+          last_modified?: string | null
+          lifecycle?: string
+          location?: string | null
+          next_check_at?: string
+          opportunity_type?: string
+          requirements_complete?: boolean
+          revision?: number
+          source_available?: boolean
+          source_class?: string
+          source_reviewed?: boolean
+          title?: string
+          value?: number
+          work_mode?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunities_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_watchlist"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunities_source_fk"
+            columns: ["id", "current_source_id"]
+            isOneToOne: false
+            referencedRelation: "opportunity_sources"
+            referencedColumns: ["opportunity_id", "id"]
+          },
+        ]
+      }
+      opportunity_requirements: {
+        Row: {
+          expected: Json
+          field: string
+          hard: boolean
+          id: string
+          operator: string
+          opportunity_id: string
+          quote: string
+          reviewed: boolean
+          source_id: string
+        }
+        Insert: {
+          expected?: Json
+          field: string
+          hard?: boolean
+          id?: string
+          operator: string
+          opportunity_id: string
+          quote: string
+          reviewed?: boolean
+          source_id: string
+        }
+        Update: {
+          expected?: Json
+          field?: string
+          hard?: boolean
+          id?: string
+          operator?: string
+          opportunity_id?: string
+          quote?: string
+          reviewed?: boolean
+          source_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_requirements_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_requirements_opportunity_id_source_id_fkey"
+            columns: ["opportunity_id", "source_id"]
+            isOneToOne: false
+            referencedRelation: "opportunity_sources"
+            referencedColumns: ["opportunity_id", "id"]
+          },
+        ]
+      }
+      opportunity_sources: {
+        Row: {
+          content_hash: string
+          content_text: string
+          etag: string | null
+          http_status: number
+          id: string
+          last_modified: string | null
+          opportunity_id: string
+          retrieved_at: string
+          source_class: string
+          source_url: string
+          supersedes_source_id: string | null
+          title: string
+        }
+        Insert: {
+          content_hash: string
+          content_text: string
+          etag?: string | null
+          http_status?: number
+          id?: string
+          last_modified?: string | null
+          opportunity_id: string
+          retrieved_at?: string
+          source_class: string
+          source_url: string
+          supersedes_source_id?: string | null
+          title: string
+        }
+        Update: {
+          content_hash?: string
+          content_text?: string
+          etag?: string | null
+          http_status?: number
+          id?: string
+          last_modified?: string | null
+          opportunity_id?: string
+          retrieved_at?: string
+          source_class?: string
+          source_url?: string
+          supersedes_source_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_sources_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "opportunity_sources_opportunity_id_supersedes_source_id_fkey"
+            columns: ["opportunity_id", "supersedes_source_id"]
+            isOneToOne: false
+            referencedRelation: "opportunity_sources"
+            referencedColumns: ["opportunity_id", "id"]
+          },
+        ]
+      }
       price_snapshots: {
         Row: {
           as_of: string
@@ -1418,6 +1756,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      career_mutate: {
+        Args: { p_action: string; p_id?: string; p_input?: Json }
+        Returns: string
+      }
       claim_approved_action_by_id: {
         Args: {
           p_approval_id: string
@@ -1530,6 +1872,17 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      commit_career_step: {
+        Args: {
+          p_data: Json
+          p_kind: string
+          p_opportunity_id: string
+          p_revision: number
+          p_run_id: string
+          p_worker_id: string
+        }
+        Returns: boolean
+      }
       complete_approval_execution: {
         Args: { p_approval_id: string; p_result: Json; p_worker_id: string }
         Returns: undefined
@@ -1604,6 +1957,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      queue_due_career_sources: { Args: { p_limit?: number }; Returns: number }
     }
     Enums: {
       [_ in never]: never

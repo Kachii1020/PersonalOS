@@ -30,6 +30,8 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/today", label: "JARVIS Today", icon: Bot },
   { href: "/inbox", label: "JARVIS 인박스", icon: Inbox },
   { href: "/approvals", label: "JARVIS 승인", icon: ShieldCheck },
+  { href: "/career", label: "커리어 비서", icon: FolderKanban },
+  { href: "/opportunities", label: "지원 기회", icon: GraduationCap },
   { href: "/calendar", label: "캘린더", icon: CalendarDays },
   { href: "/tasks", label: "마감·할 일", icon: ListTodo },
   { href: "/quiz", label: "퀴즈", icon: BrainCircuit },

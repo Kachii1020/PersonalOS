@@ -10,7 +10,7 @@ on:
         required: true
         default: all
         type: choice
-        options: [all, process-system-events, process-approved-actions, generate-command-brief]
+        options: [all, monitor-career-sources, process-system-events, process-approved-actions, generate-command-brief]
 
 permissions:
   contents: read
@@ -32,6 +32,7 @@ jobs:
           APP_URL: ${{ secrets.APP_URL }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
           REQUESTED_JOB: ${{ inputs.job }}
+          CAREER_MONITOR_ENABLED: ${{ vars.JARVIS_CAREER_ENABLED }}
         run: |
           set -euo pipefail
           APP_URL="${APP_URL%/}"
@@ -44,8 +45,10 @@ jobs:
             exit 1
           fi
           case "${REQUESTED_JOB:-all}" in
-            all) jobs="process-system-events process-approved-actions generate-command-brief" ;;
-            process-system-events|process-approved-actions|generate-command-brief) jobs="$REQUESTED_JOB" ;;
+            all)
+              jobs="process-system-events process-approved-actions generate-command-brief"
+              if [ "$CAREER_MONITOR_ENABLED" = "true" ]; then jobs="monitor-career-sources $jobs"; fi ;;
+            monitor-career-sources|process-system-events|process-approved-actions|generate-command-brief) jobs="$REQUESTED_JOB" ;;
             *) echo "::error::Unknown JARVIS job"; exit 1 ;;
           esac
           for job in $jobs; do

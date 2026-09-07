@@ -43,7 +43,7 @@ export async function captureInboxItem(formData: FormData): Promise<void> {
   });
 
   try {
-    await processJarvisSteps({ workerId: `capture-${crypto.randomUUID()}`, maxSteps: 6 });
+    await processJarvisSteps({ workerId: `capture-${crypto.randomUUID()}`, maxSteps: 6, allowCareer: false });
   } catch (error) {
     // 캡처 자체는 이미 저장됐다. queue가 다음 수동/예약 job에서 재시도한다.
     console.error("[jarvis] 즉시 인박스 처리 실패:", error);

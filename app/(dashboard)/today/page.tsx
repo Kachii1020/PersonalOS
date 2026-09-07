@@ -5,6 +5,7 @@ import { buttonClass } from "@/components/ui/button";
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { buildLiveCommandBrief } from "@/lib/repos/jarvis-briefs";
 import { ErrorState } from "@/components/ui/error-state";
+import { TodayCareerSummary } from "@/components/career/summary";
 
 export const metadata = { title: "Today · JARVIS · Personal OS" };
 
@@ -97,6 +98,8 @@ export default async function TodayPage() {
               전체 할 일 보기 <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
           </Card>
+
+          <TodayCareerSummary />
 
           {brief.warnings.length > 0 && (
             <Card>
