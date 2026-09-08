@@ -1,9 +1,9 @@
 # Phase 7 implementation evidence
 
-Status: limited-release delta locally verified; production migration/deployment and two real integration scenarios pending. **Not a completed G7 acceptance gate.**
+Status: **limited-release verification complete** for work continuity, individual approvals and direct reminders. **Not a completed Phase 7/G7 acceptance gate and no 99% timing claim.**
 Branch: `codex/phase7-work-context`, baseline `70ba754f157bd4506eaf40b91439d99a31e4c6c4`.
-Draft PR: https://github.com/Kachii1020/PersonalOS/pull/30 (implementation commit `1d6f614`). Vercel reported its preview check successful; no hosted Phase 7 functional flow is claimed.
-Only the dedicated `personalos-dialogue-eval` database (API 54721, DB 54722) is used below. No Phase 7 production DB migration, deployment, cron cutover, or physical-device confirmation has been performed.
+PR: https://github.com/Kachii1020/PersonalOS/pull/30; limited-release code commit `c920415` plus this evidence update.
+Local gates used the dedicated `personalos-dialogue-eval` database (API 54721, DB 54722). The separately identified production rollout below used the hosted project and current user only; no local fixture was pointed at production.
 
 ## Implemented scope
 
@@ -44,23 +44,41 @@ Browser evidence: `test-results/g7-browser/G7-browser-f65ddc47-a119-44a6-a221-e1
 
 Limited-release rerun evidence: `test-results/g7-browser/G7-browser-3d35c013-d5b5-4523-9601-299e6a049933/evidence.json`; 3 actual Sonnet calls, $0.0443, no page errors. The harness checks the ledger before each model request and stops before another request once 12 calls or $0.50 recorded cost has been reached; a final call may cross the cost threshold because provider cost is known only after response. The central monthly guard remains authoritative. A preceding UI-harness attempt failed before any model call because it waited for preview-only copy before creating a preview; the order was corrected without changing product expectations.
 
-Limited-release scenario status: save/resume passed in two authenticated browser sessions; concurrent revision passed in actual local DB; individual approval/replay passed with one task; partial-failure preservation passed in DB with mock CalDAV. Real app-calendar create→same-work UPDATE and locked-iPhone direct reminder receipt/open remain pending and block the limited-release completion label.
+Pre-production scenario status was four passed and two pending; the production section below records the two actual integrations and closes the limited-release acceptance set.
+
+## Limited production rollout — 2026-09-09 JST
+
+- Production dry-run listed exactly 0022–0024. The hosted push completed, and the subsequent migration list showed local/remote equality through 0024. Before activation: automatic config `false`, scheduler disabled, work contexts 0, anon work-context read denied with 401.
+- Code commit `c920415` was first deployed with all four new flags false as `dpl_68hvyvEoq7uqiR12VheAGEo6x4nb` and promoted after READY/guard smoke. Context, inline approval and attention were then set true; automatic attention remained false. Activated deployments reached READY and the canonical alias; final secret-rotation deployment is `dpl_7UtLpMZKL5UMA7cFL9ZcHLmgL4Tt`.
+- `personalos-work-tick` is the only new cron job. The first three probes returned 401 because a local test secret had overridden the intended production value during Vault setup. The job was immediately disabled. A new random secret was generated, sent without plaintext output to Vercel and GitHub Actions, stored in Vault, and all temporary plaintext files were deleted. After redeploy/re-enable, the 15:37 UTC slot returned HTTP 200, worker start `15:37:02.151187`, finish `15:37:05.110237`; the next stored work-tick result was `idle/ok`. Existing GitHub workflow contents were unchanged.
+- Actual app-calendar scenario `G7-LIMITED-0459f1b6-25b4-4315-bcb3-37b17e68f09a`: CREATE then same-work UPDATE both reached verified receipts. Event `49660fc6-fc35-4fd1-955c-a531bdcadbfd` remained one row with the same UID and moved from 03:00–03:15 to 04:00–04:15 JST. Two model calls cost $0.0322. The exact remote test event and mirror row were deleted; work `f561bfda-4023-4256-8c95-eede7761b820` was forgotten/scrubbed; two linked actions, approvals and receipts were preserved.
+- Actual direct reminder due `2026-09-09 00:50 JST` was claimed after 2,374 ms and provider state became `accepted`. The user explicitly confirmed iPhone receipt, opening and the correct work destination. Service-worker `received_at/opened_at` callbacks remained null, so automated device telemetry is **not** claimed. Test work `d28e726b-291d-4fc5-bb8e-480da6b146fc` was forgotten/scrubbed and its delivery evidence retained.
+- New model use for this limited-release increment: 5 calls / $0.0765 recorded (3 local browser + 2 production calendar), below the 12-call/$0.50 stop rule. The fixed 100-sentence evaluation was not rerun because the shared prompt/grounding path was unchanged.
+
+| Limited-release acceptance | Evidence | Result |
+|---|---|---|
+| Save and resume | Two authenticated local browser sessions, identical context/revision | Pass |
+| Concurrent correction | Actual isolated DB CAS; one winner and one conflict | Pass |
+| Individual approval/replay | One approved task, unapproved calendar untouched, replay no duplicate | Pass |
+| Partial failure | Isolated DB with mock CalDAV; first verified result preserved | Pass within specified isolated scope |
+| Real calendar CREATE→UPDATE | Hosted approval/executor/CalDAV/re-read, one UID and one final event; cleanup succeeded | Pass |
+| Real direct reminder | Hosted cron/worker/provider plus explicit locked-iPhone receipt/open/correct-work confirmation | Pass; automatic client callbacks unobserved |
 
 Regression evidence: `test-results/dialogue-eval-phase7-regression-01/summary.json`; fixed corpus SHA-256 `c08e659b0325776b7171ecd333b497be5d14396d5ecfd8b9a16d17d9b8b8aa8a`, p50 2,563 ms / p95 4,507 ms. Evaluation ran against the uncommitted Phase 7 worktree, so its metadata git SHA is the baseline, not a claim that this code was committed at evaluation time.
 
 Review correction: wake-up timing alone cannot promote automatic notifications. The final SQL uses a **rolling** seven-day window and additionally requires all registered due attention items' actual first-claim ratio ≥99%, with at least 100 samples across seven JST dates. The minimum sample floor is a conservative engineering guard, not a measured result; cancelled/unclaimed due samples remain failures rather than being silently excluded. Actual device display remains separate. Final SQL health body was forward-applied successfully to the isolated DB after the clean reset; this is not a new production migration.
 
-## Still required
+## Still required for full Phase 7
 
 - Real 7-day schedule observation including missed slots, actual attention queue delays, failures and denominator; **no 99% timing claim**. Short successful probes cannot replace it.
 - 30 independent supported model/browser workflows, physical iPhone/Mac resumption/Push, real work-bound CalDAV UPDATE, production canary and cron cutover.
 
 ## Rollout / rollback
 
-Keep `JARVIS_CONTEXT_ENABLED`, `JARVIS_INLINE_APPROVALS_ENABLED`, `JARVIS_ATTENTION_ENABLED`, `JARVIS_AUTOMATIC_ATTENTION_ENABLED` off in production until the corresponding evidence is reviewed. Scheduler installation alone enables no job. Configure the approved worker URL with an existing named Vault secret only after deployment; never commit secret values. Automatic notification promotion requires the seven-day criterion plus actual attention delay audit, not only successful HTTP dispatch.
+Production limited-release state: `JARVIS_CONTEXT_ENABLED`, `JARVIS_INLINE_APPROVALS_ENABLED`, and `JARVIS_ATTENTION_ENABLED` are on; `JARVIS_AUTOMATIC_ATTENTION_ENABLED` and DB config `phase7_automatic_attention_enabled` remain false. Automatic notification promotion still requires the seven-day criterion plus actual attention delay audit, not only successful HTTP dispatch.
 
 Rollback: disable context/inline/attention flags and call `configure_work_scheduler(false,'','')` with service authority. Preserve work data and all existing task/event/approval/receipt audit records; do not drop old tables or replay migrations backwards. Existing Phase 6 remains accessible. A push already attempted cannot be recalled by disabling a flag.
 
 Local reproducibility: prepare an ignored `.env.eval.local` for the dedicated 54721 synthetic owner, then use `node scripts/run-g7-local.mjs build`, `dev`, or `test <gate files>`. The runner rejects external execution credentials and serializes fixture gates. Live model evaluation is an explicit separate `eval <unique-label>` invocation with the existing budget guard.
 
-Session cleanup: temporary cron disabled and named test Vault secrets removed by the gates; owned test fixtures cleaned, local app server stopped, original synthetic `.env.local` restored and temporary AI-enabled `.env.eval.local` removed. Evidence logs and the existing exploratory experience plan were preserved. The isolated DB stack is stopped with its data retained; production settings remain unchanged.
+Local session cleanup: owned test fixtures were cleaned; original synthetic `.env.local` must be restored and the temporary AI-enabled `.env.eval.local` removed at final handoff. Production test content was scrubbed/deleted as described while immutable approval/receipt/delivery evidence was retained.
