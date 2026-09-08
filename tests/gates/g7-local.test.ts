@@ -161,6 +161,7 @@ describe("G7 local ownership, restore, attention and workflow projection", { con
     subscriptionId = keep("push_subscriptions", (await rows("push_subscriptions", "POST", { endpoint: `https://push.example.test/${marker}`, p256dh: "synthetic-not-a-real-key", auth: "synthetic-not-a-real-auth" }))[0].id);
     process.env.JARVIS_CALENDAR_ACTIONS_ENABLED = "true";
     process.env.JARVIS_CONTEXT_ENABLED = "true";
+    await rows("app_config?key=eq.phase7_automatic_attention_enabled", "PATCH", { value: "true" });
   });
   after(async () => {
     if (!guarded) return;
@@ -187,6 +188,7 @@ describe("G7 local ownership, restore, attention and workflow projection", { con
         for (const id of owned.get(table) ?? []) await rows(`${table}?id=eq.${id}`, "DELETE");
       }
     } finally {
+      await rows("app_config?key=eq.phase7_automatic_attention_enabled", "PATCH", { value: "false" });
       if (originalCalendarFlag === undefined) delete process.env.JARVIS_CALENDAR_ACTIONS_ENABLED; else process.env.JARVIS_CALENDAR_ACTIONS_ENABLED = originalCalendarFlag;
       if (originalWorkFlag === undefined) delete process.env.JARVIS_CONTEXT_ENABLED; else process.env.JARVIS_CONTEXT_ENABLED = originalWorkFlag;
       if (otherId) assert.ifError((await createClient(url, service).auth.admin.deleteUser(otherId)).error);
@@ -212,6 +214,20 @@ describe("G7 local ownership, restore, attention and workflow projection", { con
     assert.equal((await rpc("mutate_work_context", { ...args, p_input: workInput("Different content") })).ok, false);
     assert.equal((await rpc("mutate_work_context", { ...args, p_request_hash: "0".repeat(64) })).ok, false);
     assert.equal((await snapshot(results[0])).context.revision, 1);
+  });
+
+  it("limited release stores deadlines and explicit reminders but rejects automatic conditions", async () => {
+    await rows("app_config?key=eq.phase7_automatic_attention_enabled", "PATCH", { value: "false" });
+    try {
+      const explicit = await makeWork({ ...workInput("Limited direct reminder"), deadlineAt: seconds(Date.now() + DAY), reminderAt: seconds(Date.now() + 3_600_000) });
+      assert.equal(explicit.context.deadlineReminder, false); assert.equal(explicit.context.resumeReminder, false);
+      assert.equal((await attention(explicit.context.id)).map(item => item.kind).join(","), "explicit");
+      const automatic = mutation("create", { ...workInput("Blocked automatic"), deadlineAt: seconds(Date.now() + DAY), deadlineReminder: true });
+      const denied = await rpc("mutate_work_context", automatic);
+      assert.equal(denied.status, 409); assert.match(JSON.stringify(denied.data), /automatic attention unavailable/);
+    } finally {
+      await rows("app_config?key=eq.phase7_automatic_attention_enabled", "PATCH", { value: "true" });
+    }
   });
 
   it("concurrent revisions isolate two work contexts and accept only one same-context correction", async () => {

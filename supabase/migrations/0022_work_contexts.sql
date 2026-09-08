@@ -1,5 +1,6 @@
 -- Phase 7: explicitly confirmed work state, bounded reminders and existing
 -- approval links. No raw conversation or duplicated task/calendar records.
+insert into public.app_config(key,value) values('phase7_automatic_attention_enabled','false') on conflict(key) do nothing;
 create table public.work_contexts (
   id uuid primary key default gen_random_uuid(), owner_id uuid not null references auth.users(id),
   goal text not null check(length(goal)<=200), progress text not null default '' check(length(progress)<=2000),
@@ -141,6 +142,9 @@ begin
     if p_input->>'reminderAt' is not null and (substring(p_input->>'reminderAt' from 12 for 2)::integer>23 or substring(p_input->>'reminderAt' from 15 for 2)::integer>59 or substring(p_input->>'reminderAt' from 18 for 2)::integer>59) then raise exception 'invalid reminder time'; end if;
     new_deadline:=(p_input->>'deadlineAt')::timestamptz; new_reminder:=(p_input->>'reminderAt')::timestamptz;
     if (p_input->>'deadlineReminder')::boolean and new_deadline is null then raise exception 'deadline reminder requires deadline'; end if;
+    if ((p_input->>'deadlineReminder')::boolean or (p_input->>'resumeReminder')::boolean)
+      and not exists(select 1 from app_config where key='phase7_automatic_attention_enabled' and value='true')
+      then raise exception 'automatic attention unavailable; use explicit reminder time' using errcode='PT409'; end if;
     if p_operation='create' then
       insert into work_contexts(owner_id,goal,progress,next_step,deadline_at,reminder_at,deadline_reminder,resume_reminder)
         values(auth.uid(),trim(p_input->>'goal'),trim(p_input->>'progress'),trim(p_input->>'nextStep'),new_deadline,new_reminder,(p_input->>'deadlineReminder')::boolean,(p_input->>'resumeReminder')::boolean) returning * into w;

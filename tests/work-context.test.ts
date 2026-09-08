@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { canSendWorkAttention, effectiveAttentionDue, groundWorkIntent, reduceWorkContext, validateWorkInput, validateWorkIntent, type WorkIntent } from "../lib/jarvis/work-context";
+import { canSendWorkAttention, effectiveAttentionDue, groundWorkIntent, reduceWorkContext, usesAutomaticAttention, validateWorkInput, validateWorkIntent, type WorkIntent } from "../lib/jarvis/work-context";
 import { buildWorkPrompt } from "../lib/ai/prompts/work-context";
 import { groundDialogueIntent } from "../lib/jarvis/dialogue-grounding";
 import type { WorkContext, WorkInput } from "../lib/jarvis/work-types";
@@ -12,6 +12,13 @@ const context: WorkContext = { ...input, id: "context-1", ownerId: "owner-1", re
 const quote = (text: string, messageIndex = 0): InputQuote => ({ text, messageIndex });
 const intent = (patch: Partial<WorkIntent> = {}): WorkIntent => ({ operation: "preview", goal: null, progress: null, nextStep: null, deadline: null, reminder: null, deadlineReminder: null, resumeReminder: null, status: null, actions: [], ...patch });
 const user = (content: string) => [{ role: "user" as const, content }];
+
+test("limited release distinguishes direct reminder and deadline from automatic conditions", () => {
+  assert.equal(usesAutomaticAttention({ ...input, reminderAt: "2030-01-13T12:00:00Z" }), false);
+  assert.equal(usesAutomaticAttention({ ...input, deadlineAt: "2030-01-13T12:00:00Z" }), false);
+  assert.equal(usesAutomaticAttention({ ...input, deadlineAt: "2030-01-13T12:00:00Z", deadlineReminder: true }), true);
+  assert.equal(usesAutomaticAttention({ ...input, resumeReminder: true }), true);
+});
 
 test("work input accepts explicit structured fields and rejects owner or result injection", () => {
   assert.deepEqual(validateWorkInput(input), input);

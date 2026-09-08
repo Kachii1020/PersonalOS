@@ -1,6 +1,6 @@
 # Phase 7 implementation evidence
 
-Status: minimum local flow implemented and verified, prepared for draft review; **not released, not a completed G7 acceptance gate**.
+Status: limited-release delta locally verified; production migration/deployment and two real integration scenarios pending. **Not a completed G7 acceptance gate.**
 Branch: `codex/phase7-work-context`, baseline `70ba754f157bd4506eaf40b91439d99a31e4c6c4`.
 Draft PR: https://github.com/Kachii1020/PersonalOS/pull/30 (implementation commit `1d6f614`). Vercel reported its preview check successful; no hosted Phase 7 functional flow is claimed.
 Only the dedicated `personalos-dialogue-eval` database (API 54721, DB 54722) is used below. No Phase 7 production DB migration, deployment, cron cutover, or physical-device confirmation has been performed.
@@ -18,7 +18,7 @@ Only the dedicated `personalos-dialogue-eval` database (API 54721, DB 54722) is 
 | Check | Actual result | Limits |
 |---|---|---|
 | TypeScript and ESLint | Passed | Local static checks |
-| Unit suite | 258 passed, 0 failed | Includes 14 work grounding/reducer checks |
+| Unit suite | 259 passed, 0 failed | Includes limited-release direct-vs-automatic boundary |
 | Clean isolated migration reset through 0024 | Exit 0 | Not a hosted migration; generated types read from actual DB |
 | Production-mode build | Exit 0 | Local build, not deployment; initial sandbox-only font fetch failed and network-enabled retry succeeded |
 | G7 DB gate | 12 passed, 0 failed, 1 explicit skipped acceptance placeholder | Synthetic records and mock CalDAV |
@@ -31,6 +31,8 @@ Only the dedicated `personalos-dialogue-eval` database (API 54721, DB 54722) is 
 | Real local cron → worker | 1 passed; 2026-09-08 07:05:00 UTC slot started after 1,029 ms | Actual automatic dispatch, not manual invocation; short sample, no 7-day claim |
 | Real cron → due attention → app-ready | 1 passed; 07:07:00 UTC slot started after 130 ms; due item claimed after 28,152 ms | One actual local due item became `ready`; zero device Push subscriptions; cron and fixture removed after test |
 | Automatic promotion failure policy | 1 passed | Synthetic timestamps in a rolled-back transaction: healthy wake-ups with missed claims blocked; timely claims allowed; recent wake-up failures blocked |
+| Limited-release boundary | Local DB gate 13 passed, 0 failed, 1 full-acceptance skip | Deadline/direct reminder stored; automatic condition rejected with 409 while release config is false |
+| Limited-release browser rerun | 1 passed; 3 calls, $0.0443 | UI automatic controls disabled; API rejection creates 0 work rows; two Chrome sessions; exactly one approved task |
 
 Holdout SHA-256: `da2f013cdf196030de27bc7cab2ffe2d1731fe783b508fee5f2066728b012982`. The verifier froze it before evaluation; two pre-evaluation scenarios were corrected to remove out-of-scope dependency behavior from the older exploratory plan. It was not tuned to failing implementation outputs.
 
@@ -39,6 +41,10 @@ Failures investigated: SQLSTATE 40001 caused PostgREST serialization retries on 
 Raw local logs: `test-results/g7-reset-final.log`, `g7-unit-final.log`, `g7-build-final.log`, `g7-regression-final.log`, `g7-gates-final.log`, `g7-scheduler.log`, `g7-scheduler-attention.log`. Logs are ignored artifacts, not production evidence. Final sequential G7 DB/source/SLO-policy run: 24 passed, 0 failed, 1 explicitly skipped acceptance placeholder.
 
 Browser evidence: `test-results/g7-browser/G7-browser-f65ddc47-a119-44a6-a221-e14b4ad1e671/evidence.json` and screenshots. Task `f91db3a5-7a90-45bf-961a-90bd852c5d82` was created through approval `2b2507d5-130b-4883-bedf-b8d08bdb3494`, then the test's own records were cleaned up. The calendar remaining proposed is **not** a calendar failure or partial-failure injection. Earlier runs remain separate: a framework route-announcer assertion error, and a real-model deadline/reminder misclassification safely clarified ($0.0141). The prompt now explicitly separates notification times from deadlines; the fixed scenario/expected values were not changed.
+
+Limited-release rerun evidence: `test-results/g7-browser/G7-browser-3d35c013-d5b5-4523-9601-299e6a049933/evidence.json`; 3 actual Sonnet calls, $0.0443, no page errors. The harness checks the ledger before each model request and stops before another request once 12 calls or $0.50 recorded cost has been reached; a final call may cross the cost threshold because provider cost is known only after response. The central monthly guard remains authoritative. A preceding UI-harness attempt failed before any model call because it waited for preview-only copy before creating a preview; the order was corrected without changing product expectations.
+
+Limited-release scenario status: save/resume passed in two authenticated browser sessions; concurrent revision passed in actual local DB; individual approval/replay passed with one task; partial-failure preservation passed in DB with mock CalDAV. Real app-calendar create→same-work UPDATE and locked-iPhone direct reminder receipt/open remain pending and block the limited-release completion label.
 
 Regression evidence: `test-results/dialogue-eval-phase7-regression-01/summary.json`; fixed corpus SHA-256 `c08e659b0325776b7171ecd333b497be5d14396d5ecfd8b9a16d17d9b8b8aa8a`, p50 2,563 ms / p95 4,507 ms. Evaluation ran against the uncommitted Phase 7 worktree, so its metadata git SHA is the baseline, not a claim that this code was committed at evaluation time.
 

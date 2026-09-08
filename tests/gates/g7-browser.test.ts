@@ -81,6 +81,11 @@ test("G7 live AI browser: preview → save → second-session restore → update
   }
   async function send(page: Page, content: string) {
     await assertSyntheticModelContext();
+    const usage = await db.from("ai_usage").select("id,cost_usd").eq("purpose", "dialogue"); checked(usage.error);
+    const currentRun = usage.data!.filter(row => !priorUsageIds.has(row.id));
+    const currentCost = currentRun.reduce((sum, row) => sum + Number(row.cost_usd), 0);
+    assert.ok(currentRun.length < 12, "limited-release live call cap reached before the next request");
+    assert.ok(currentCost < 0.5, `limited-release recorded cost cap reached before the next request: $${currentCost}`);
     await page.getByRole("textbox", { name: "업무 요청", exact: true }).fill(content);
     const waiting = page.waitForResponse(response => new URL(response.url()).pathname === "/api/jarvis/work-chat" && response.request().method() === "POST", { timeout: 110_000 });
     await page.getByRole("button", { name: "업무 요청 보내기", exact: true }).click();
@@ -118,15 +123,23 @@ test("G7 live AI browser: preview → save → second-session restore → update
     const mobile = await session(375);
     await mobile.page.goto(`${app}/jarvis`);
     await mobile.page.getByRole("heading", { name: "업무 이어하기 · JARVIS", exact: true }).waitFor();
+    const blockedAutomatic = await mobile.context.request.post(`${app}/api/jarvis/work-contexts`, { headers: { Origin: app }, data: {
+      requestId: randomUUID(), input: { goal: `${marker} 차단 확인`, progress: "", nextStep: "검토", deadlineAt: new Date(Date.now()+86_400_000).toISOString().replace(/\.\d{3}Z$/, "Z"), reminderAt: null, deadlineReminder: true, resumeReminder: false },
+    } });
+    assert.equal(blockedAutomatic.status(), 409); assert.match(JSON.stringify(await blockedAutomatic.json()), /자동 알림은 후속 검증 전까지/);
+    const blockedCount = await db.from("work_contexts").select("id", { count: "exact", head: true }); checked(blockedCount.error); assert.equal(blockedCount.count, 0);
     const tomorrow = new Date(Date.now() + 9 * 3_600_000 + 86_400_000).toISOString().slice(0, 10);
     const initialText = `"${goal}"를 진행 업무로 저장해. 현재 진행은 "${initialProgress}"이고, 다음 행동은 "${initialNext}"야. ${tomorrow} 19:00에 다시 알려줘.`;
     evidence.scenario = { initialText, progressText: `현재 진행은 "${updatedProgress}"야. 다음 행동은 "${updatedNext}"로 바꿔줘.`,
       actionText: `"${taskTitle}" 할 일을 추가해. ${tomorrow} 20:00부터 30분 동안 "${calendarTitle}" 일정을 추가해.` };
     const preview = await send(mobile.page, initialText);
     assert.equal(preview.body.mode, "preview"); assert.ok(preview.body.preview); assert.equal(preview.body.work, null);
+    await mobile.page.getByText("마감·중단 조건 자동 알림은 후속 검증 후 제공합니다.", { exact: false }).waitFor();
     assert.equal(preview.body.preview.goal, goal); assert.equal(preview.body.preview.progress, initialProgress); assert.equal(preview.body.preview.nextStep, initialNext);
     assert.equal(Date.parse(preview.body.preview.reminderAt!), Date.parse(`${tomorrow}T19:00:00+09:00`));
     assert.equal(preview.body.preview.deadlineReminder, false); assert.equal(preview.body.preview.resumeReminder, false);
+    assert.equal(await mobile.page.getByRole("checkbox", { name: "마감 24시간 전 알림 허용" }).isDisabled(), true);
+    assert.equal(await mobile.page.getByRole("checkbox", { name: "진행 갱신 후 48시간 재개 알림 허용" }).isDisabled(), true);
     const unsaved = await db.from("work_contexts").select("id", { count: "exact", head: true }); checked(unsaved.error); assert.equal(unsaved.count, 0);
     await mobile.page.screenshot({ path: `${directory}/375-preview.png`, fullPage: true, animations: "disabled" });
     const saveWaiting = mobile.page.waitForResponse(response => new URL(response.url()).pathname === "/api/jarvis/work-contexts" && response.request().method() === "POST");
@@ -190,9 +203,11 @@ test("G7 live AI browser: preview → save → second-session restore → update
     assert.deepEqual(errors, []);
     const afterUsage = await db.from("ai_usage").select("id,cost_usd").eq("purpose", "dialogue"); checked(afterUsage.error);
     const calls = afterUsage.data!.filter(row => !priorUsageIds.has(row.id)); assert.equal(calls.length, 3, "exactly three real interpretation calls; replay must use cached results");
+    const recordedCost = calls.reduce((sum, row) => sum + Number(row.cost_usd), 0);
+    assert.ok(calls.length <= 12); assert.ok(recordedCost <= 0.5, `limited-release live call cap exceeded: $${recordedCost}`);
     Object.assign(evidence, { passed: true, contextId, approvalId: completedTask.approvalId, taskId: created.data![0].id, taskCount: 1,
       calendarExecuted: false, calendarStatus: unexecutedCalendar.status, workStatus: approved.work.context.status,
-      modelCalls: calls.length, recordedCostUsd: calls.reduce((sum, row) => sum + Number(row.cost_usd), 0), pageErrors: errors, finishedAt: new Date().toISOString() });
+      modelCalls: calls.length, recordedCostUsd: recordedCost, pageErrors: errors, finishedAt: new Date().toISOString() });
     console.log(`G7 browser: two contexts, 3 actual AI calls, one approved task, calendar unexecuted; evidence ${directory}`);
   } catch (error) {
     Object.assign(evidence, { passed: false, contextId, failureName: error instanceof Error ? error.name : "UnknownError", pageErrors: errors });

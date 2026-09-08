@@ -15,6 +15,7 @@ const [mode = "dev", ...args] = process.argv.slice(2);
 const env = { ...process.env, ...local, JARVIS_CONTEXT_ENABLED: "true", JARVIS_INLINE_APPROVALS_ENABLED: "true", JARVIS_ATTENTION_ENABLED: "true", JARVIS_AUTOMATIC_ATTENTION_ENABLED: "false", JARVIS_CALENDAR_ACTIONS_ENABLED: "false" };
 for (const key of Object.keys(env)) if (/APPLE|NOTION|VAPID_PRIVATE/.test(key)) delete env[key];
 if (mode === "eval") env.DIALOGUE_EVAL_ALLOW_LIVE = "1";
+if (mode === "test" && args.includes("tests/gates/g7-browser.test.ts")) env.G7_ALLOW_LIVE_AI = "1";
 const command = mode === "dev" ? ["node_modules/next/dist/bin/next", "dev", "-p", "3055"] : mode === "build" ? ["node_modules/next/dist/bin/next", "build"] : mode === "test" ? ["--import", "tsx", "--conditions=react-server", "--test", "--test-concurrency=1", ...args] : mode === "eval" ? ["--import", "tsx", "--conditions=react-server", "scripts/eval-dialogue.ts", ...args] : null;
 if (!command) throw Error("Use dev, build, test <test paths>, or eval <unique label>");
 const child = spawn(process.execPath, command, { env, stdio: "inherit" });

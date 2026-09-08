@@ -27,6 +27,10 @@ export function validateWorkInput(raw: unknown): WorkInput {
   return { goal: bounded(raw.goal, "goal", 200, true), progress: bounded(raw.progress, "progress", 2000), nextStep: bounded(raw.nextStep, "nextStep", 2000), deadlineAt, reminderAt, deadlineReminder: raw.deadlineReminder, resumeReminder: raw.resumeReminder };
 }
 
+export function usesAutomaticAttention(input: WorkInput): boolean {
+  return input.deadlineReminder || input.resumeReminder;
+}
+
 export type WorkOperation = { type: "update"; expectedRevision: number; now: Date; input: WorkInput } | { type: "status"; expectedRevision: number; now: Date; status: WorkStatus } | { type: "forget"; expectedRevision: number; now: Date };
 export function reduceWorkContext(current: WorkContext, operation: WorkOperation): WorkContext {
   if (!Number.isInteger(operation.expectedRevision) || operation.expectedRevision !== current.revision) throw new Error("업무가 다른 곳에서 변경되었습니다. 최신 상태를 다시 확인해 주세요.");

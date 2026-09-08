@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { DialogueDraft } from "@/lib/jarvis/dialogue-types";
 import type { JsonValue } from "@/lib/jarvis/types";
 import type { AttentionItem, WorkAction, WorkContext, WorkInput, WorkSnapshot, WorkStatus } from "@/lib/jarvis/work-types";
-import { validateWorkInput } from "@/lib/jarvis/work-context";
+import { usesAutomaticAttention, validateWorkInput } from "@/lib/jarvis/work-context";
 
 export class WorkRequestError extends Error {
   constructor(message: string, readonly status: 400 | 401 | 403 | 404 | 409 = 400) { super(message); this.name = "WorkRequestError"; }
@@ -113,6 +113,9 @@ export async function mutateWorkContext(request: {
   let input = request.input ?? {};
   if (request.operation === "create" || request.operation === "update") {
     try { input = validateWorkInput(input); } catch (error) { throw new WorkRequestError(error instanceof Error ? error.message : "업무 입력을 확인해 주세요."); }
+    if (usesAutomaticAttention(input as WorkInput) && process.env.JARVIS_AUTOMATIC_ATTENTION_ENABLED !== "true") {
+      throw new WorkRequestError("마감·재개 자동 알림은 후속 검증 전까지 사용할 수 없습니다. 직접 알림 시각만 지정해 주세요.", 409);
+    }
   }
   const canonical = { operation: request.operation, contextId: request.contextId ?? null, expectedRevision: request.expectedRevision ?? null, input };
   // The generated schema omits nullable required SQL arguments. Create's
