@@ -1,4 +1,5 @@
 import type { ChatMessage, DialogueGrounding, DialogueIntent, DialogueKind } from "./dialogue-types";
+import { deriveDialogueReadFilters } from "./dialogue-read-filters";
 
 const KINDS: DialogueKind[] = ["read_tasks", "read_calendar", "read_career", "create_task", "create_calendar", "update_calendar", "clarify"];
 const QUOTE_KEYS = ["title", "date", "time", "duration"] as const;
@@ -80,6 +81,26 @@ function slotOnlyAnswer(latest: string): boolean {
   return residual.replace(/(?:으로|로|입니다|이야|이에요|예요|그리고|에|은|는|요|[\s,.!?])/g, "").length === 0;
 }
 
+function readRequest(content: string): boolean {
+  return /(?:보여\s*(?:줘|주세요|줄래|주실)|알려\s*(?:줘|주세요|줄래|주실)|(?:조회|검색|확인)\s*(?:해|하고\s*싶어))/.test(content);
+}
+
+function cancellation(content: string): boolean {
+  return /(?:하지\s*마|만들지\s*마|추가하지\s*마|취소|실행하지|무시해)/.test(content);
+}
+
+function quotedRequestContinuation(content: string): boolean {
+  if (slotOnlyAnswer(content)) return true;
+  const tokens = temporalTokens(content);
+  const noDeadline = /마감\s*없(?:이|는)/.test(content);
+  if (!noDeadline && !tokens.date.length && !tokens.time.length && !tokens.duration.length) return false;
+  let residual = content;
+  for (const token of [...tokens.date, ...tokens.time, ...tokens.duration].sort((a, b) => b.length - a.length)) residual = residual.replace(token, " ");
+  residual = residual.replace(/마감\s*없(?:이|는)|마감(?:으로|은|을|에)?|기한(?:으로|은|을|에)?/g, " ");
+  residual = residual.replace(/(?:추가|변경|수정|생성|등록)해|만들어|넣어|옮겨/g, " ");
+  return residual.replace(/(?:주세요|줘|으로|로|입니다|이야|이에요|예요|그리고|에|은|는|요|[\s,.!?])/g, "").length === 0;
+}
+
 function inheritsUserWrite(intent: DialogueIntent, messages: ChatMessage[], userIndex: number): boolean {
   if (!slotOnlyAnswer(messages[userIndex].content)) return false;
   let examined = 0;
@@ -88,7 +109,7 @@ function inheritsUserWrite(intent: DialogueIntent, messages: ChatMessage[], user
     if (message.role !== "user") continue;
     examined++;
     const content = message.content;
-    if (/(?:취소|하지\s*마|보여|알려|조회|검색|삭제|이메일|전송)/.test(content)) return false;
+    if (cancellation(content) || readRequest(content) || /(?:삭제|이메일|전송)/.test(content)) return false;
     const update = /(?:옮겨|변경|수정)/.test(content);
     const create = /(?:추가|만들|생성|등록|잡아|잡고|넣어)/.test(content);
     if (update || create) {
@@ -103,12 +124,6 @@ function inheritsUserWrite(intent: DialogueIntent, messages: ChatMessage[], user
     if (priorResidual.replace(/(?:으로|로|입니다|이야|이에요|예요|그리고|에|은|는|요|[\s,.!?])/g, "")) return false;
   }
   return false;
-}
-
-function plainListRequest(content: string, kind: "read_tasks" | "read_career"): boolean {
-  const nouns = kind === "read_tasks" ? /할\s*일|태스크|tasks?/gi : /커리어|기회|채용|공고|career|opportunities/gi;
-  const residual = content.replace(nouns, " ").replace(/보여주세요|알려주세요|보여줄래|알려줄래|보여줘|알려줘|조회해|확인해|보고\s*싶어|부탁해|뭐가\s*있나요|뭐가\s*있어|뭐\s*있어|뭐야|현재|지금|전체|목록|리스트|조회|주세요|please|current|show|list|my|내|좀|을|를|은|는|이|가|요|[\s,.!?]/gi, "");
-  return residual.length === 0;
 }
 
 /** Model output chooses an intent only; fields must be traced to user messages. */
@@ -128,13 +143,33 @@ export function groundDialogueIntent(intent: DialogueIntent, messages: ChatMessa
   if (selectedSourceId != null && (!allowedSourceIds.includes(selectedSourceId) || (intent.kind === "update_calendar" && intent.sourceId !== selectedSourceId))) return clarify("직접 선택한 대상과 요청의 대상이 일치하지 않습니다. 목록에서 다시 선택해 주세요.");
   if (intent.kind === "clarify") return clarify("원하는 조회나 할 일·일정 요청을 구체적으로 입력해 주세요. 일정에는 날짜, 오전·오후 시각, 소요 시간이 필요합니다.");
   const isWrite = ["create_task", "create_calendar", "update_calendar"].includes(intent.kind);
-  if (isWrite && /(?:보여\s*(?:줘|주세요|줄)|알려\s*(?:줘|주세요)|조회해|검색해)/.test(latest)) return clarify("조회 요청으로 확인했습니다. 생성·변경 제안은 준비하지 않았습니다.");
-  if (isWrite && /(?:하지\s*마|만들지\s*마|추가하지\s*마|취소|실행하지|무시해)/.test(latest)) return clarify("변경은 준비하지 않았습니다. 필요한 요청을 다시 확인해 주세요.");
-  if (isWrite && /(?:아니[ ,]|말고|대신|정정)/.test(latest)) return clarify("정정하신 최종 제목·날짜·시각·소요 시간을 한 번에 입력해 주세요.");
-  const selectedUpdate = intent.kind === "update_calendar" && selectedSourceId != null && selectedSourceId === intent.sourceId && slotOnlyAnswer(latest);
+  if (isWrite && readRequest(latest)) return clarify("조회 요청으로 확인했습니다. 생성·변경 제안은 준비하지 않았습니다.");
+  if (isWrite && cancellation(latest)) return clarify("변경은 준비하지 않았습니다. 필요한 요청을 다시 확인해 주세요.");
+  const currentQuote = (field: typeof QUOTE_KEYS[number]) => intent[field]?.messageIndex === userIndex;
+  const completeCorrection = intent.kind === "create_task"
+    ? currentQuote("title") && ((currentQuote("date") && currentQuote("time") && !intent.duration) || (!intent.date && !intent.time && !intent.duration && /마감\s*없(?:이|는)/.test(latest)))
+    : currentQuote("date") && currentQuote("time") && currentQuote("duration") && (intent.kind === "update_calendar" ? intent.title === null || currentQuote("title") : currentQuote("title"));
+  if (isWrite && /(?:아니[ ,]|말고|대신|정정)/.test(latest) && !completeCorrection) return clarify("정정하신 최종 제목·날짜·시각·소요 시간을 한 번에 입력해 주세요.");
+  const lastCancellation = messages.findLastIndex((message) => message.role === "user" && cancellation(message.content));
+  const renewedUpdate = lastCancellation < 0 || messages.slice(lastCancellation + 1, userIndex + 1).some((message) => message.role === "user" && /(?:옮겨|변경|수정)/.test(message.content) && !readRequest(message.content) && !cancellation(message.content));
+  const selectedUpdate = intent.kind === "update_calendar" && selectedSourceId != null && selectedSourceId === intent.sourceId && slotOnlyAnswer(latest) && renewedUpdate;
   if (isWrite && !/(?:추가|만들|생성|등록|잡아|잡고|옮겨|변경|수정|넣어)/.test(latest) && !inheritsUserWrite(intent, messages, userIndex) && !selectedUpdate) return clarify("할 일이나 일정을 만들거나 변경하려는 요청인지 확인해 주세요.");
+  if (isWrite) {
+    for (const field of QUOTE_KEYS) {
+      const quote = intent[field];
+      if (!quote || quote.messageIndex === userIndex) continue;
+      for (let index = quote.messageIndex + 1; index <= userIndex; index++) {
+        const message = messages[index];
+        if (message.role !== "user") continue;
+        if (cancellation(message.content) || readRequest(message.content)) return clarify("이전 요청 이후 의도가 바뀌었습니다. 현재 요청의 내용을 다시 입력해 주세요.");
+        const independentWrite = /(?:추가|만들|생성|등록|잡아|넣어|옮겨|변경|수정)/.test(message.content) && /(?:일정|캘린더|할\s*일|태스크)/.test(message.content);
+        if (independentWrite && !slotOnlyAnswer(message.content)) return clarify("새 요청에 이전 제목·날짜·시각을 섞을 수 없습니다. 새 요청의 내용을 모두 입력해 주세요.");
+        if (!quotedRequestContinuation(message.content)) return clarify("새로운 내용이 포함된 요청에는 이전 값을 재사용하지 않습니다. 현재 요청의 제목·날짜·시각을 확인해 주세요.");
+      }
+    }
+  }
   if (unsupportedTimezone(latest) && (isWrite || intent.kind === "read_calendar")) return clarify("현재 일정 요청은 일본 시간(Asia/Tokyo)만 지원합니다. 일본 날짜와 시각으로 입력해 주세요.");
-  const latestTokens = temporalTokens(latest);
+  const latestTokens = temporalTokens(intent.kind === "read_tasks" || intent.kind === "read_career" ? latest.replace(/제목(?:에|이)?\s*["“'][^"”'\r\n]*["”']/g, " ") : latest);
   if (isWrite && (latestTokens.time.length > 1 || latestTokens.duration.length > 1)) return clarify("시각 또는 소요 시간이 여러 개 있습니다. 원하는 시각과 소요 시간을 하나씩 입력해 주세요.");
   for (const field of ["date", "time", "duration"] as const) {
     const quote = intent[field];
@@ -150,15 +185,22 @@ export function groundDialogueIntent(intent: DialogueIntent, messages: ChatMessa
     if (isWrite && latestTokens[field].length > 0 && intent[field] && intent[field]!.messageIndex !== userIndex) return clarify("가장 최근에 말씀한 날짜·시각·소요 시간으로 다시 확인해 주세요.");
   }
   const evidence = QUOTE_KEYS.flatMap((field) => intent[field] ? [intent[field]!] : []);
-  if ((isWrite || intent.kind === "read_calendar") && !intent.date && (latestTokens.date.length > 0 || /다음\s*주|이번\s*주/.test(latest))) return clarify("말씀한 날짜를 명확히 확인해야 합니다. YYYY-MM-DD 또는 오늘·내일·모레로 입력해 주세요.");
+  if (isWrite && !intent.date && (latestTokens.date.length > 0 || /다음\s*주|이번\s*주/.test(latest))) return clarify("말씀한 날짜를 명확히 확인해야 합니다. YYYY-MM-DD 또는 오늘·내일·모레로 입력해 주세요.");
   if (isWrite && !intent.time && /\d{1,2}:\d{2}|\d{1,2}시(?!간)/.test(latest)) return clarify("말씀한 시각과 날짜를 함께 확인해야 합니다.");
-  if ((isWrite || intent.kind === "read_calendar") && new Set(latestTokens.date).size > 1) return clarify("요청에 날짜가 여러 개 있습니다. 원하는 날짜 하나로 다시 입력해 주세요.");
-  const date = intent.date ? parseDate(intent.date.text, referenceTime) : null;
-  if (intent.date && !date) return clarify("날짜는 YYYY-MM-DD 또는 오늘·내일·모레로 입력해 주세요.");
+  if (new Set(latestTokens.date).size > 1) return clarify("요청에 날짜가 여러 개 있습니다. 원하는 날짜 하나로 다시 입력해 주세요.");
+  const dateText = intent.kind.startsWith("read_") ? latestTokens.date[0] ?? null : intent.date?.text ?? null;
+  const date = dateText ? parseDate(dateText, referenceTime) : null;
+  if (dateText && !date) return clarify("날짜는 YYYY-MM-DD 또는 오늘·내일·모레로 입력해 주세요.");
   if (intent.kind.startsWith("read_")) {
-    if (intent.title || intent.time || intent.duration || (intent.kind !== "read_calendar" && intent.date)) return clarify("현재 조회는 할 일 목록, 날짜별 일정, 커리어 목록을 지원합니다.");
-    if ((intent.kind === "read_tasks" || intent.kind === "read_career") && (intent.sourceId !== null || latestTokens.date.length || latestTokens.time.length || latestTokens.duration.length || !plainListRequest(latest, intent.kind))) return clarify("현재는 할 일·커리어 전체 목록 조회만 지원합니다. 날짜·시각·조건 필터는 아직 지원하지 않습니다.");
-    return { ...empty, message: intent.kind === "read_tasks" ? "현재 할 일 목록입니다." : intent.kind === "read_career" ? "현재 확인된 커리어 기회입니다." : "일본 시간 기준 일정입니다.", sourceId: intent.sourceId, queryDate: date, evidence };
+    if (intent.time || intent.duration || latestTokens.time.length || latestTokens.duration.length || intent.sourceId !== null) return clarify("지원하지 않는 조회 조건입니다. 날짜별 일정 또는 할 일·커리어 목록 조건을 확인해 주세요.");
+    if (intent.kind === "read_tasks" || intent.kind === "read_career") {
+      const readFilters = deriveDialogueReadFilters(intent.kind, latest, dateText);
+      if (!readFilters) return clarify("조회 조건이 불명확하거나 지원하지 않습니다. 날짜·상태·정렬·제목 조건을 다시 확인해 주세요.");
+      if (intent.title && (intent.title.messageIndex !== userIndex || intent.title.text !== readFilters.keyword)) return clarify("모델이 제안한 제목 조건이 사용자가 직접 지정한 검색어와 일치하지 않습니다.");
+      return { ...empty, message: intent.kind === "read_tasks" ? "요청한 조건의 할 일 목록입니다." : "요청한 조건의 커리어 기회입니다.", queryDate: date, readFilters, evidence };
+    }
+    if (intent.title || deriveDialogueReadFilters("read_calendar", latest, dateText) === null) return clarify("현재 일정 조회는 날짜 하나만 지정할 수 있습니다. 제목·빈 시간·정렬 등 추가 조건은 지원하지 않습니다.");
+    return { ...empty, message: "일본 시간 기준 일정입니다.", queryDate: date, evidence };
   }
   if (intent.kind !== "update_calendar" && intent.sourceId !== null) return clarify("새 항목에는 기존 대상 ID를 지정할 수 없습니다.");
   if (intent.kind === "update_calendar" && !intent.sourceId) return clarify("변경할 일정을 목록에서 지정해 주세요.");

@@ -123,7 +123,7 @@ async function audit(b: Bundle) { return (await rows<Table<"action_audit_logs">>
 
 describe("G6B DB receipts and mock CalDAV gate", { concurrency: false }, () => {
   before(async () => {
-    assert.equal(process.env.GATE_ISOLATED_DB, "1"); assert.equal(url, "http://127.0.0.1:54621");
+    assert.equal(process.env.GATE_ISOLATED_DB, "1"); assert.ok(["http://127.0.0.1:54621", "http://127.0.0.1:54721"].includes(url));
     assert.equal(process.env.ALLOWED_EMAIL, "phase5a@example.test"); assert.ok(anon && service); guarded = true;
     const auth = await login(process.env.ALLOWED_EMAIL!); ownerId = auth.id; token = auth.token;
     const other = await login(`${marker}@example.test`); otherId = other.id; otherToken = other.token;

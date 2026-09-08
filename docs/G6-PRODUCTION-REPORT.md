@@ -1,5 +1,7 @@
 # Phase 6 production rollout
 
+Follow-up observation: actual schedule-triggered run [34128546484](https://github.com/Kachii1020/PersonalOS/actions/runs/34128546484), 2026-09-07 13:38:43 UTC, verified all five jobs HTTP 200. This closes the first-run observation item below, but the preceding gap was 367.85 minutes: it does not establish reliable five-minute delivery. Updated audit and the separate, not-yet-deployed dialogue improvements are in PHASE6-REPORT.md. Earlier statements below preserve rollout-time evidence.
+
 2026-09-07 JST. User explicitly authorized the production DB, deployment and cron transition and requested numerical current/next reporting. Status: **production DB/deployment/activation complete; first new schedule-triggered run remains unobserved**. The user previously waived repetitive teach-back/physical-device checks, not backup, permissions or truthful evidence.
 
 ## Baseline observed before changes

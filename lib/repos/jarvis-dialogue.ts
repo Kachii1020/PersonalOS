@@ -13,7 +13,8 @@ import { DIALOGUE_SCHEMA, DIALOGUE_SYSTEM, buildDialoguePrompt } from "@/lib/ai/
 import { groundDialogueIntent, validateDialogueIntent } from "@/lib/jarvis/dialogue-grounding";
 import { parseCreateTaskPayload } from "@/lib/jarvis/action-payload";
 import { parseCalendarActionPayload } from "@/lib/jarvis/calendar-action-payload";
-import type { ChatMessage, ChatReply, DialogueDraft, DialogueFact, DialogueIntent } from "@/lib/jarvis/dialogue-types";
+import { dialogueTaskStatusLabel, filterDialogueCareer, literalContainsPattern } from "@/lib/jarvis/dialogue-record-filters";
+import type { ChatMessage, ChatReply, DialogueDraft, DialogueFact, DialogueIntent, DialogueReadFilters } from "@/lib/jarvis/dialogue-types";
 import type { JsonValue } from "@/lib/jarvis/types";
 
 type Client = SupabaseClient<Database>;
@@ -46,21 +47,39 @@ export async function requireDialogueOwner() {
   return { client, ownerId: data.user.id };
 }
 
+export async function readDialogueTasks(client: Client, now: Date, filters: DialogueReadFilters = {}, day: string | null = null) {
+  let query = client.from("tasks").select("id,title,due_at,status,priority", { count: "exact" });
+  if (filters.taskStatus !== "all") query = query.eq("status", filters.taskStatus ?? "open");
+  if (day) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || new Date(day).toISOString().slice(0, 10) !== day) throw new DialogueRequestError("마감 날짜를 확인하세요.");
+    const start = new Date(`${day}T00:00:00+09:00`).toISOString();
+    query = query.gte("due_at", start).lt("due_at", new Date(Date.parse(start) + DAY).toISOString());
+  }
+  if (filters.keyword) query = query.filter("title", "imatch", literalContainsPattern(filters.keyword));
+  if (filters.order === "priority") query = query.order("priority", { ascending: false, nullsFirst: false });
+  const result = await query.order("due_at", { ascending: true, nullsFirst: false }).order("id").limit(20);
+  if (result.error) throw new Error(`할 일 조회 실패: ${result.error.message}`);
+  const facts: DialogueFact[] = result.data.map(row => ({ id: `task:${row.id}`, title: row.title,
+    detail: `${dialogueTaskStatusLabel(row.status)} 할 일 · 마감 ${describeTime(row.due_at)} (JST) · 우선순위 점수 ${row.priority ?? "미지정"}`,
+    href: "/tasks", observedAt: now.toISOString() }));
+  return { facts, count: result.count ?? facts.length,
+    warnings: (result.count ?? 0) > 20 ? [`조건에 맞는 할 일 중 ${filters.order === "priority" ? "우선순위 점수" : "마감"}순 20개만 표시합니다.`] : [] };
+}
+
 export async function readDialogueSnapshot(client: Client, now: Date, day = jstDate(now), days = 14) {
   const from = new Date(`${day}T00:00:00+09:00`).toISOString();
   const to = new Date(Date.parse(from) + days * DAY).toISOString();
   const [tasks, calendars, candidates] = await Promise.all([
-    client.from("tasks").select("id,title,due_at,status", { count: "exact" }).eq("status", "open").order("due_at", { ascending: true, nullsFirst: false }).order("id").limit(20),
+    readDialogueTasks(client, now),
     client.from("calendars").select("*").order("id").limit(100),
     client.from("events").select("*").lt("starts_at", to).or(`ends_at.gt.${from},rrule.not.is.null`).order("starts_at").order("id").limit(201),
   ]);
-  for (const result of [tasks, calendars, candidates]) if (result.error) throw new Error(`대화 데이터 조회 실패: ${result.error.message}`);
-  const warnings: string[] = [];
-  if ((tasks.count ?? 0) > 20) warnings.push("할 일은 마감순 20개만 표시합니다. 전체 목록에서 나머지를 확인하세요.");
+  for (const result of [calendars, candidates]) if (result.error) throw new Error(`대화 데이터 조회 실패: ${result.error.message}`);
+  const warnings: string[] = [...tasks.warnings];
   if (candidates.data!.length > 200) warnings.push("일정 후보가 많아 일부만 조회했습니다. 조회 범위를 좁혀 주세요.");
   if (calendars.data!.length === 100) warnings.push("캘린더 조회 한도에 도달했습니다. 쓰기 대상은 별도로 다시 확인합니다.");
   const observedAt = now.toISOString();
-  const taskFacts: DialogueFact[] = tasks.data!.map((row) => ({ id: `task:${row.id}`, title: row.title, detail: `열린 할 일 · 마감 ${describeTime(row.due_at)} (JST)`, href: "/tasks", observedAt }));
+  const taskFacts = tasks.facts;
   const eventCandidates: (DialogueFact & { startsAt: string })[] = [];
   const eventRows = new Map<string, EventRow>();
   let occurrenceCount = 0;
@@ -87,7 +106,7 @@ export async function readDialogueSnapshot(client: Client, now: Date, day = jstD
   const eventFacts: DialogueFact[] = eventCandidates.sort((a, b) => Date.parse(a.startsAt) - Date.parse(b.startsAt) || a.id.localeCompare(b.id)).slice(0, 20).map(({ id, title, detail, href, observedAt }) => ({ id, title, detail, href, observedAt }));
   if (occurrenceCount > 20) warnings.push("일정은 조회한 항목 중 시작 시각순 20개만 표시합니다.");
   return { taskFacts, eventFacts, eventRows, calendars: calendars.data!, taskCount: tasks.count ?? taskFacts.length, occurrenceCount,
-    eventComplete, warnings: [...new Set(warnings)], from, to, observedAt };
+    eventComplete, warnings: [...new Set(warnings)], taskWarnings: tasks.warnings, from, to, observedAt };
 }
 
 async function writableCalendar(client: Client): Promise<CalendarRow> {
@@ -116,13 +135,16 @@ export async function answerDialogue(input: { messages: ChatMessage[]; selectedS
   const now = new Date();
   let snapshot = await readDialogueSnapshot(client, now);
   let careerFacts: DialogueFact[] = [];
+  let careerRows: Awaited<ReturnType<typeof getCareerDashboardForClient>>["opportunities"] = [];
+  const careerFact = (row: typeof careerRows[number]): DialogueFact => ({ id: `opportunity:${row.id}`, title: row.title,
+    detail: `자격 ${row.assessment.eligibility} · 모집 ${row.assessment.lifecycle} · 선택 ${row.decision}`,
+    href: `/opportunities/${row.id}`, observedAt: row.source?.checkedAt ?? now.toISOString() });
   try {
     // Only derived status/title enter model context, never raw career facts,
     // requirements, documents, descriptions or full source snapshots.
     const career = await getCareerDashboardForClient(client);
-    careerFacts = career.opportunities.slice(0, 20).map((row) => ({ id: `opportunity:${row.id}`, title: row.title,
-      detail: `자격 ${row.assessment.eligibility} · 모집 ${row.assessment.lifecycle} · 선택 ${row.decision}`,
-      href: `/opportunities/${row.id}`, observedAt: row.source?.checkedAt ?? now.toISOString() }));
+    careerRows = career.opportunities;
+    careerFacts = careerRows.slice(0, 20).map(careerFact);
     if (career.opportunities.length > 20) snapshot.warnings.push("지원 기회는 최근 20개만 조회했습니다.");
   } catch { snapshot.warnings.push("지원 기회를 조회하지 못했습니다. 해당 정보는 답변 근거로 사용하지 않습니다."); }
   const sources = [...snapshot.taskFacts, ...snapshot.eventFacts, ...careerFacts];
@@ -136,8 +158,22 @@ export async function answerDialogue(input: { messages: ChatMessage[]; selectedS
   const grounded = groundDialogueIntent(intent, messages, now, sourceIds, input.selectedSourceId);
   const base = { observedAt: now.toISOString(), warnings: snapshot.warnings, facts: [] as DialogueFact[], draft: null };
   if (grounded.needsClarification) return { ...base, mode: "clarify", message: grounded.message };
-  if (grounded.kind === "read_tasks") return { ...base, mode: "answer", message: `조회 시점의 열린 할 일은 ${snapshot.taskCount}개입니다.`, facts: snapshot.taskFacts };
-  if (grounded.kind === "read_career") return { ...base, mode: "answer", message: careerFacts.length ? "서버가 확인한 지원 기회 상태입니다. 조건 확인 필요는 지원 가능 확정이 아닙니다." : "현재 조회에서 확인한 지원 기회가 없습니다. 조회 오류가 있으면 경고를 확인하세요.", facts: careerFacts };
+  if (grounded.kind === "read_tasks") {
+    const filters = grounded.readFilters ?? {};
+    const tasks = await readDialogueTasks(client, now, filters, grounded.queryDate);
+    const conditions = [filters.taskStatus === "all" ? "모든 상태" : filters.taskStatus === "done" ? "완료" : "미완료",
+      ...(grounded.queryDate ? [`${grounded.queryDate} 마감(JST)`] : []), ...(filters.keyword ? [`제목에 “${filters.keyword}” 포함`] : []),
+      filters.order === "priority" ? "우선순위 점수 높은 순" : "마감 가까운 순"];
+    return { ...base, mode: "answer", message: `조회 조건: ${conditions.join(" · ")}. 조건에 맞는 할 일은 ${tasks.count}개입니다.`, facts: tasks.facts,
+      warnings: [...new Set([...base.warnings.filter(warning => !snapshot.taskWarnings.includes(warning)), ...tasks.warnings])] };
+  }
+  if (grounded.kind === "read_career") {
+    const filters = grounded.readFilters ?? {};
+    const rows = filterDialogueCareer(careerRows, filters);
+    const conditions = [filters.eligibility ? `자격 분류 ${filters.eligibility}` : "모든 자격 분류", ...(filters.keyword ? [`제목에 “${filters.keyword}” 포함`] : [])];
+    return { ...base, mode: "answer", message: `조회 조건: ${conditions.join(" · ")}. 현재 조회에서 ${rows.length}개를 확인했습니다. 조회 오류·조건 확인 필요는 지원 가능 확정이 아닙니다.`,
+      facts: rows.slice(0, 20).map(careerFact), warnings: [...base.warnings, ...(rows.length > 20 ? ["조건에 맞는 지원 기회 중 최근 20개만 표시합니다."] : [])] };
+  }
   if (grounded.kind === "read_calendar") {
     if (grounded.queryDate) snapshot = await readDialogueSnapshot(client, now, grounded.queryDate, 1);
     return { ...base, mode: "answer", message: `${describeTime(snapshot.from)}부터 ${describeTime(snapshot.to)}까지 저장된 일정${snapshot.eventComplete ? ` ${snapshot.occurrenceCount}개` : " 중 조회한 항목"}입니다.`, facts: snapshot.eventFacts, warnings: snapshot.warnings };

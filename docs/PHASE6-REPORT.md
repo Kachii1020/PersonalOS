@@ -1,5 +1,33 @@
 # Phase 6 implementation evidence
 
+## 2026-09-07 measured dialogue follow-up (not yet deployed)
+
+The user requested implementation directly, so the existing spec/report were extended without a new plan document. A separate verifier authored and froze 100 unique synthetic scenarios before baseline: 15 plain reads, 15 filters, 15 task creates, 15 calendar creates, 10 updates, 15 multi-turn and 15 safety cases. Corpus SHA-256 `c08e659b0325776b7171ecd333b497be5d14396d5ecfd8b9a16d17d9b8b8aa8a` stayed unchanged throughout.
+
+| Actual live run | Exact grounded-output matches | Recorded cost | p50 / p95 pipeline latency |
+|---|---:|---:|---:|
+| Baseline | 73/100 | $0.7987 | 2313 / 3558 ms |
+| First improvement | 99/100 | $0.8757 | 2249 / 3648 ms |
+| Final improvement | 100/100 | $0.8755 | 2314 / 3530 ms |
+
+Every actual response in all three runs reported model `claude-sonnet-5` through the existing central AI client.
+
+All three runs completed 100 actual responses and 100 local usage records: **300 live model calls, $2.5499 recorded**. This measures the model plus deterministic grounding on a reused development corpus, not independent holdout accuracy, general conversation competence, or executed external actions. Two calls ran concurrently, retries were disabled and each run had a $2 recorded-response-cost stop threshold (in-flight calls can finish). Only corpus strings were sent to the model; no production snapshots or raw profile/event data were used. The runner has no external-action import/call. Baseline's single oracle-inconsistent write proposal was an extra generic word in a title, not an unauthorized external execution. Raw synthetic outcomes remain in ignored test-results; all three summaries and implementation hashes are retained in `docs/evidence/dialogue-eval-20260907.json`.
+
+Changes: broader normal read phrasing; deterministic explicit filters applied in SQL/structured career data before limiting to 20; correct dropped-task labeling; literal title matching via escaped PostgREST `imatch` ([LIKE/ILIKE aliases `*` to `%`](https://docs.postgrest.org/en/v14/references/api/tables_views.html#operators)); full user corrections; cancellation clears UI selection and blocks stale context; unknown calendar modifiers fail closed. Independent review supplied additional non-corpus cases for cancellation/old-title carryover, star matching and ignored filters. User/assistant/source authorization boundaries and immutable approval/execution guards remain unchanged.
+
+Executed verification: TypeScript, ESLint, build and **244 unit tests** passed. Actual isolated SQL filtering gate passed: 25 matches/20 displayed, highest priority item outside the initial 20 selected correctly, JST boundaries, literal `*`/`%`/`_`, dropped status, other owner zero rows and no read-generated draft. Existing G6A DB 9 and G6B DB 12 passed (each retains its explicit separate-gate placeholder). Actual browser selection-cancellation test passed with mocked chat responses; actual G6A browser model→proposal→pending→approval→one task regression also passed using three additional synthetic AI requests, separate from the 300-case comparison. Full G1–G4 external integrations and a new actual iCloud write were not rerun in this follow-up; prior production evidence is separate.
+
+Independent final review: related pure tests 39/39, additional former-defect probes 4/4, frozen corpus/code hashes matched the final run. Supplementary post-run inspection of 9 time-only UPDATE cases confirmed title remained null and the correct existing event ID was retained. This supplements the specified oracle fields; it does not silently change/re-score the fixed 100-case corpus. No additional blocker was found within that bounded review.
+
+Local harness: macOS `rapportd` occupied old API port 54621 and returned non-HTTP data, while Kong was healthy internally. It was not stopped. A separate `personalos-dialogue-eval` stack uses 54721/54722 with synthetic seed and all migrations; no new application migration was added. Existing G6 local gates accept only the two explicit dedicated loopback ports. Initial storage-disabled startup failed because historical migration 0004 requires storage tables; restoring that harness dependency succeeded. A build without network permission failed to fetch the existing Google font; the same build passed with font access.
+
+Reproduce after preparing the guarded local-only `.env.eval.local`: `DIALOGUE_EVAL_ALLOW_LIVE=1 node --env-file=.env.eval.local --conditions=react-server --import tsx scripts/eval-dialogue.ts <new-run-label>`. Results never overwrite an earlier label. Read/filter tests use the same environment and node test runner. Never point this evaluator or fixture gates at production.
+
+Cron audit: initial 15 observed scheduled runs succeeded, with 100.65 / 129.12 / 299.70 minutes between runs (min / median / max). During this work, [actual scheduled run 34128546484](https://github.com/Kachii1020/PersonalOS/actions/runs/34128546484) started at **2026-09-07 13:38:43 UTC** on deployed main `b9d139c` and all five jobs returned HTTP 200. Updated sample: **16/16 successful scheduled runs**, 15 inter-run intervals **100.65 / 131.88 / 367.85 minutes**, not five minutes. Workflow is active and no observed run is queued. Exact provider-side cause is unproven. GitHub documents possible delay/drop under load ([official troubleshooting](https://docs.github.com/en/actions/how-tos/troubleshoot-workflows)); this does not prove the cause of this repository's gap. No cadence/scheduler/provider/production change was made merely to hide the problem. A reliable five-minute delivery requirement needs a separately scoped scheduler/monitoring decision.
+
+## Earlier implementation and rollout boundary
+
 Operational follow-up: the user subsequently authorized production rollout. Actual hosted migrations, flag-bearing READY deployment and cron activation evidence are in G6-PRODUCTION-REPORT.md. The local-increment deployment statements below describe the earlier verification boundary, not the current operational state.
 
 2026-09-07 JST. **Conversation and approval-gated calendar execution implemented and locally verified; production rollout remains pending.** Branch `codex/phase6-conversation-actions`, draft PR #27. Latest main checked at `47d5447`; no incoming main changes or migration-number collision at final fetch.
