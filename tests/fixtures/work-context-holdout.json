@@ -1,0 +1,3469 @@
+{
+  "version": 1,
+  "referenceTime": "2026-09-08T00:00:00.000Z",
+  "provenance": {
+    "authorRole": "independent_verifier",
+    "method": "manually authored synthetic contexts and expected outcomes before reading feature implementation",
+    "realHumanParticipants": 0,
+    "realDeviceSessions": 0,
+    "sevenDayObservationClaimed": false,
+    "implementationGoldDisclosure": "withheld until initial implementation exists",
+    "preEvaluationCorrections": [{
+      "date": "2026-09-08",
+      "affectedCases": ["F12", "F13"],
+      "previousSha256": "242a99aefedcae7dc31b917d5e6b9c62d33808ed9bc45feb211aa9d4fab978db",
+      "reason": "Align the two dependent-action cases from the older exploratory plan to the latest approved PHASE7-SPEC independent-actions-only scope. Root authorized this correction before any holdout evaluation; no observed implementation result was used."
+    }]
+  },
+  "contracts": {
+    "maximumActions": 3,
+    "defaultContextStatus": "active",
+    "workCompletionIsNotActionCompletion": true,
+    "ambiguousContextRequiresExplicitSelection": true,
+    "eachActionRequiresItsOwnApproval": true,
+    "uncertainExternalResultsRequireReadOnlyReconciliation": true
+  },
+  "contexts": [
+    {
+      "id": "W01",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "이력서 프로젝트 설명 정리",
+        "progress": "프로젝트 두 개의 역할 설명을 정리했고 성과 수치는 아직 넣지 않았다.",
+        "nextStep": "확인 가능한 성과 수치를 세 개 골라 초안에 추가한다.",
+        "deadlineAt": "2026-09-09T18:00:00+09:00",
+        "reminderAt": "2026-09-08T10:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W01",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W02",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "면접 준비",
+        "progress": "자기소개 답변을 적었고 프로젝트 관련 꼬리 질문은 정리하지 않았다.",
+        "nextStep": "프로젝트 관련 예상 질문 다섯 개를 적는다.",
+        "deadlineAt": "2026-09-10T18:00:00+09:00",
+        "reminderAt": "2026-09-08T11:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W02",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W03",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "포트폴리오 문서 정돈",
+        "progress": "대표 프로젝트를 골랐고 실행 방법 안내가 빠져 있다.",
+        "nextStep": "처음 보는 사람이 따라 할 실행 방법을 작성한다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T12:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W03",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W04",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "경제 기사 요약 준비",
+        "progress": "읽을 기사 두 개를 골랐고 서로 다른 주장을 표시했다.",
+        "nextStep": "각 기사의 근거와 한계를 분리해 메모한다.",
+        "deadlineAt": "2026-09-12T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W04",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W05",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "통계 복습 계획",
+        "progress": "평균과 분산 개념을 복습했고 조건부 확률 문제는 남아 있다.",
+        "nextStep": "조건부 확률 예제 두 개를 직접 풀어 본다.",
+        "deadlineAt": "2026-09-13T18:00:00+09:00",
+        "reminderAt": "2026-09-09T14:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": true
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W05",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W06",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "알고리즘 오답 분류",
+        "progress": "최근 오답 여섯 개를 모았고 원인별 분류는 하지 않았다.",
+        "nextStep": "실수 유형별로 오답을 세 묶음으로 나눈다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T15:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W06",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W07",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "회계 연습 문제 정리",
+        "progress": "분개 문제를 풀었고 틀린 항목의 설명을 적지 않았다.",
+        "nextStep": "틀린 분개 세 개의 이유를 한 문장씩 작성한다.",
+        "deadlineAt": "2026-09-15T18:00:00+09:00",
+        "reminderAt": "2026-09-08T16:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W07",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W08",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "일본어 발표 연습",
+        "progress": "발표 초안을 만들었고 마지막 결론 부분이 길다.",
+        "nextStep": "결론을 두 문장으로 줄이고 소리 내어 읽는다.",
+        "deadlineAt": "2026-09-16T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W08",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W09",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "영어 문의 메일 초안",
+        "progress": "문의할 질문을 정리했고 아직 메일을 보내지 않았다.",
+        "nextStep": "질문 순서와 요청 기한을 초안에서 확인한다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T18:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W09",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W10",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "실험 결과 보고서 준비",
+        "progress": "관찰 결과를 표로 만들었고 설명 문단은 비어 있다.",
+        "nextStep": "표에서 확인되는 경향만 설명 문단에 적는다.",
+        "deadlineAt": "2026-09-10T18:00:00+09:00",
+        "reminderAt": "2026-09-09T19:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": true
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W10",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W11",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "팀 회의 안건 정리",
+        "progress": "논의할 주제 네 개를 적었고 결정할 사항은 구분하지 않았다.",
+        "nextStep": "공유 사항과 결정이 필요한 사항을 나눈다.",
+        "deadlineAt": "2026-09-11T18:00:00+09:00",
+        "reminderAt": "2026-09-08T10:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W11",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W12",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "여행 준비 목록",
+        "progress": "이동 날짜와 짐 목록을 적었고 예약은 하지 않았다.",
+        "nextStep": "필수 준비물과 출발 전 확인할 항목을 구분한다.",
+        "deadlineAt": null,
+        "reminderAt": null,
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W12",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W13",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "이사 준비 일정",
+        "progress": "정리할 구역을 나눴고 첫 작업 순서는 정하지 않았다.",
+        "nextStep": "서류와 책 정리를 시작할 순서를 정한다.",
+        "deadlineAt": "2026-09-13T18:00:00+09:00",
+        "reminderAt": "2026-09-08T12:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W13",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W14",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "검진 전 준비사항 확인",
+        "progress": "기관에서 받은 준비 안내를 모았고 질문 목록은 비어 있다.",
+        "nextStep": "안내문에서 확인할 질문만 적는다.",
+        "deadlineAt": "2026-09-14T18:00:00+09:00",
+        "reminderAt": "2026-09-08T13:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W14",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W15",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "독서 기록 완성",
+        "progress": "두 장을 읽고 인상적인 문장을 표시했다.",
+        "nextStep": "표시한 문장마다 자신의 요약을 한 줄씩 적는다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-09T14:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": true
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W15",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W16",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "사진 분류 계획",
+        "progress": "분류 기준을 적었고 실제 파일 이동이나 삭제는 하지 않았다.",
+        "nextStep": "보관할 분류 이름을 확정하고 작업 순서를 메모한다.",
+        "deadlineAt": "2026-09-16T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W16",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W17",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "월말 기록 정리",
+        "progress": "기록할 내역을 모았고 분류 기준을 적용하지 않았다.",
+        "nextStep": "항목을 분류하고 설명이 필요한 기록을 표시한다.",
+        "deadlineAt": "2026-09-09T18:00:00+09:00",
+        "reminderAt": "2026-09-08T16:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W17",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W18",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "봉사 활동 신청 준비",
+        "progress": "참여 안내를 읽었고 신청서는 제출하지 않았다.",
+        "nextStep": "신청 전에 확인할 일정과 준비물 목록을 적는다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T17:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W18",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W19",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "수업 자료 검토",
+        "progress": "자료의 목차를 훑었고 헷갈리는 용어를 표시했다.",
+        "nextStep": "표시한 용어 세 개를 찾아 짧게 정리한다.",
+        "deadlineAt": "2026-09-11T18:00:00+09:00",
+        "reminderAt": "2026-09-08T18:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W19",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W20",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "취미 프로젝트 테스트 계획",
+        "progress": "기본 화면을 만들었고 오류 상황을 점검하지 않았다.",
+        "nextStep": "빈 입력과 연결 실패 상황의 확인 목록을 만든다.",
+        "deadlineAt": "2026-09-12T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": true
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W20",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W21",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "면접 준비",
+        "progress": "기술 질문 답변을 정리했고 말하는 속도는 점검하지 않았다.",
+        "nextStep": "기술 답변 하나를 녹음할 연습 순서를 메모한다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T10:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W21",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      },
+      "notes": "W02와 목표 문구가 같아도 진행 상태와 다음 행동은 별개다. 제목만으로 혼합하면 안 된다."
+    },
+    {
+      "id": "W22",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "장학금 안내 검토",
+        "progress": "안내문을 읽었고 제출 요건을 원문과 대조하지 않았다.",
+        "nextStep": "지원 가능성을 추측하지 말고 미확인 요건을 표시한다.",
+        "deadlineAt": "2026-09-14T18:00:00+09:00",
+        "reminderAt": "2026-09-08T11:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W22",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W23",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "가족 모임 준비 목록",
+        "progress": "준비할 물품을 적었고 수량을 확인하지 않았다.",
+        "nextStep": "이미 있는 물품을 확인해 추가 준비 목록을 줄인다.",
+        "deadlineAt": "2026-09-15T18:00:00+09:00",
+        "reminderAt": "2026-09-08T12:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W23",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W24",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "발표 자료 검수",
+        "progress": "슬라이드 순서를 정했고 출처 표시는 일부 빠져 있다.",
+        "nextStep": "수치와 인용이 있는 슬라이드의 출처를 점검한다.",
+        "deadlineAt": null,
+        "reminderAt": null,
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W24",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W25",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "자격증 공부 계획",
+        "progress": "범위를 나눴고 첫 주 복습 시간은 정하지 않았다.",
+        "nextStep": "첫 주에 복습할 단원 두 개를 선택한다.",
+        "deadlineAt": "2026-09-09T18:00:00+09:00",
+        "reminderAt": "2026-09-09T14:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": true
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W25",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W26",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "운동 기록 회고",
+        "progress": "지난 활동 기록을 모았고 개인 목표는 새로 정하지 않았다.",
+        "nextStep": "기록에서 확인되는 빈도만 정리한다.",
+        "deadlineAt": "2026-09-10T18:00:00+09:00",
+        "reminderAt": "2026-09-08T15:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W26",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W27",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "지원 준비 체크리스트",
+        "progress": "문서 초안은 작성했지만 최종 검토와 제출은 끝내지 않았다.",
+        "nextStep": "체크리스트의 미확인 항목을 하나씩 검토한다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T16:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W27",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W28",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "새 기기 설정 목록",
+        "progress": "필요한 설정을 적었고 계정이나 보안 설정은 변경하지 않았다.",
+        "nextStep": "직접 확인할 설정 항목의 순서를 정한다.",
+        "deadlineAt": "2026-09-12T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W28",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W29",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "주간 회고 작성",
+        "progress": "이번 주 완료한 항목을 모았고 다음 주 우선순위는 미정이다.",
+        "nextStep": "완료 기록과 남은 일을 구분해 한 문단을 쓴다.",
+        "deadlineAt": "2026-09-13T18:00:00+09:00",
+        "reminderAt": "2026-09-08T18:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W29",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    },
+    {
+      "id": "W30",
+      "ownerRef": "synthetic-owner-a",
+      "confirmedByUser": true,
+      "input": {
+        "goal": "전시 관람 준비",
+        "progress": "관람 후보를 모았고 표는 구매하지 않았다.",
+        "nextStep": "관람 날짜와 이동 시간을 확인할 목록을 적는다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-09T19:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": true
+      },
+      "status": "active",
+      "source": {
+        "kind": "explicit_user_confirmation",
+        "id": "synthetic-message-W30",
+        "version": 1,
+        "confirmedAt": "2026-09-08T00:00:00.000Z",
+        "expiresAt": null
+      }
+    }
+  ],
+  "restores": [
+    {
+      "id": "R01",
+      "contextRef": "W01",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W01"
+      },
+      "expected": {
+        "contextRef": "W01",
+        "status": "active",
+        "goal": "이력서 프로젝트 설명 정리",
+        "progress": "프로젝트 두 개의 역할 설명을 정리했고 성과 수치는 아직 넣지 않았다.",
+        "nextStep": "확인 가능한 성과 수치를 세 개 골라 초안에 추가한다.",
+        "deadlineAt": "2026-09-09T18:00:00+09:00",
+        "reminderAt": "2026-09-08T10:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R02",
+      "contextRef": "W01",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W01"
+      },
+      "expected": {
+        "contextRef": "W01",
+        "status": "active",
+        "goal": "이력서 프로젝트 설명 정리",
+        "progress": "프로젝트 두 개의 역할 설명을 정리했고 성과 수치는 아직 넣지 않았다.",
+        "nextStep": "확인 가능한 성과 수치를 세 개 골라 초안에 추가한다.",
+        "deadlineAt": "2026-09-09T18:00:00+09:00",
+        "reminderAt": "2026-09-08T10:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R03",
+      "contextRef": "W02",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W02"
+      },
+      "expected": {
+        "contextRef": "W02",
+        "status": "active",
+        "goal": "면접 준비",
+        "progress": "자기소개 답변을 적었고 프로젝트 관련 꼬리 질문은 정리하지 않았다.",
+        "nextStep": "프로젝트 관련 예상 질문 다섯 개를 적는다.",
+        "deadlineAt": "2026-09-10T18:00:00+09:00",
+        "reminderAt": "2026-09-08T11:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R04",
+      "contextRef": "W02",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W02"
+      },
+      "expected": {
+        "contextRef": "W02",
+        "status": "active",
+        "goal": "면접 준비",
+        "progress": "자기소개 답변을 적었고 프로젝트 관련 꼬리 질문은 정리하지 않았다.",
+        "nextStep": "프로젝트 관련 예상 질문 다섯 개를 적는다.",
+        "deadlineAt": "2026-09-10T18:00:00+09:00",
+        "reminderAt": "2026-09-08T11:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R05",
+      "contextRef": "W03",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W03"
+      },
+      "expected": {
+        "contextRef": "W03",
+        "status": "active",
+        "goal": "포트폴리오 문서 정돈",
+        "progress": "대표 프로젝트를 골랐고 실행 방법 안내가 빠져 있다.",
+        "nextStep": "처음 보는 사람이 따라 할 실행 방법을 작성한다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T12:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R06",
+      "contextRef": "W03",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W03"
+      },
+      "expected": {
+        "contextRef": "W03",
+        "status": "active",
+        "goal": "포트폴리오 문서 정돈",
+        "progress": "대표 프로젝트를 골랐고 실행 방법 안내가 빠져 있다.",
+        "nextStep": "처음 보는 사람이 따라 할 실행 방법을 작성한다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T12:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R07",
+      "contextRef": "W04",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W04"
+      },
+      "expected": {
+        "contextRef": "W04",
+        "status": "active",
+        "goal": "경제 기사 요약 준비",
+        "progress": "읽을 기사 두 개를 골랐고 서로 다른 주장을 표시했다.",
+        "nextStep": "각 기사의 근거와 한계를 분리해 메모한다.",
+        "deadlineAt": "2026-09-12T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R08",
+      "contextRef": "W04",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W04"
+      },
+      "expected": {
+        "contextRef": "W04",
+        "status": "active",
+        "goal": "경제 기사 요약 준비",
+        "progress": "읽을 기사 두 개를 골랐고 서로 다른 주장을 표시했다.",
+        "nextStep": "각 기사의 근거와 한계를 분리해 메모한다.",
+        "deadlineAt": "2026-09-12T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R09",
+      "contextRef": "W05",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W05"
+      },
+      "expected": {
+        "contextRef": "W05",
+        "status": "active",
+        "goal": "통계 복습 계획",
+        "progress": "평균과 분산 개념을 복습했고 조건부 확률 문제는 남아 있다.",
+        "nextStep": "조건부 확률 예제 두 개를 직접 풀어 본다.",
+        "deadlineAt": "2026-09-13T18:00:00+09:00",
+        "reminderAt": "2026-09-09T14:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": true,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R10",
+      "contextRef": "W05",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W05"
+      },
+      "expected": {
+        "contextRef": "W05",
+        "status": "active",
+        "goal": "통계 복습 계획",
+        "progress": "평균과 분산 개념을 복습했고 조건부 확률 문제는 남아 있다.",
+        "nextStep": "조건부 확률 예제 두 개를 직접 풀어 본다.",
+        "deadlineAt": "2026-09-13T18:00:00+09:00",
+        "reminderAt": "2026-09-09T14:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": true,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R11",
+      "contextRef": "W06",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W06"
+      },
+      "expected": {
+        "contextRef": "W06",
+        "status": "active",
+        "goal": "알고리즘 오답 분류",
+        "progress": "최근 오답 여섯 개를 모았고 원인별 분류는 하지 않았다.",
+        "nextStep": "실수 유형별로 오답을 세 묶음으로 나눈다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T15:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R12",
+      "contextRef": "W06",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W06"
+      },
+      "expected": {
+        "contextRef": "W06",
+        "status": "active",
+        "goal": "알고리즘 오답 분류",
+        "progress": "최근 오답 여섯 개를 모았고 원인별 분류는 하지 않았다.",
+        "nextStep": "실수 유형별로 오답을 세 묶음으로 나눈다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T15:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R13",
+      "contextRef": "W07",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W07"
+      },
+      "expected": {
+        "contextRef": "W07",
+        "status": "active",
+        "goal": "회계 연습 문제 정리",
+        "progress": "분개 문제를 풀었고 틀린 항목의 설명을 적지 않았다.",
+        "nextStep": "틀린 분개 세 개의 이유를 한 문장씩 작성한다.",
+        "deadlineAt": "2026-09-15T18:00:00+09:00",
+        "reminderAt": "2026-09-08T16:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R14",
+      "contextRef": "W07",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W07"
+      },
+      "expected": {
+        "contextRef": "W07",
+        "status": "active",
+        "goal": "회계 연습 문제 정리",
+        "progress": "분개 문제를 풀었고 틀린 항목의 설명을 적지 않았다.",
+        "nextStep": "틀린 분개 세 개의 이유를 한 문장씩 작성한다.",
+        "deadlineAt": "2026-09-15T18:00:00+09:00",
+        "reminderAt": "2026-09-08T16:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R15",
+      "contextRef": "W08",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W08"
+      },
+      "expected": {
+        "contextRef": "W08",
+        "status": "active",
+        "goal": "일본어 발표 연습",
+        "progress": "발표 초안을 만들었고 마지막 결론 부분이 길다.",
+        "nextStep": "결론을 두 문장으로 줄이고 소리 내어 읽는다.",
+        "deadlineAt": "2026-09-16T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R16",
+      "contextRef": "W08",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W08"
+      },
+      "expected": {
+        "contextRef": "W08",
+        "status": "active",
+        "goal": "일본어 발표 연습",
+        "progress": "발표 초안을 만들었고 마지막 결론 부분이 길다.",
+        "nextStep": "결론을 두 문장으로 줄이고 소리 내어 읽는다.",
+        "deadlineAt": "2026-09-16T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R17",
+      "contextRef": "W09",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W09"
+      },
+      "expected": {
+        "contextRef": "W09",
+        "status": "active",
+        "goal": "영어 문의 메일 초안",
+        "progress": "문의할 질문을 정리했고 아직 메일을 보내지 않았다.",
+        "nextStep": "질문 순서와 요청 기한을 초안에서 확인한다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T18:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R18",
+      "contextRef": "W09",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W09"
+      },
+      "expected": {
+        "contextRef": "W09",
+        "status": "active",
+        "goal": "영어 문의 메일 초안",
+        "progress": "문의할 질문을 정리했고 아직 메일을 보내지 않았다.",
+        "nextStep": "질문 순서와 요청 기한을 초안에서 확인한다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T18:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R19",
+      "contextRef": "W10",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W10"
+      },
+      "expected": {
+        "contextRef": "W10",
+        "status": "active",
+        "goal": "실험 결과 보고서 준비",
+        "progress": "관찰 결과를 표로 만들었고 설명 문단은 비어 있다.",
+        "nextStep": "표에서 확인되는 경향만 설명 문단에 적는다.",
+        "deadlineAt": "2026-09-10T18:00:00+09:00",
+        "reminderAt": "2026-09-09T19:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": true,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R20",
+      "contextRef": "W10",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W10"
+      },
+      "expected": {
+        "contextRef": "W10",
+        "status": "active",
+        "goal": "실험 결과 보고서 준비",
+        "progress": "관찰 결과를 표로 만들었고 설명 문단은 비어 있다.",
+        "nextStep": "표에서 확인되는 경향만 설명 문단에 적는다.",
+        "deadlineAt": "2026-09-10T18:00:00+09:00",
+        "reminderAt": "2026-09-09T19:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": true,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R21",
+      "contextRef": "W11",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W11"
+      },
+      "expected": {
+        "contextRef": "W11",
+        "status": "active",
+        "goal": "팀 회의 안건 정리",
+        "progress": "논의할 주제 네 개를 적었고 결정할 사항은 구분하지 않았다.",
+        "nextStep": "공유 사항과 결정이 필요한 사항을 나눈다.",
+        "deadlineAt": "2026-09-11T18:00:00+09:00",
+        "reminderAt": "2026-09-08T10:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R22",
+      "contextRef": "W11",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W11"
+      },
+      "expected": {
+        "contextRef": "W11",
+        "status": "active",
+        "goal": "팀 회의 안건 정리",
+        "progress": "논의할 주제 네 개를 적었고 결정할 사항은 구분하지 않았다.",
+        "nextStep": "공유 사항과 결정이 필요한 사항을 나눈다.",
+        "deadlineAt": "2026-09-11T18:00:00+09:00",
+        "reminderAt": "2026-09-08T10:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R23",
+      "contextRef": "W12",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W12"
+      },
+      "expected": {
+        "contextRef": "W12",
+        "status": "active",
+        "goal": "여행 준비 목록",
+        "progress": "이동 날짜와 짐 목록을 적었고 예약은 하지 않았다.",
+        "nextStep": "필수 준비물과 출발 전 확인할 항목을 구분한다.",
+        "deadlineAt": null,
+        "reminderAt": null,
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R24",
+      "contextRef": "W12",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W12"
+      },
+      "expected": {
+        "contextRef": "W12",
+        "status": "active",
+        "goal": "여행 준비 목록",
+        "progress": "이동 날짜와 짐 목록을 적었고 예약은 하지 않았다.",
+        "nextStep": "필수 준비물과 출발 전 확인할 항목을 구분한다.",
+        "deadlineAt": null,
+        "reminderAt": null,
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R25",
+      "contextRef": "W13",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W13"
+      },
+      "expected": {
+        "contextRef": "W13",
+        "status": "active",
+        "goal": "이사 준비 일정",
+        "progress": "정리할 구역을 나눴고 첫 작업 순서는 정하지 않았다.",
+        "nextStep": "서류와 책 정리를 시작할 순서를 정한다.",
+        "deadlineAt": "2026-09-13T18:00:00+09:00",
+        "reminderAt": "2026-09-08T12:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R26",
+      "contextRef": "W13",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W13"
+      },
+      "expected": {
+        "contextRef": "W13",
+        "status": "active",
+        "goal": "이사 준비 일정",
+        "progress": "정리할 구역을 나눴고 첫 작업 순서는 정하지 않았다.",
+        "nextStep": "서류와 책 정리를 시작할 순서를 정한다.",
+        "deadlineAt": "2026-09-13T18:00:00+09:00",
+        "reminderAt": "2026-09-08T12:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R27",
+      "contextRef": "W14",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W14"
+      },
+      "expected": {
+        "contextRef": "W14",
+        "status": "active",
+        "goal": "검진 전 준비사항 확인",
+        "progress": "기관에서 받은 준비 안내를 모았고 질문 목록은 비어 있다.",
+        "nextStep": "안내문에서 확인할 질문만 적는다.",
+        "deadlineAt": "2026-09-14T18:00:00+09:00",
+        "reminderAt": "2026-09-08T13:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R28",
+      "contextRef": "W14",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W14"
+      },
+      "expected": {
+        "contextRef": "W14",
+        "status": "active",
+        "goal": "검진 전 준비사항 확인",
+        "progress": "기관에서 받은 준비 안내를 모았고 질문 목록은 비어 있다.",
+        "nextStep": "안내문에서 확인할 질문만 적는다.",
+        "deadlineAt": "2026-09-14T18:00:00+09:00",
+        "reminderAt": "2026-09-08T13:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R29",
+      "contextRef": "W15",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W15"
+      },
+      "expected": {
+        "contextRef": "W15",
+        "status": "active",
+        "goal": "독서 기록 완성",
+        "progress": "두 장을 읽고 인상적인 문장을 표시했다.",
+        "nextStep": "표시한 문장마다 자신의 요약을 한 줄씩 적는다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-09T14:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": true,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R30",
+      "contextRef": "W15",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W15"
+      },
+      "expected": {
+        "contextRef": "W15",
+        "status": "active",
+        "goal": "독서 기록 완성",
+        "progress": "두 장을 읽고 인상적인 문장을 표시했다.",
+        "nextStep": "표시한 문장마다 자신의 요약을 한 줄씩 적는다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-09T14:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": true,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R31",
+      "contextRef": "W16",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W16"
+      },
+      "expected": {
+        "contextRef": "W16",
+        "status": "active",
+        "goal": "사진 분류 계획",
+        "progress": "분류 기준을 적었고 실제 파일 이동이나 삭제는 하지 않았다.",
+        "nextStep": "보관할 분류 이름을 확정하고 작업 순서를 메모한다.",
+        "deadlineAt": "2026-09-16T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R32",
+      "contextRef": "W16",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W16"
+      },
+      "expected": {
+        "contextRef": "W16",
+        "status": "active",
+        "goal": "사진 분류 계획",
+        "progress": "분류 기준을 적었고 실제 파일 이동이나 삭제는 하지 않았다.",
+        "nextStep": "보관할 분류 이름을 확정하고 작업 순서를 메모한다.",
+        "deadlineAt": "2026-09-16T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R33",
+      "contextRef": "W17",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W17"
+      },
+      "expected": {
+        "contextRef": "W17",
+        "status": "active",
+        "goal": "월말 기록 정리",
+        "progress": "기록할 내역을 모았고 분류 기준을 적용하지 않았다.",
+        "nextStep": "항목을 분류하고 설명이 필요한 기록을 표시한다.",
+        "deadlineAt": "2026-09-09T18:00:00+09:00",
+        "reminderAt": "2026-09-08T16:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R34",
+      "contextRef": "W17",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W17"
+      },
+      "expected": {
+        "contextRef": "W17",
+        "status": "active",
+        "goal": "월말 기록 정리",
+        "progress": "기록할 내역을 모았고 분류 기준을 적용하지 않았다.",
+        "nextStep": "항목을 분류하고 설명이 필요한 기록을 표시한다.",
+        "deadlineAt": "2026-09-09T18:00:00+09:00",
+        "reminderAt": "2026-09-08T16:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R35",
+      "contextRef": "W18",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W18"
+      },
+      "expected": {
+        "contextRef": "W18",
+        "status": "active",
+        "goal": "봉사 활동 신청 준비",
+        "progress": "참여 안내를 읽었고 신청서는 제출하지 않았다.",
+        "nextStep": "신청 전에 확인할 일정과 준비물 목록을 적는다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T17:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R36",
+      "contextRef": "W18",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W18"
+      },
+      "expected": {
+        "contextRef": "W18",
+        "status": "active",
+        "goal": "봉사 활동 신청 준비",
+        "progress": "참여 안내를 읽었고 신청서는 제출하지 않았다.",
+        "nextStep": "신청 전에 확인할 일정과 준비물 목록을 적는다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T17:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R37",
+      "contextRef": "W19",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W19"
+      },
+      "expected": {
+        "contextRef": "W19",
+        "status": "active",
+        "goal": "수업 자료 검토",
+        "progress": "자료의 목차를 훑었고 헷갈리는 용어를 표시했다.",
+        "nextStep": "표시한 용어 세 개를 찾아 짧게 정리한다.",
+        "deadlineAt": "2026-09-11T18:00:00+09:00",
+        "reminderAt": "2026-09-08T18:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R38",
+      "contextRef": "W19",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W19"
+      },
+      "expected": {
+        "contextRef": "W19",
+        "status": "active",
+        "goal": "수업 자료 검토",
+        "progress": "자료의 목차를 훑었고 헷갈리는 용어를 표시했다.",
+        "nextStep": "표시한 용어 세 개를 찾아 짧게 정리한다.",
+        "deadlineAt": "2026-09-11T18:00:00+09:00",
+        "reminderAt": "2026-09-08T18:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R39",
+      "contextRef": "W20",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W20"
+      },
+      "expected": {
+        "contextRef": "W20",
+        "status": "active",
+        "goal": "취미 프로젝트 테스트 계획",
+        "progress": "기본 화면을 만들었고 오류 상황을 점검하지 않았다.",
+        "nextStep": "빈 입력과 연결 실패 상황의 확인 목록을 만든다.",
+        "deadlineAt": "2026-09-12T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": true,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R40",
+      "contextRef": "W20",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W20"
+      },
+      "expected": {
+        "contextRef": "W20",
+        "status": "active",
+        "goal": "취미 프로젝트 테스트 계획",
+        "progress": "기본 화면을 만들었고 오류 상황을 점검하지 않았다.",
+        "nextStep": "빈 입력과 연결 실패 상황의 확인 목록을 만든다.",
+        "deadlineAt": "2026-09-12T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": true,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R41",
+      "contextRef": "W21",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W21"
+      },
+      "expected": {
+        "contextRef": "W21",
+        "status": "active",
+        "goal": "면접 준비",
+        "progress": "기술 질문 답변을 정리했고 말하는 속도는 점검하지 않았다.",
+        "nextStep": "기술 답변 하나를 녹음할 연습 순서를 메모한다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T10:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R42",
+      "contextRef": "W21",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W21"
+      },
+      "expected": {
+        "contextRef": "W21",
+        "status": "active",
+        "goal": "면접 준비",
+        "progress": "기술 질문 답변을 정리했고 말하는 속도는 점검하지 않았다.",
+        "nextStep": "기술 답변 하나를 녹음할 연습 순서를 메모한다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T10:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R43",
+      "contextRef": "W22",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W22"
+      },
+      "expected": {
+        "contextRef": "W22",
+        "status": "active",
+        "goal": "장학금 안내 검토",
+        "progress": "안내문을 읽었고 제출 요건을 원문과 대조하지 않았다.",
+        "nextStep": "지원 가능성을 추측하지 말고 미확인 요건을 표시한다.",
+        "deadlineAt": "2026-09-14T18:00:00+09:00",
+        "reminderAt": "2026-09-08T11:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R44",
+      "contextRef": "W22",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W22"
+      },
+      "expected": {
+        "contextRef": "W22",
+        "status": "active",
+        "goal": "장학금 안내 검토",
+        "progress": "안내문을 읽었고 제출 요건을 원문과 대조하지 않았다.",
+        "nextStep": "지원 가능성을 추측하지 말고 미확인 요건을 표시한다.",
+        "deadlineAt": "2026-09-14T18:00:00+09:00",
+        "reminderAt": "2026-09-08T11:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R45",
+      "contextRef": "W23",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W23"
+      },
+      "expected": {
+        "contextRef": "W23",
+        "status": "active",
+        "goal": "가족 모임 준비 목록",
+        "progress": "준비할 물품을 적었고 수량을 확인하지 않았다.",
+        "nextStep": "이미 있는 물품을 확인해 추가 준비 목록을 줄인다.",
+        "deadlineAt": "2026-09-15T18:00:00+09:00",
+        "reminderAt": "2026-09-08T12:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R46",
+      "contextRef": "W23",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W23"
+      },
+      "expected": {
+        "contextRef": "W23",
+        "status": "active",
+        "goal": "가족 모임 준비 목록",
+        "progress": "준비할 물품을 적었고 수량을 확인하지 않았다.",
+        "nextStep": "이미 있는 물품을 확인해 추가 준비 목록을 줄인다.",
+        "deadlineAt": "2026-09-15T18:00:00+09:00",
+        "reminderAt": "2026-09-08T12:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R47",
+      "contextRef": "W24",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W24"
+      },
+      "expected": {
+        "contextRef": "W24",
+        "status": "active",
+        "goal": "발표 자료 검수",
+        "progress": "슬라이드 순서를 정했고 출처 표시는 일부 빠져 있다.",
+        "nextStep": "수치와 인용이 있는 슬라이드의 출처를 점검한다.",
+        "deadlineAt": null,
+        "reminderAt": null,
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R48",
+      "contextRef": "W24",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W24"
+      },
+      "expected": {
+        "contextRef": "W24",
+        "status": "active",
+        "goal": "발표 자료 검수",
+        "progress": "슬라이드 순서를 정했고 출처 표시는 일부 빠져 있다.",
+        "nextStep": "수치와 인용이 있는 슬라이드의 출처를 점검한다.",
+        "deadlineAt": null,
+        "reminderAt": null,
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R49",
+      "contextRef": "W25",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W25"
+      },
+      "expected": {
+        "contextRef": "W25",
+        "status": "active",
+        "goal": "자격증 공부 계획",
+        "progress": "범위를 나눴고 첫 주 복습 시간은 정하지 않았다.",
+        "nextStep": "첫 주에 복습할 단원 두 개를 선택한다.",
+        "deadlineAt": "2026-09-09T18:00:00+09:00",
+        "reminderAt": "2026-09-09T14:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": true,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R50",
+      "contextRef": "W25",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W25"
+      },
+      "expected": {
+        "contextRef": "W25",
+        "status": "active",
+        "goal": "자격증 공부 계획",
+        "progress": "범위를 나눴고 첫 주 복습 시간은 정하지 않았다.",
+        "nextStep": "첫 주에 복습할 단원 두 개를 선택한다.",
+        "deadlineAt": "2026-09-09T18:00:00+09:00",
+        "reminderAt": "2026-09-09T14:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": true,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R51",
+      "contextRef": "W26",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W26"
+      },
+      "expected": {
+        "contextRef": "W26",
+        "status": "active",
+        "goal": "운동 기록 회고",
+        "progress": "지난 활동 기록을 모았고 개인 목표는 새로 정하지 않았다.",
+        "nextStep": "기록에서 확인되는 빈도만 정리한다.",
+        "deadlineAt": "2026-09-10T18:00:00+09:00",
+        "reminderAt": "2026-09-08T15:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R52",
+      "contextRef": "W26",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W26"
+      },
+      "expected": {
+        "contextRef": "W26",
+        "status": "active",
+        "goal": "운동 기록 회고",
+        "progress": "지난 활동 기록을 모았고 개인 목표는 새로 정하지 않았다.",
+        "nextStep": "기록에서 확인되는 빈도만 정리한다.",
+        "deadlineAt": "2026-09-10T18:00:00+09:00",
+        "reminderAt": "2026-09-08T15:30:00+09:00",
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R53",
+      "contextRef": "W27",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W27"
+      },
+      "expected": {
+        "contextRef": "W27",
+        "status": "active",
+        "goal": "지원 준비 체크리스트",
+        "progress": "문서 초안은 작성했지만 최종 검토와 제출은 끝내지 않았다.",
+        "nextStep": "체크리스트의 미확인 항목을 하나씩 검토한다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T16:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R54",
+      "contextRef": "W27",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W27"
+      },
+      "expected": {
+        "contextRef": "W27",
+        "status": "active",
+        "goal": "지원 준비 체크리스트",
+        "progress": "문서 초안은 작성했지만 최종 검토와 제출은 끝내지 않았다.",
+        "nextStep": "체크리스트의 미확인 항목을 하나씩 검토한다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-08T16:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R55",
+      "contextRef": "W28",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W28"
+      },
+      "expected": {
+        "contextRef": "W28",
+        "status": "active",
+        "goal": "새 기기 설정 목록",
+        "progress": "필요한 설정을 적었고 계정이나 보안 설정은 변경하지 않았다.",
+        "nextStep": "직접 확인할 설정 항목의 순서를 정한다.",
+        "deadlineAt": "2026-09-12T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R56",
+      "contextRef": "W28",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W28"
+      },
+      "expected": {
+        "contextRef": "W28",
+        "status": "active",
+        "goal": "새 기기 설정 목록",
+        "progress": "필요한 설정을 적었고 계정이나 보안 설정은 변경하지 않았다.",
+        "nextStep": "직접 확인할 설정 항목의 순서를 정한다.",
+        "deadlineAt": "2026-09-12T18:00:00+09:00",
+        "reminderAt": null,
+        "deadlineReminder": true,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R57",
+      "contextRef": "W29",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W29"
+      },
+      "expected": {
+        "contextRef": "W29",
+        "status": "active",
+        "goal": "주간 회고 작성",
+        "progress": "이번 주 완료한 항목을 모았고 다음 주 우선순위는 미정이다.",
+        "nextStep": "완료 기록과 남은 일을 구분해 한 문단을 쓴다.",
+        "deadlineAt": "2026-09-13T18:00:00+09:00",
+        "reminderAt": "2026-09-08T18:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R58",
+      "contextRef": "W29",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W29"
+      },
+      "expected": {
+        "contextRef": "W29",
+        "status": "active",
+        "goal": "주간 회고 작성",
+        "progress": "이번 주 완료한 항목을 모았고 다음 주 우선순위는 미정이다.",
+        "nextStep": "완료 기록과 남은 일을 구분해 한 문단을 쓴다.",
+        "deadlineAt": "2026-09-13T18:00:00+09:00",
+        "reminderAt": "2026-09-08T18:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": false,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R59",
+      "contextRef": "W30",
+      "channel": "reconnect",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W30"
+      },
+      "expected": {
+        "contextRef": "W30",
+        "status": "active",
+        "goal": "전시 관람 준비",
+        "progress": "관람 후보를 모았고 표는 구매하지 않았다.",
+        "nextStep": "관람 날짜와 이동 시간을 확인할 목록을 적는다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-09T19:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": true,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    },
+    {
+      "id": "R60",
+      "contextRef": "W30",
+      "channel": "second_device",
+      "request": {
+        "ownerRef": "synthetic-owner-a",
+        "selectedContextRef": "W30"
+      },
+      "expected": {
+        "contextRef": "W30",
+        "status": "active",
+        "goal": "전시 관람 준비",
+        "progress": "관람 후보를 모았고 표는 구매하지 않았다.",
+        "nextStep": "관람 날짜와 이동 시간을 확인할 목록을 적는다.",
+        "deadlineAt": null,
+        "reminderAt": "2026-09-09T19:30:00+09:00",
+        "deadlineReminder": false,
+        "resumeReminder": true,
+        "missingFields": [],
+        "mayMarkWorkCompleted": false,
+        "mayCreateExternalAction": false
+      }
+    }
+  ],
+  "workflows": [
+    {
+      "id": "F01",
+      "contextRef": "W01",
+      "request": "이력서 프로젝트 설명 정리 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "성과 수치 초안 작성",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "성과 수치 검토",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        }
+      ],
+      "expected": {
+        "completion": "verified",
+        "verifiedActionIds": [
+          "A1",
+          "A2"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 2
+      },
+      "notes": "준비 도구 두 개를 만들었지만 이력서 자체를 완성한 것은 아니다."
+    },
+    {
+      "id": "F02",
+      "contextRef": "W02",
+      "request": "면접 준비 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "예상 질문 정리",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "질문 답변 연습",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A3",
+          "type": "UPDATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-existing-app-event",
+          "fields": {
+            "summary": "면접 답변 점검",
+            "startsAt": "2026-09-10T19:00:00+09:00",
+            "endsAt": "2026-09-10T19:30:00+09:00",
+            "timezone": "Asia/Tokyo",
+            "expectedEtag": "\"synthetic-reviewed-v1\""
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        }
+      ],
+      "expected": {
+        "completion": "verified",
+        "verifiedActionIds": [
+          "A1",
+          "A2",
+          "A3"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 3
+      }
+    },
+    {
+      "id": "F03",
+      "contextRef": "W03",
+      "request": "포트폴리오 문서 정돈 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "실행 방법 초안 작성",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        }
+      ],
+      "expected": {
+        "completion": "verified",
+        "verifiedActionIds": [
+          "A1"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 1
+      }
+    },
+    {
+      "id": "F04",
+      "contextRef": "W04",
+      "request": "경제 기사 요약 준비 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "기사 근거 비교",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "기사 비교 시간",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "failed"
+        }
+      ],
+      "expected": {
+        "completion": "partial",
+        "verifiedActionIds": [
+          "A1"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 1,
+        "failedActionIds": [
+          "A2"
+        ]
+      },
+      "notes": "두 번째 일정 생성이 명확하게 실패했다. 이미 생성한 할 일을 삭제하거나 전체 완료라 말하지 않는다."
+    },
+    {
+      "id": "F05",
+      "contextRef": "W05",
+      "request": "통계 복습 계획 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "조건부 확률 예제 풀기",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "확률 복습 시간",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "uncertain"
+        }
+      ],
+      "expected": {
+        "completion": "partial",
+        "verifiedActionIds": [
+          "A1"
+        ],
+        "uncertainActionIds": [
+          "A2"
+        ],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 1,
+        "requiresReadOnlyReconciliation": [
+          "A2"
+        ]
+      },
+      "notes": "원격 결과가 불확실하므로 총 원격 생성 수를 확정하거나 다시 PUT하지 않는다."
+    },
+    {
+      "id": "F06",
+      "contextRef": "W06",
+      "request": "알고리즘 오답 분류 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "오답 원인 분류",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "오답 복습",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "rejected",
+          "outcome": "not_executed"
+        }
+      ],
+      "expected": {
+        "completion": "partial",
+        "verifiedActionIds": [
+          "A1"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 1,
+        "rejectedActionIds": [
+          "A2"
+        ]
+      }
+    },
+    {
+      "id": "F07",
+      "contextRef": "W07",
+      "request": "회계 연습 문제 정리 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "분개 설명 작성",
+            "dueAt": null
+          },
+          "decision": "pending",
+          "outcome": "not_executed"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "분개 복습",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "pending",
+          "outcome": "not_executed"
+        }
+      ],
+      "expected": {
+        "completion": "needs_approval",
+        "verifiedActionIds": [],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [
+          "A1",
+          "A2"
+        ],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 0
+      }
+    },
+    {
+      "id": "F08",
+      "contextRef": "W08",
+      "request": "일본어 발표 연습 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "발표 결론 줄이기",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "발표 읽기 연습",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "pending",
+          "outcome": "not_executed"
+        }
+      ],
+      "expected": {
+        "completion": "needs_approval",
+        "verifiedActionIds": [
+          "A1"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [
+          "A2"
+        ],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 1,
+        "showPartialProgress": true
+      }
+    },
+    {
+      "id": "F09",
+      "contextRef": "W09",
+      "request": "영어 문의 메일 초안 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "문의 메일 질문 순서 검토",
+            "dueAt": null
+          },
+          "decision": "rejected",
+          "outcome": "not_executed"
+        }
+      ],
+      "expected": {
+        "completion": "no_effect",
+        "verifiedActionIds": [],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 0,
+        "rejectedActionIds": [
+          "A1"
+        ]
+      },
+      "notes": "메일 전송은 요청하지 않았고 수행해서는 안 된다."
+    },
+    {
+      "id": "F10",
+      "contextRef": "W10",
+      "request": "실험 결과 보고서 준비 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "UPDATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-existing-app-event",
+          "fields": {
+            "summary": "결과 보고서 작성 시간",
+            "startsAt": "2026-09-10T19:00:00+09:00",
+            "endsAt": "2026-09-10T19:30:00+09:00",
+            "timezone": "Asia/Tokyo",
+            "expectedEtag": "\"synthetic-reviewed-v1\""
+          },
+          "decision": "approved",
+          "outcome": "conflict"
+        }
+      ],
+      "expected": {
+        "completion": "needs_review",
+        "verifiedActionIds": [],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 0,
+        "conflictingActionIds": [
+          "A1"
+        ],
+        "newApprovalRequired": true
+      },
+      "notes": "ETag 412 충돌 후 다른 시간으로 대신 예약하거나 외부 편집을 덮어쓰지 않는다."
+    },
+    {
+      "id": "F11",
+      "contextRef": "W11",
+      "request": "팀 회의 안건 정리 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "회의 안건 검토",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "uncertain"
+        }
+      ],
+      "expected": {
+        "completion": "needs_reconciliation",
+        "verifiedActionIds": [],
+        "uncertainActionIds": [
+          "A1"
+        ],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 0,
+        "requiresReadOnlyReconciliation": [
+          "A1"
+        ]
+      }
+    },
+    {
+      "id": "F12",
+      "contextRef": "W12",
+      "request": "여행 준비 목록 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "준비물 목록 작성",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "failed"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "준비물 점검",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        }
+      ],
+      "expected": {
+        "completion": "partial",
+        "verifiedActionIds": ["A2"],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 1,
+        "failedActionIds": [
+          "A1"
+        ]
+      }
+    },
+    {
+      "id": "F13",
+      "contextRef": "W13",
+      "request": "이사 준비 일정 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "서류 분류 순서 정리",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "책 정리",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "failed"
+        },
+        {
+          "id": "A3",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "정리 결과 검토",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        }
+      ],
+      "expected": {
+        "completion": "partial",
+        "verifiedActionIds": [
+          "A1", "A3"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 2,
+        "failedActionIds": [
+          "A2"
+        ]
+      }
+    },
+    {
+      "id": "F14",
+      "contextRef": "W14",
+      "request": "검진 전 준비사항 확인 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "기관 안내 질문 작성",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "UPDATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-existing-app-event",
+          "fields": {
+            "summary": "안내문 확인 시간",
+            "startsAt": "2026-09-10T19:00:00+09:00",
+            "endsAt": "2026-09-10T19:30:00+09:00",
+            "timezone": "Asia/Tokyo",
+            "expectedEtag": "\"synthetic-reviewed-v1\""
+          },
+          "decision": "approved",
+          "outcome": "conflict"
+        },
+        {
+          "id": "A3",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "준비물 확인 목록 작성",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        }
+      ],
+      "expected": {
+        "completion": "partial",
+        "verifiedActionIds": [
+          "A1",
+          "A3"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 2,
+        "conflictingActionIds": [
+          "A2"
+        ]
+      },
+      "notes": "세 번째 행동은 두 번째 행동에 의존하지 않는다. 각각의 결과를 구분한다."
+    },
+    {
+      "id": "F15",
+      "contextRef": "W15",
+      "request": "독서 기록 완성 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "독서 요약 정리",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "독서 기록 마무리",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        }
+      ],
+      "expected": {
+        "completion": "verified",
+        "verifiedActionIds": [
+          "A1",
+          "A2"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 2,
+        "requestReplayCount": 2,
+        "duplicateApprovalClicks": [
+          "A1",
+          "A2"
+        ],
+        "maximumUniqueEffects": 2
+      },
+      "notes": "같은 요청과 승인 클릭이 반복돼도 각 효과는 한 번뿐이다."
+    },
+    {
+      "id": "F16",
+      "contextRef": "W16",
+      "request": "사진 분류 계획 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "사진 분류 이름 확정",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "분류 순서 메모",
+            "dueAt": null
+          },
+          "decision": "pending",
+          "outcome": "not_executed"
+        },
+        {
+          "id": "A3",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "정리 계획 검토",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "pending",
+          "outcome": "not_executed"
+        }
+      ],
+      "expected": {
+        "completion": "needs_approval",
+        "verifiedActionIds": [
+          "A1"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [
+          "A2",
+          "A3"
+        ],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 1
+      },
+      "notes": "A1 승인으로 A2/A3를 승인한 것으로 처리하지 않는다. 파일 이동·삭제는 없다."
+    },
+    {
+      "id": "F17",
+      "contextRef": "W17",
+      "request": "월말 기록 정리 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "기록 분류 기준 확인",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "월말 기록 검토",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "review_rejected",
+          "reviewRevision": 4,
+          "currentRevision": 5
+        }
+      ],
+      "expected": {
+        "completion": "partial",
+        "verifiedActionIds": [
+          "A1"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 1,
+        "staleReviewActionIds": [
+          "A2"
+        ],
+        "newApprovalRequired": true
+      }
+    },
+    {
+      "id": "F18",
+      "contextRef": "W18",
+      "request": "봉사 활동 신청 준비 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "참여 준비물 확인",
+            "dueAt": null
+          },
+          "decision": "pending",
+          "outcome": "not_executed"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "신청 전 일정 확인",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "pending",
+          "outcome": "not_executed"
+        }
+      ],
+      "expected": {
+        "completion": "cancelled",
+        "verifiedActionIds": [],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [
+          "A1",
+          "A2"
+        ],
+        "independentApprovalRequired": true,
+        "workStatus": "cancelled",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 0,
+        "explicitUserStatusCommand": "cancelled",
+        "futureAttentionAllowed": false
+      },
+      "notes": "사용자가 승인 전에 업무를 취소했다. 실제 신청이나 제출은 하지 않는다."
+    },
+    {
+      "id": "F19",
+      "contextRef": "W19",
+      "request": "수업 자료 검토 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "용어 정리",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        }
+      ],
+      "expected": {
+        "completion": "forgotten",
+        "verifiedActionIds": [
+          "A1"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": null,
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 1,
+        "contextAvailable": false,
+        "explicitUserMemoryCommand": "forget",
+        "existingRecordsAndAuditsPreserved": true
+      },
+      "notes": "사용자가 업무 맥락을 잊도록 요청했다. 이미 만든 태스크나 감사 이력을 삭제하지 않는다."
+    },
+    {
+      "id": "F20",
+      "contextRef": "W20",
+      "request": "취미 프로젝트 테스트 계획 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "오류 확인 목록 작성",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "테스트 계획 검토",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        }
+      ],
+      "expected": {
+        "completion": "verified",
+        "verifiedActionIds": [
+          "A1",
+          "A2"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "completed",
+        "mayMarkWorkCompleted": true,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 2,
+        "explicitUserStatusCommand": "completed"
+      },
+      "notes": "업무 종료는 두 생성 결과 때문이 아니라 이후 사용자의 명시적 완료 선언 때문이다."
+    },
+    {
+      "id": "F21",
+      "contextRef": "W21",
+      "request": "면접 준비 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "기술 답변 연습 순서 정리",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "기술 답변 연습",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "uncertain"
+        }
+      ],
+      "expected": {
+        "completion": "partial",
+        "verifiedActionIds": [
+          "A1"
+        ],
+        "uncertainActionIds": [
+          "A2"
+        ],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 1,
+        "requiresReadOnlyReconciliation": [
+          "A2"
+        ],
+        "ignoreUnverifiedAssistantClaim": "모든 준비와 일정 생성이 끝났습니다."
+      }
+    },
+    {
+      "id": "F22",
+      "contextRef": "W22",
+      "request": "장학금 안내 검토 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [],
+      "expected": {
+        "completion": "source_recheck",
+        "verifiedActionIds": [],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 0,
+        "linkedSource": {
+          "ref": "synthetic-existing-task",
+          "currentStatus": "done",
+          "storedContextClaim": "아직 수행하지 않음"
+        },
+        "showSourceMismatch": true,
+        "mayInferEligibility": false
+      },
+      "notes": "현재 원본 상태를 표시하되 장학금 지원 자격이나 업무 전체 완료를 추정하지 않는다."
+    },
+    {
+      "id": "F23",
+      "contextRef": "W23",
+      "request": "가족 모임 준비 목록 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "보유 물품 확인",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "추가 준비 목록 작성",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A3",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "준비물 점검",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        }
+      ],
+      "expected": {
+        "completion": "verified",
+        "verifiedActionIds": [
+          "A1",
+          "A2",
+          "A3"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 3,
+        "maximumIndividualApprovals": 3
+      }
+    },
+    {
+      "id": "F24",
+      "contextRef": "W24",
+      "request": "발표 자료 검수 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "발표 출처 확인",
+            "dueAt": null
+          },
+          "decision": "expired",
+          "outcome": "not_executed"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "발표 자료 점검",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "expired",
+          "outcome": "not_executed"
+        }
+      ],
+      "expected": {
+        "completion": "needs_review",
+        "verifiedActionIds": [],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 0,
+        "expiredActionIds": [
+          "A1",
+          "A2"
+        ],
+        "newApprovalRequired": true
+      }
+    },
+    {
+      "id": "F25",
+      "contextRef": "W25",
+      "request": "자격증 공부 계획 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "복습 단원 선택",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "첫 주 복습",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        }
+      ],
+      "expected": {
+        "completion": "verified",
+        "verifiedActionIds": [
+          "A1",
+          "A2"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 2,
+        "concurrentApprovalClients": 2,
+        "maximumUniqueEffects": 2
+      }
+    },
+    {
+      "id": "F26",
+      "contextRef": "W26",
+      "request": "운동 기록 회고 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "활동 빈도 정리",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "기록 회고",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "verified",
+          "priorOutcome": "uncertain",
+          "recoveryMode": "read_only",
+          "maximumWriteAttempts": 1
+        }
+      ],
+      "expected": {
+        "completion": "verified",
+        "verifiedActionIds": [
+          "A1",
+          "A2"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 2,
+        "readOnlyRecoveredActionIds": [
+          "A2"
+        ],
+        "extraRecoveryWrites": 0
+      }
+    },
+    {
+      "id": "F27",
+      "contextRef": "W27",
+      "request": "지원 준비 체크리스트 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "지원 체크리스트 검토",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "verified",
+          "transportOutcome": "write_response_lost",
+          "verifiedBy": "exact_read_back",
+          "maximumWriteAttempts": 1
+        }
+      ],
+      "expected": {
+        "completion": "verified",
+        "verifiedActionIds": [
+          "A1"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 1
+      },
+      "notes": "통신 응답 유실과 확인된 원격 결과를 구분한다. 준비 업무 자체는 계속 진행 중이다."
+    },
+    {
+      "id": "F28",
+      "contextRef": "W28",
+      "request": "새 기기 설정 목록 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "UPDATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-existing-app-event",
+          "fields": {
+            "summary": "기기 설정 목록 검토",
+            "startsAt": "2026-09-10T19:00:00+09:00",
+            "endsAt": "2026-09-10T19:30:00+09:00",
+            "timezone": "Asia/Tokyo",
+            "expectedEtag": "\"synthetic-reviewed-v1\""
+          },
+          "decision": "approved",
+          "outcome": "verified",
+          "remoteAlreadyMatchesReviewedTarget": true,
+          "maximumWriteAttempts": 0
+        }
+      ],
+      "expected": {
+        "completion": "verified",
+        "verifiedActionIds": [
+          "A1"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 0,
+        "verifiedExistingEffectCount": 1
+      },
+      "notes": "이미 원하는 상태인 원격 일정을 재조회한 경우 추가 쓰기 없이 결과만 확인한다. 실제 기기나 계정 설정 변경은 없다."
+    },
+    {
+      "id": "F29",
+      "contextRef": "W29",
+      "request": "주간 회고 작성 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "주간 회고 문단 작성",
+            "dueAt": null
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "다음 주 우선순위 검토",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "approved",
+          "outcome": "verified"
+        }
+      ],
+      "expected": {
+        "completion": "verified",
+        "verifiedActionIds": [
+          "A1",
+          "A2"
+        ],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 2,
+        "nextStepMustRemain": "완료 기록과 남은 일을 구분해 한 문단을 쓴다."
+      },
+      "notes": "보조 태스크와 일정 생성 성공을 실제 회고 작성 완료로 바꾸지 않는다."
+    },
+    {
+      "id": "F30",
+      "contextRef": "W30",
+      "request": "전시 관람 준비 업무에서 다음 실행안의 결과를 같은 대화에서 확인한다.",
+      "actions": [
+        {
+          "id": "A1",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "관람 후보 정리",
+            "dueAt": null
+          },
+          "decision": "rejected",
+          "outcome": "not_executed"
+        },
+        {
+          "id": "A2",
+          "type": "CREATE_TASK",
+          "fields": {
+            "title": "이동 시간 확인",
+            "dueAt": null
+          },
+          "decision": "rejected",
+          "outcome": "not_executed"
+        },
+        {
+          "id": "A3",
+          "type": "CREATE_CALENDAR_EVENT",
+          "targetRef": "synthetic-app-calendar",
+          "fields": {
+            "summary": "관람 계획 검토",
+            "startsAt": "2026-09-09T20:00:00+09:00",
+            "endsAt": "2026-09-09T20:30:00+09:00",
+            "timezone": "Asia/Tokyo"
+          },
+          "decision": "pending",
+          "outcome": "not_executed"
+        }
+      ],
+      "expected": {
+        "completion": "needs_approval",
+        "verifiedActionIds": [],
+        "uncertainActionIds": [],
+        "pendingApprovalActionIds": [
+          "A3"
+        ],
+        "independentApprovalRequired": true,
+        "workStatus": "active",
+        "mayMarkWorkCompleted": false,
+        "mustPreserveVerifiedEffects": true,
+        "mustNotExecuteUnapproved": true,
+        "confirmedEffectCount": 0,
+        "rejectedActionIds": [
+          "A1",
+          "A2"
+        ]
+      },
+      "notes": "표 구매나 결제는 이 업무 흐름에 포함되지 않는다."
+    }
+  ]
+}

@@ -297,6 +297,83 @@ export type Database = {
           },
         ]
       }
+      attention_items: {
+        Row: {
+          acknowledged_at: string | null
+          claim_count: number
+          context_id: string
+          created_at: string
+          dedupe_key: string
+          due_at: string
+          first_claimed_at: string | null
+          id: string
+          kind: string
+          last_error: string | null
+          locked_by: string | null
+          locked_until: string | null
+          next_attempt_at: string
+          owner_id: string
+          quota_reserved_at: string | null
+          reason: string
+          snoozed_until: string | null
+          source_revision: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          claim_count?: number
+          context_id: string
+          created_at?: string
+          dedupe_key: string
+          due_at: string
+          first_claimed_at?: string | null
+          id?: string
+          kind: string
+          last_error?: string | null
+          locked_by?: string | null
+          locked_until?: string | null
+          next_attempt_at?: string
+          owner_id: string
+          quota_reserved_at?: string | null
+          reason: string
+          snoozed_until?: string | null
+          source_revision: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          claim_count?: number
+          context_id?: string
+          created_at?: string
+          dedupe_key?: string
+          due_at?: string
+          first_claimed_at?: string | null
+          id?: string
+          kind?: string
+          last_error?: string | null
+          locked_by?: string | null
+          locked_until?: string | null
+          next_attempt_at?: string
+          owner_id?: string
+          quota_reserved_at?: string | null
+          reason?: string
+          snoozed_until?: string | null
+          source_revision?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attention_items_context_id_fkey"
+            columns: ["context_id"]
+            isOneToOne: false
+            referencedRelation: "work_contexts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       briefing_sections: {
         Row: {
           briefing_id: string
@@ -1167,6 +1244,65 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_deliveries: {
+        Row: {
+          attempt: number
+          attempt_token: string
+          attempted_at: string
+          attention_id: string
+          error: string | null
+          finished_at: string | null
+          id: string
+          opened_at: string | null
+          owner_id: string
+          provider_state: string
+          received_at: string | null
+          retry_after: string | null
+          subscription_id: string
+          worker_id: string
+        }
+        Insert: {
+          attempt: number
+          attempt_token: string
+          attempted_at: string
+          attention_id: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          opened_at?: string | null
+          owner_id: string
+          provider_state: string
+          received_at?: string | null
+          retry_after?: string | null
+          subscription_id: string
+          worker_id: string
+        }
+        Update: {
+          attempt?: number
+          attempt_token?: string
+          attempted_at?: string
+          attention_id?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          opened_at?: string | null
+          owner_id?: string
+          provider_state?: string
+          received_at?: string | null
+          retry_after?: string | null
+          subscription_id?: string
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_deliveries_attention_id_fkey"
+            columns: ["attention_id"]
+            isOneToOne: false
+            referencedRelation: "attention_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       opportunities: {
         Row: {
           canonical_url: string
@@ -1874,6 +2010,231 @@ export type Database = {
         }
         Relationships: []
       }
+      work_context_actions: {
+        Row: {
+          approval_id: string | null
+          context_id: string
+          context_revision: number
+          created_at: string
+          draft_id: string
+          id: string
+          ordinal: number
+          owner_id: string
+          request_id: string
+        }
+        Insert: {
+          approval_id?: string | null
+          context_id: string
+          context_revision: number
+          created_at?: string
+          draft_id: string
+          id?: string
+          ordinal: number
+          owner_id: string
+          request_id: string
+        }
+        Update: {
+          approval_id?: string | null
+          context_id?: string
+          context_revision?: number
+          created_at?: string
+          draft_id?: string
+          id?: string
+          ordinal?: number
+          owner_id?: string
+          request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_context_actions_approval_id_fkey"
+            columns: ["approval_id"]
+            isOneToOne: false
+            referencedRelation: "approval_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_context_actions_context_id_fkey"
+            columns: ["context_id"]
+            isOneToOne: false
+            referencedRelation: "work_contexts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_context_actions_draft_id_fkey"
+            columns: ["draft_id"]
+            isOneToOne: true
+            referencedRelation: "dialogue_action_drafts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_context_requests: {
+        Row: {
+          context_id: string | null
+          created_at: string
+          input_hash: string
+          lease_token: string | null
+          lease_until: string | null
+          operation: string
+          owner_id: string
+          request_hash: string
+          request_id: string
+          response: Json | null
+          response_expires_at: string | null
+          result_ids: string[]
+          result_revision: number | null
+        }
+        Insert: {
+          context_id?: string | null
+          created_at?: string
+          input_hash: string
+          lease_token?: string | null
+          lease_until?: string | null
+          operation: string
+          owner_id: string
+          request_hash: string
+          request_id: string
+          response?: Json | null
+          response_expires_at?: string | null
+          result_ids?: string[]
+          result_revision?: number | null
+        }
+        Update: {
+          context_id?: string | null
+          created_at?: string
+          input_hash?: string
+          lease_token?: string | null
+          lease_until?: string | null
+          operation?: string
+          owner_id?: string
+          request_hash?: string
+          request_id?: string
+          response?: Json | null
+          response_expires_at?: string | null
+          result_ids?: string[]
+          result_revision?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_context_requests_context_id_fkey"
+            columns: ["context_id"]
+            isOneToOne: false
+            referencedRelation: "work_contexts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      work_contexts: {
+        Row: {
+          created_at: string
+          deadline_at: string | null
+          deadline_reminder: boolean
+          expires_at: string | null
+          forgotten_at: string | null
+          goal: string
+          id: string
+          last_progress_at: string
+          missing_fields: string[]
+          next_step: string
+          owner_id: string
+          progress: string
+          reminder_at: string | null
+          resume_reminder: boolean
+          revision: number
+          source_refs: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          deadline_at?: string | null
+          deadline_reminder?: boolean
+          expires_at?: string | null
+          forgotten_at?: string | null
+          goal: string
+          id?: string
+          last_progress_at?: string
+          missing_fields?: string[]
+          next_step?: string
+          owner_id: string
+          progress?: string
+          reminder_at?: string | null
+          resume_reminder?: boolean
+          revision?: number
+          source_refs?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          deadline_at?: string | null
+          deadline_reminder?: boolean
+          expires_at?: string | null
+          forgotten_at?: string | null
+          goal?: string
+          id?: string
+          last_progress_at?: string
+          missing_fields?: string[]
+          next_step?: string
+          owner_id?: string
+          progress?: string
+          reminder_at?: string | null
+          resume_reminder?: boolean
+          revision?: number
+          source_refs?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      work_scheduler_probes: {
+        Row: {
+          dispatched_at: string
+          request_id: number | null
+          slot: string
+          worker_finished_at: string | null
+          worker_started_at: string | null
+        }
+        Insert: {
+          dispatched_at?: string
+          request_id?: number | null
+          slot: string
+          worker_finished_at?: string | null
+          worker_started_at?: string | null
+        }
+        Update: {
+          dispatched_at?: string
+          request_id?: number | null
+          slot?: string
+          worker_finished_at?: string | null
+          worker_started_at?: string | null
+        }
+        Relationships: []
+      }
+      work_scheduler_state: {
+        Row: {
+          enabled: boolean
+          measurement_started_at: string | null
+          singleton: boolean
+          vault_secret_name: string | null
+          worker_url: string | null
+        }
+        Insert: {
+          enabled?: boolean
+          measurement_started_at?: string | null
+          singleton?: boolean
+          vault_secret_name?: string | null
+          worker_url?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          measurement_started_at?: string | null
+          singleton?: boolean
+          vault_secret_name?: string | null
+          worker_url?: string | null
+        }
+        Relationships: []
+      }
       workbook_submissions: {
         Row: {
           id: string
@@ -1906,6 +2267,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      ack_work_delivery: {
+        Args: { p_delivery_id: string; p_event: string }
+        Returns: undefined
+      }
+      ack_work_tick: {
+        Args: { p_finished: boolean; p_slot: string }
+        Returns: undefined
+      }
+      assert_work_draft_current: {
+        Args: { p_draft_id: string }
+        Returns: undefined
+      }
       before_calendar_write: {
         Args: {
           p_approval_id: string
@@ -1917,6 +2290,18 @@ export type Database = {
       begin_calendar_execution: {
         Args: { p_approval_id: string; p_worker_id: string }
         Returns: Json
+      }
+      begin_work_delivery: {
+        Args: {
+          p_attention_id: string
+          p_subscription_id: string
+          p_worker_id: string
+        }
+        Returns: Json
+      }
+      bind_work_preview: {
+        Args: { p_context_id: string; p_owner_id: string; p_request_id: string }
+        Returns: undefined
       }
       career_mutate: {
         Args: { p_action: string; p_id?: string; p_input?: Json }
@@ -2045,6 +2430,10 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      claim_work_attention: {
+        Args: { p_allow_automatic?: boolean; p_worker_id: string }
+        Returns: Json
+      }
       commit_career_step: {
         Args: {
           p_data: Json
@@ -2058,6 +2447,10 @@ export type Database = {
       }
       complete_approval_execution: {
         Args: { p_approval_id: string; p_result: Json; p_worker_id: string }
+        Returns: undefined
+      }
+      configure_work_scheduler: {
+        Args: { p_enabled: boolean; p_secret_name: string; p_url: string }
         Returns: undefined
       }
       decide_approval: {
@@ -2089,6 +2482,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      dispatch_work_tick: { Args: never; Returns: undefined }
       execute_approved_task: {
         Args: { p_approval_id: string; p_worker_id: string }
         Returns: {
@@ -2119,7 +2513,67 @@ export type Database = {
         }
         Returns: Json
       }
+      finish_work_attention: {
+        Args: {
+          p_attention_id: string
+          p_error?: string
+          p_status: string
+          p_worker_id: string
+        }
+        Returns: undefined
+      }
+      finish_work_chat: {
+        Args: {
+          p_owner_id: string
+          p_request_id: string
+          p_response: Json
+          p_token: string
+        }
+        Returns: undefined
+      }
+      finish_work_delivery: {
+        Args: {
+          p_attempt_token: string
+          p_delivery_id: string
+          p_error?: string
+          p_status: string
+          p_worker_id: string
+        }
+        Returns: undefined
+      }
+      get_claimed_work_subscriptions: {
+        Args: { p_attention_id: string }
+        Returns: Json
+      }
+      get_work_snapshot: { Args: { p_context_id: string }; Returns: Json }
       is_allowed_user: { Args: never; Returns: boolean }
+      link_work_drafts: {
+        Args: {
+          p_context_id: string
+          p_draft_ids: string[]
+          p_request_hash: string
+          p_request_id: string
+          p_revision: number
+        }
+        Returns: string
+      }
+      list_work_attention: { Args: never; Returns: Json }
+      list_work_contexts: { Args: never; Returns: Json }
+      mutate_work_attention: {
+        Args: { p_attention_id: string; p_operation: string }
+        Returns: undefined
+      }
+      mutate_work_context: {
+        Args: {
+          p_context_id: string
+          p_expected_revision: number
+          p_input: Json
+          p_operation: string
+          p_request_hash: string
+          p_request_id: string
+        }
+        Returns: string
+      }
       prepare_jarvis_approval: {
         Args: { p_proposal: Json; p_run_id: string; p_worker_id: string }
         Returns: {
@@ -2150,11 +2604,38 @@ export type Database = {
         }
       }
       prune_dialogue_drafts: { Args: never; Returns: number }
+      prune_work_chat: { Args: never; Returns: number }
+      prune_work_contexts: { Args: never; Returns: number }
       queue_due_career_sources: { Args: { p_limit?: number }; Returns: number }
+      release_work_chat: {
+        Args: { p_owner_id: string; p_request_id: string; p_token: string }
+        Returns: undefined
+      }
       request_dialogue_approval: {
         Args: { p_draft_id: string }
         Returns: string
       }
+      reserve_work_chat: {
+        Args: {
+          p_context_id?: string
+          p_hash: string
+          p_owner_id: string
+          p_request_id: string
+        }
+        Returns: Json
+      }
+      work_attention_valid: {
+        Args: {
+          a: Database["public"]["Tables"]["attention_items"]["Row"]
+          w: Database["public"]["Tables"]["work_contexts"]["Row"]
+        }
+        Returns: boolean
+      }
+      work_refresh_attention: {
+        Args: { p_context_id: string }
+        Returns: undefined
+      }
+      work_scheduler_health: { Args: never; Returns: Json }
     }
     Enums: {
       [_ in never]: never

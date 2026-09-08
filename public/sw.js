@@ -70,19 +70,34 @@ self.addEventListener("push", (event) => {
     const text = event.data ? event.data.text() : "";
     if (text) data.body = text;
   }
-  event.waitUntil(
+  const deliveryId = typeof data.deliveryId === "string" && /^[0-9a-f-]{36}$/i.test(data.deliveryId) ? data.deliveryId : null;
+  event.waitUntil(Promise.all([
     self.registration.showNotification(data.title, {
       body: data.body,
-      data: { url: data.url || "/" },
+      tag: data.attentionId ? `work-${data.attentionId}` : undefined,
+      data: { url: safePushTarget(data.url), deliveryId },
     }),
-  );
+    observeWorkDelivery(deliveryId, "received"),
+  ]));
 });
+
+function safePushTarget(value) {
+  try { const url = new URL(value || "/", self.location.origin); return url.origin === self.location.origin ? url.pathname + url.search : "/"; }
+  catch { return "/"; }
+}
+async function observeWorkDelivery(id, event) {
+  if (!id) return;
+  try {
+    const response = await fetch(`/api/jarvis/work-deliveries/${encodeURIComponent(id)}`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event }) });
+    if (!response.ok) console.warn("Work delivery observation not recorded; authentication or network may be unavailable.");
+  } catch { console.warn("Work delivery observation unavailable; do not infer receipt from provider acceptance."); }
+}
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-  const target = event.notification.data?.url || "/";
+  const target = safePushTarget(event.notification.data?.url);
   event.waitUntil(
-    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+    Promise.all([observeWorkDelivery(event.notification.data?.deliveryId, "opened"), self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
       for (const client of windows) {
         if ("focus" in client) {
           client.navigate?.(target);
@@ -90,6 +105,6 @@ self.addEventListener("notificationclick", (event) => {
         }
       }
       return self.clients.openWindow(target);
-    }),
+    })]),
   );
 });
