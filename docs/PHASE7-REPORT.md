@@ -71,7 +71,8 @@ Review correction: wake-up timing alone cannot promote automatic notifications. 
 ## Still required for full Phase 7
 
 - Real 7-day schedule observation including missed slots, actual attention queue delays, failures and denominator; **no 99% timing claim**. Short successful probes cannot replace it.
-- 30 independent supported model/browser workflows, physical iPhone/Mac resumption/Push, real work-bound CalDAV UPDATE, production canary and cron cutover.
+- 30 independent supported model/browser workflows and physical iPhone→Mac cross-device work resumption remain unexecuted.
+- Automatic deadline/stale-work notification promotion still requires the real seven-day gate. The limited direct-reminder cron is live, but replacement of any older time-sensitive GitHub scheduling path is not claimed or performed.
 
 ## Rollout / rollback
 
