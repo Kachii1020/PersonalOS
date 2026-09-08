@@ -2,6 +2,7 @@
 
 Status: minimum local flow implemented and verified, prepared for draft review; **not released, not a completed G7 acceptance gate**.
 Branch: `codex/phase7-work-context`, baseline `70ba754f157bd4506eaf40b91439d99a31e4c6c4`.
+Draft PR: https://github.com/Kachii1020/PersonalOS/pull/30 (implementation commit `1d6f614`). Vercel reported its preview check successful; no hosted Phase 7 functional flow is claimed.
 Only the dedicated `personalos-dialogue-eval` database (API 54721, DB 54722) is used below. No Phase 7 production DB migration, deployment, cron cutover, or physical-device confirmation has been performed.
 
 ## Implemented scope
@@ -55,3 +56,5 @@ Keep `JARVIS_CONTEXT_ENABLED`, `JARVIS_INLINE_APPROVALS_ENABLED`, `JARVIS_ATTENT
 Rollback: disable context/inline/attention flags and call `configure_work_scheduler(false,'','')` with service authority. Preserve work data and all existing task/event/approval/receipt audit records; do not drop old tables or replay migrations backwards. Existing Phase 6 remains accessible. A push already attempted cannot be recalled by disabling a flag.
 
 Local reproducibility: prepare an ignored `.env.eval.local` for the dedicated 54721 synthetic owner, then use `node scripts/run-g7-local.mjs build`, `dev`, or `test <gate files>`. The runner rejects external execution credentials and serializes fixture gates. Live model evaluation is an explicit separate `eval <unique-label>` invocation with the existing budget guard.
+
+Session cleanup: temporary cron disabled and named test Vault secrets removed by the gates; owned test fixtures cleaned, local app server stopped, original synthetic `.env.local` restored and temporary AI-enabled `.env.eval.local` removed. Evidence logs and the existing exploratory experience plan were preserved. The isolated DB stack is stopped with its data retained; production settings remain unchanged.
