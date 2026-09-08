@@ -280,6 +280,5 @@ export const PHASE3: Phase = {
   title: "재무 모델링 기초",
   weeks: "5–8주차",
   desc: "3-Statement Model + DCF",
-  practiceFile: { name: "phase3-model-template.xlsx", href: "/learn/phase3-model-template.xlsx" },
   modules: [model, threeStmt, dcf],
 };

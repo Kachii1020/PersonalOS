@@ -246,6 +246,7 @@ const nav: Module = {
       trap: "Ctrl+End는 사용된 범위의 우하단이다. 빈 서식 때문에 엉뚱한 곳으로 간다.",
       ib: "모델에서 가정 블록·출력 블록 사이를 왕복할 때 기본 이동이다.",
       labIds: [],
+      xlsxTaskId: "hands",
       quizIds: ["nav-q1"],
     },
     {
@@ -256,6 +257,7 @@ const nav: Module = {
       trap: "중간에 빈 칸이 있으면 거기서 멈춘다.",
       ib: "열 전체를 잡아 붙여넣기·서식 복사할 때 쓴다.",
       labIds: [],
+      xlsxTaskId: "hands",
       quizIds: ["nav-q2"],
     },
     {
@@ -266,6 +268,7 @@ const nav: Module = {
       trap: "표(Table) 안에서는 표 열만 선택될 수 있다.",
       ib: "입력 열을 숨기거나 체크 행을 넣을 때 쓴다.",
       labIds: [],
+      xlsxTaskId: "hands",
       quizIds: ["nav-q2"],
     },
     {
@@ -276,6 +279,7 @@ const nav: Module = {
       trap: "언어 팩에 따라 키가 다르다. 영문 Excel 기준을 기억한다.",
       ib: "피벗은 Alt+N+V가 기본이다.",
       labIds: [],
+      xlsxTaskId: "hands",
       quizIds: ["nav-q3"],
     },
     {
@@ -286,6 +290,7 @@ const nav: Module = {
       trap: "편집 모드에서 방향키는 셀 이동이 아니라 수식 안 이동이다.",
       ib: "감사 중 수식을 읽을 때 F2로 참조를 색으로 확인한다.",
       labIds: [],
+      xlsxTaskId: "hands",
       quizIds: ["nav-q3"],
     },
     {
@@ -296,6 +301,7 @@ const nav: Module = {
       trap: "Ctrl+Shift+1은 서식 상자가 아니라 즉시 숫자 서식이다.",
       ib: "입력 셀은 파랑, 단위는 서식으로 분리한다.",
       labIds: [],
+      xlsxTaskId: "hands",
       quizIds: ["nav-q3"],
     },
     {
@@ -306,6 +312,7 @@ const nav: Module = {
       trap: "이 그리드의 채우기는 모서리 핸들만 있다. 단축키는 엑셀에서 연습한다.",
       ib: "열을 내린 뒤 가정 셀은 $로 잠근다.",
       labIds: [],
+      xlsxTaskId: "hands",
       quizIds: ["nav-q1"],
     },
   ],
@@ -357,6 +364,7 @@ const basicFn: Module = {
       trap: "이름 범위가 밀리면 전체가 틀린다. 테이블 열 이름을 우선한다.",
       ib: "가정 블록에 이름을 붙이는 팀은 있고, 셀 주소만 쓰는 팀도 있다.",
       labIds: [],
+      xlsxTaskId: "hands",
       quizIds: ["basic-fn-q1"],
     },
   ],
@@ -515,6 +523,5 @@ export const PHASE1: Phase = {
   title: "Excel 기초 체력",
   weeks: "1–2주차",
   desc: "마우스 없이 엑셀을 다루는 속도감 + 핵심 함수 12개",
-  practiceFile: { name: "phase1-practice.xlsx", href: "/learn/phase1-practice.xlsx" },
   modules: [nav, basicFn, logic, lookup],
 };
