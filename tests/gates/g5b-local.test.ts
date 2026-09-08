@@ -1,7 +1,7 @@
 /**
  * G5B local integration: real PostgreSQL/RLS/repositories/workers; synthetic
  * public-source and extraction boundaries. No live website fetch or paid AI.
- * Run serially against the dedicated 54621 stack, never alongside other gates.
+ * Run serially against a dedicated 54621/54721 stack, never alongside other gates.
  * G5B-11 (G1–G5A regression) is a separate required run, not proved here.
  */
 import { after, before, describe, it } from "node:test";
@@ -178,7 +178,7 @@ async function ready(label: string) {
 describe("G5B local database gate (synthetic source/AI boundaries)", { concurrency: false }, () => {
   before(async () => {
     assert.equal(process.env.GATE_ISOLATED_DB, "1");
-    assert.equal(url, "http://127.0.0.1:54621", "Only the dedicated local gate stack is allowed");
+    assert.ok(["http://127.0.0.1:54621", "http://127.0.0.1:54721"].includes(url), "Only the dedicated local gate stacks are allowed");
     assert.equal(email, "phase5a@example.test");
     assert.ok(anon && service);
     guarded = true;

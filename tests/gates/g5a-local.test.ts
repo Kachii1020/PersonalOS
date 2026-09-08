@@ -68,7 +68,7 @@ async function decision(id: string, value: "approved" | "rejected") {
 
 describe("G5A local database and worker integration", { concurrency: false }, () => {
   before(async () => {
-    assert.equal(url, "http://127.0.0.1:54621", "Use the isolated G5A stack only");
+    assert.ok(["http://127.0.0.1:54621", "http://127.0.0.1:54721"].includes(url), "Use a dedicated local gate stack only");
     assert.equal(email, "phase5a@example.test");
     token = await login(email);
     otherToken = await login("not-allowed@example.test");

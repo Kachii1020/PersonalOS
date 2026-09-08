@@ -2,6 +2,7 @@ import "server-only";
 import { parseCreateTaskPayload } from "./action-payload";
 import { policyForAction } from "./policy";
 import { executeCalendarForApprovalForJob, isCalendarExecutorEnabled } from "@/lib/repos/jarvis-calendar-actions";
+import { assertWorkFeatureForApprovalForJob } from "@/lib/repos/work-execution-guard";
 import type { ApprovalRequest } from "./db-types";
 import type { JsonValue } from "./types";
 import {
@@ -20,6 +21,7 @@ export type ExecutionResult = {
 
 async function executeClaimedApproval(approval: ApprovalRequest, workerId: string): Promise<ExecutionResult> {
   try {
+    await assertWorkFeatureForApprovalForJob(approval.id);
     if (policyForAction(approval.actionType) !== "approval") {
       throw new Error(`policy가 실행을 허용하지 않습니다: ${approval.actionType}`);
     }

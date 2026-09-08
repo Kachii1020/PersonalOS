@@ -16,6 +16,9 @@ import { parseCalendarActionPayload } from "@/lib/jarvis/calendar-action-payload
 import { dialogueTaskStatusLabel, filterDialogueCareer, literalContainsPattern } from "@/lib/jarvis/dialogue-record-filters";
 import type { ChatMessage, ChatReply, DialogueDraft, DialogueFact, DialogueIntent, DialogueReadFilters } from "@/lib/jarvis/dialogue-types";
 import type { JsonValue } from "@/lib/jarvis/types";
+import type { WorkSnapshot } from "@/lib/jarvis/work-types";
+import type { WorkBoundEventSource } from "@/lib/ai/prompts/work-context";
+import { getWorkSnapshotForClient } from "./work-contexts";
 
 type Client = SupabaseClient<Database>;
 type CalendarRow = Database["public"]["Tables"]["calendars"]["Row"];
@@ -126,14 +129,45 @@ export async function createDialogueDraftForOwner(input: {
     expiresAt: result.data.expires_at, canRequestApproval: input.executable };
 }
 
+/** Project only owner-read current events backed by this work's verified
+ * calendar actions. Neither arbitrary source_refs nor stored prose grant IDs. */
+export function projectWorkBoundEventSources(work: WorkSnapshot): WorkBoundEventSource[] {
+  if (work.context.status !== "active" || work.context.forgottenAt) return [];
+  const sources = new Map<string, WorkBoundEventSource>();
+  for (const action of work.actions) {
+    const result = action.result;
+    if (action.contextId !== work.context.id || action.draft.type === "CREATE_TASK" || action.status !== "executed" || !action.approvalId || !result || typeof result !== "object" || Array.isArray(result)
+      || result.calendarState !== "verified" || typeof result.eventId !== "string") continue;
+    const ref = work.context.sourceRefs.find(value => value && typeof value === "object" && !Array.isArray(value)
+      && value.kind === "event" && value.id === result.eventId && value.approvalId === action.approvalId && value.available === true);
+    if (!ref || typeof ref !== "object" || Array.isArray(ref) || !ref.current || typeof ref.current !== "object" || Array.isArray(ref.current)) continue;
+    const event = ref.current;
+    if (event.id !== result.eventId || typeof event.summary !== "string" || !event.summary || event.summary.length > 300
+      || typeof event.starts_at !== "string" || typeof event.ends_at !== "string" || typeof ref.observedAt !== "string"
+      || [event.starts_at, event.ends_at, ref.observedAt].some(value => !Number.isFinite(Date.parse(value))) || Date.parse(event.ends_at) <= Date.parse(event.starts_at)
+      || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(result.eventId)) continue;
+    const id = `event:${result.eventId}`;
+    sources.set(id, { id, title: event.summary, startsAt: event.starts_at, endsAt: event.ends_at, observedAt: ref.observedAt });
+  }
+  return [...sources.values()].slice(0, 20);
+}
+
 export async function answerDialogue(input: { messages: ChatMessage[]; selectedSourceId?: string | null }, dependencies?: {
   owner?: { client: Client; ownerId: string };
   interpret?: (messages: ChatMessage[], sources: DialogueFact[], now: Date) => Promise<DialogueIntent>;
+  workContext?: { id: string; revision: number };
 }) : Promise<ChatReply> {
   const messages = validateChatMessages(input.messages);
   const { client, ownerId } = dependencies?.owner ?? await requireDialogueOwner();
   const now = new Date();
   let snapshot = await readDialogueSnapshot(client, now);
+  let boundEvents: WorkBoundEventSource[] | null = null;
+  if (dependencies?.workContext) {
+    const work = await getWorkSnapshotForClient(client, dependencies.workContext.id);
+    if (!work || work.context.ownerId !== ownerId || work.context.status !== "active" || work.context.revision !== dependencies.workContext.revision) throw new DialogueRequestError("선택한 업무가 변경되었거나 더 이상 진행 중이 아닙니다.", 409);
+    boundEvents = projectWorkBoundEventSources(work);
+    if (input.selectedSourceId) throw new DialogueRequestError("업무 선택은 일정 대상 선택이 아닙니다. 연결된 일정의 정확한 이름을 요청에 적어 주세요.", 409);
+  }
   let careerFacts: DialogueFact[] = [];
   let careerRows: Awaited<ReturnType<typeof getCareerDashboardForClient>>["opportunities"] = [];
   const careerFact = (row: typeof careerRows[number]): DialogueFact => ({ id: `opportunity:${row.id}`, title: row.title,
@@ -147,13 +181,26 @@ export async function answerDialogue(input: { messages: ChatMessage[]; selectedS
     careerFacts = careerRows.slice(0, 20).map(careerFact);
     if (career.opportunities.length > 20) snapshot.warnings.push("지원 기회는 최근 20개만 조회했습니다.");
   } catch { snapshot.warnings.push("지원 기회를 조회하지 못했습니다. 해당 정보는 답변 근거로 사용하지 않습니다."); }
-  const sources = [...snapshot.taskFacts, ...snapshot.eventFacts, ...careerFacts];
+  const boundFacts: DialogueFact[] = (boundEvents ?? []).map(source => ({ id: source.id, title: source.title,
+    detail: `${describeTime(source.startsAt)}–${describeTime(source.endsAt)} (JST) · 이 업무에 연결된 일정`, href: "/calendar", observedAt: source.observedAt }));
+  const sources = boundEvents === null ? [...snapshot.taskFacts, ...snapshot.eventFacts, ...careerFacts] : boundFacts;
   if (input.selectedSourceId && !snapshot.eventRows.has(input.selectedSourceId)) throw new DialogueRequestError("선택한 일정이 현재 조회 범위에 없습니다. 다시 조회하고 선택하세요.");
   const sourceIds = sources.map((source) => source.id);
   const intent = dependencies?.interpret ? await dependencies.interpret(messages, sources, now) : validateDialogueIntent((await callStructured<unknown>({
     purpose: "dialogue", system: DIALOGUE_SYSTEM, userMessage: buildDialoguePrompt(messages, sources, now, input.selectedSourceId), schema: DIALOGUE_SCHEMA,
     maxTokens: 1800, effort: "low", retries: 0, timeoutMs: 45_000,
   })).data);
+  if (boundEvents !== null && intent.kind === "update_calendar") {
+    if (!boundEvents.some(source => source.id === intent.sourceId)) return { mode: "clarify", message: "이 업무에 연결되어 현재 확인할 수 있는 일정의 정확한 이름을 지정해 주세요.", facts: boundFacts, draft: null, observedAt: now.toISOString(), warnings: snapshot.warnings };
+    // An established work link can outlive the normal 14-day reading window.
+    // Fetch only its already validated target ID, through the same owner client.
+    if (!snapshot.eventRows.has(intent.sourceId!)) {
+      const current = await client.from("events").select("*").eq("id", intent.sourceId!.slice("event:".length)).maybeSingle();
+      if (current.error) throw new DialogueRequestError("업무에 연결된 현재 일정을 확인하지 못했습니다.", 409);
+      if (!current.data) return { mode: "clarify", message: "연결된 일정이 더 이상 원본에 없습니다. 다른 일정을 자동으로 선택하지 않습니다.", facts: [], draft: null, observedAt: now.toISOString(), warnings: snapshot.warnings };
+      snapshot.eventRows.set(intent.sourceId!, current.data);
+    }
+  }
   if (intent.kind === "update_calendar" && input.selectedSourceId) intent.sourceId = input.selectedSourceId;
   const grounded = groundDialogueIntent(intent, messages, now, sourceIds, input.selectedSourceId);
   const base = { observedAt: now.toISOString(), warnings: snapshot.warnings, facts: [] as DialogueFact[], draft: null };
@@ -185,6 +232,10 @@ export async function answerDialogue(input: { messages: ChatMessage[]; selectedS
     requestHash: hash(messages.filter((value) => value.role === "user").map((value) => value.content).join("\n")),
     fieldEvidence: grounded.evidence.map(({ messageIndex, text }) => ({ messageIndex, text })),
     targetOrigin: input.selectedSourceId ? "explicit_user_selection" : grounded.sourceId ? "unique_user_title" : "new_user_request" };
+  if (dependencies?.workContext) {
+    sourceSnapshot.workContextId = dependencies.workContext.id;
+    sourceSnapshot.contextRevision = dependencies.workContext.revision;
+  }
   if (grounded.kind === "create_task") {
     type = "CREATE_TASK";
     const task = parseCreateTaskPayload({ title: grounded.title, dueAt: grounded.startsAt });
@@ -197,10 +248,13 @@ export async function answerDialogue(input: { messages: ChatMessage[]; selectedS
     if (grounded.kind === "update_calendar") {
       type = "UPDATE_CALENDAR_EVENT";
       const event = snapshot.eventRows.get(grounded.sourceId ?? "");
-      if (!event || event.calendar_id !== calendar.id || event.source !== "app" || event.is_all_day || event.rrule) return { ...base, mode: "clarify", message: "앱에서 만든 단일 시간 일정만 수정할 수 있습니다." };
+      if (!event || event.calendar_id !== calendar.id || event.source !== "app" || event.is_all_day || event.rrule || event.exdates.length) return { ...base, mode: "clarify", message: "앱에서 만든 단일 시간 일정만 수정할 수 있습니다." };
       const named = messages.filter((value) => value.role === "user").some((value) => value.content.includes(event.summary));
-      const sameTitles = [...snapshot.eventRows.values()].filter((value) => value.summary === event.summary).length;
-      if (!input.selectedSourceId && (!named || sameTitles !== 1)) return { ...base, mode: "clarify", message: "수정할 일정을 조회한 뒤 ‘수정 대상으로 선택’을 눌러 주세요.", facts: snapshot.eventFacts };
+      const sameTitles = boundEvents === null ? [...snapshot.eventRows.values()].filter((value) => value.summary === event.summary).length
+        : boundEvents.filter(value => (snapshot.eventRows.get(value.id)?.summary ?? value.title) === event.summary).length;
+      const namedWorkEvents = boundEvents?.filter(value => messages.some(message => message.role === "user"
+        && message.content.includes(snapshot.eventRows.get(value.id)?.summary ?? value.title)));
+      if (!input.selectedSourceId && (!named || sameTitles !== 1 || (namedWorkEvents && (namedWorkEvents.length !== 1 || namedWorkEvents[0].id !== grounded.sourceId)))) return { ...base, mode: "clarify", message: boundEvents === null ? "수정할 일정을 조회한 뒤 ‘수정 대상으로 선택’을 눌러 주세요." : "연결된 일정 이름이 빠졌거나 둘 이상의 일정과 일치합니다. 대상이 구분되는 정확한 이름을 확인해 주세요.", facts: boundEvents === null ? snapshot.eventFacts : boundFacts };
       if (!event.etag && !calendarDialogueExecutionReady()) return { ...base, mode: "clarify", message: "일정의 버전 정보가 없습니다. 캘린더를 동기화한 뒤 다시 요청하세요." };
       let remoteHash: string | null = null;
       if (calendarDialogueExecutionReady()) {
