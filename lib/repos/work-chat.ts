@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { callStructured } from "@/lib/ai/client";
 import { buildWorkPrompt, WORK_SCHEMA, WORK_SYSTEM } from "@/lib/ai/prompts/work-context";
-import { groundWorkIntent, usesAutomaticAttention } from "@/lib/jarvis/work-context";
+import { groundWorkIntent, parseDeterministicWorkRequest, usesAutomaticAttention } from "@/lib/jarvis/work-context";
 import type { WorkChatInput, WorkChatReply } from "@/lib/jarvis/work-types";
 import type { DialogueDraft } from "@/lib/jarvis/dialogue-types";
 import { answerDialogue, DialogueRequestError, projectWorkBoundEventSources, validateChatMessages } from "./jarvis-dialogue";
@@ -61,8 +61,9 @@ export async function answerWorkChat(input: WorkChatInput): Promise<WorkChatRepl
     }
     const now = new Date();
     const boundEvents = snapshot ? projectWorkBoundEventSources(snapshot) : [];
-    const response = await callStructured<unknown>({ purpose: "dialogue", system: WORK_SYSTEM, userMessage: buildWorkPrompt(messages, snapshot?.context ?? null, now, boundEvents), schema: WORK_SCHEMA, maxTokens: 3000, effort: "low", retries: 0, timeoutMs: 45_000 });
-    const grounded = groundWorkIntent(response.data, messages, snapshot?.context ?? null, now);
+    const deterministic=parseDeterministicWorkRequest(messages,snapshot?.context??null);
+    const response = deterministic?null:await callStructured<unknown>({ purpose: "dialogue", system: WORK_SYSTEM, userMessage: buildWorkPrompt(messages, snapshot?.context ?? null, now, boundEvents), schema: WORK_SCHEMA, maxTokens: 3000, effort: "low", retries: 0, timeoutMs: 45_000 });
+    const grounded = deterministic??groundWorkIntent(response!.data, messages, snapshot?.context ?? null, now);
     if (grounded.operation === "clarify") return await finish(reply(grounded.message, "clarify"));
     if (grounded.input && usesAutomaticAttention(grounded.input) && process.env.JARVIS_AUTOMATIC_ATTENTION_ENABLED !== "true") {
       return await finish(reply("마감 24시간 전·48시간 중단 자동 알림은 후속 검증 전까지 제공하지 않습니다. 마감은 저장할 수 있고, 직접 알림 시각을 지정하면 별도로 예약할 수 있습니다.", "clarify"));

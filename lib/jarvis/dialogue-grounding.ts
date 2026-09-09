@@ -169,7 +169,9 @@ export function groundDialogueIntent(intent: DialogueIntent, messages: ChatMessa
     }
   }
   if (unsupportedTimezone(latest) && (isWrite || intent.kind === "read_calendar")) return clarify("현재 일정 요청은 일본 시간(Asia/Tokyo)만 지원합니다. 일본 날짜와 시각으로 입력해 주세요.");
-  const latestTokens = temporalTokens(intent.kind === "read_tasks" || intent.kind === "read_career" ? latest.replace(/제목(?:에|이)?\s*["“'][^"”'\r\n]*["”']/g, " ") : latest);
+  const quotedTitle=intent.title?[`"${intent.title.text}"`,`“${intent.title.text}”`,`'${intent.title.text}'`,`‘${intent.title.text}’`].find(value=>latest.includes(value)):null;
+  const temporalText=intent.kind==="read_tasks"||intent.kind==="read_career"?latest.replace(/제목(?:에|이)?\s*["“'][^"”'\r\n]*["”']/g," "):quotedTitle?latest.replace(quotedTitle," "):latest;
+  const latestTokens = temporalTokens(temporalText);
   if (isWrite && (latestTokens.time.length > 1 || latestTokens.duration.length > 1)) return clarify("시각 또는 소요 시간이 여러 개 있습니다. 원하는 시각과 소요 시간을 하나씩 입력해 주세요.");
   for (const field of ["date", "time", "duration"] as const) {
     const quote = intent[field];
@@ -185,8 +187,8 @@ export function groundDialogueIntent(intent: DialogueIntent, messages: ChatMessa
     if (isWrite && latestTokens[field].length > 0 && intent[field] && intent[field]!.messageIndex !== userIndex) return clarify("가장 최근에 말씀한 날짜·시각·소요 시간으로 다시 확인해 주세요.");
   }
   const evidence = QUOTE_KEYS.flatMap((field) => intent[field] ? [intent[field]!] : []);
-  if (isWrite && !intent.date && (latestTokens.date.length > 0 || /다음\s*주|이번\s*주/.test(latest))) return clarify("말씀한 날짜를 명확히 확인해야 합니다. YYYY-MM-DD 또는 오늘·내일·모레로 입력해 주세요.");
-  if (isWrite && !intent.time && /\d{1,2}:\d{2}|\d{1,2}시(?!간)/.test(latest)) return clarify("말씀한 시각과 날짜를 함께 확인해야 합니다.");
+  if (isWrite && !intent.date && (latestTokens.date.length > 0 || /다음\s*주|이번\s*주/.test(temporalText))) return clarify("말씀한 날짜를 명확히 확인해야 합니다. YYYY-MM-DD 또는 오늘·내일·모레로 입력해 주세요.");
+  if (isWrite && !intent.time && /\d{1,2}:\d{2}|\d{1,2}시(?!간)/.test(temporalText)) return clarify("말씀한 시각과 날짜를 함께 확인해야 합니다.");
   if (new Set(latestTokens.date).size > 1) return clarify("요청에 날짜가 여러 개 있습니다. 원하는 날짜 하나로 다시 입력해 주세요.");
   const dateText = intent.kind.startsWith("read_") ? latestTokens.date[0] ?? null : intent.date?.text ?? null;
   const date = dateText ? parseDate(dateText, referenceTime) : null;

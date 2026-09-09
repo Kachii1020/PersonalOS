@@ -2,9 +2,27 @@ import "server-only";
 import webpush from "web-push";
 import { claimWorkAttention, beginWorkDelivery, finishWorkDelivery, finishWorkAttention, getClaimedWorkSubscriptions, pruneWorkContextsForJob } from "./work-attention";
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { ClaimedWorkAttention } from "./work-attention";
+import type { Database } from "@/lib/types/database";
 
 type PushTarget = { endpoint: string; p256dh: string; auth: string };
-type Sender = (target: PushTarget, payload: { title: string; body: string; url: string; deliveryId: string; attentionId: string }) => Promise<number>;
+type Sender = (target: PushTarget, payload: { title: string; body: string; url: string; deliveryId: string; attentionId: string; observationToken: string }) => Promise<number>;
+type MeasuredAttention = ClaimedWorkAttention & { isMeasurement?: boolean };
+type CanaryRpcName = "seed_work_attention_canary" | "claim_measured_work_attention";
+async function canaryRpc<N extends CanaryRpcName>(name: N, args?: Database["public"]["Functions"][N]["Args"]): Promise<unknown> {
+  const result = await createAdminClient().rpc(name, args);
+  if (result.error) throw new Error(`Silent attention measurement failed: ${result.error.message}`);
+  return result.data;
+}
+
+/** No provider/subscription dependency exists on the measurement path. The
+ * injectable completion callback lets pure gates verify this without a DB. */
+export async function completeSilentWorkMeasurement(attention: MeasuredAttention, workerId: string, finish: typeof finishWorkAttention = finishWorkAttention) {
+  if (attention.isMeasurement !== true) return null;
+  await finish(attention.id, workerId, "ready");
+  return { kind: "measurement" as const, measurementScope: "silent_canary" as const, attentionId: attention.id,
+    accepted: 0, failed: 0, uncertain: 0, pushSkipped: true };
+}
 export async function acknowledgeWorkTick(slot: string, finished: boolean) {
   const result = await createAdminClient().rpc("ack_work_tick", { p_slot: slot, p_finished: finished });
   if (result.error) throw new Error(`Worker acknowledgment failed: ${result.error.message}`);
@@ -15,11 +33,15 @@ const defaultSender: Sender = async (target, payload) => {
   return response.statusCode;
 };
 /** One attention per request; durable attempts are reserved immediately before send. */
-export async function processWorkAttention(workerId: string, sender?: Sender) {
+export async function processWorkAttention(workerId: string, sender?: Sender, schedulerSlot?: string) {
   const pruned = await pruneWorkContextsForJob();
   const chatPrune = await createAdminClient().rpc("prune_work_chat");
   if (chatPrune.error) throw new Error("만료된 업무 응답 정리에 실패했습니다.");
-  if (process.env.JARVIS_ATTENTION_ENABLED !== "true") return { kind: "disabled", pruned };
+  // Future registration is not a successful observation. Actual claims are
+  // available only through the scheduler-slot wrapper below.
+  const canaryRegistered = await canaryRpc("seed_work_attention_canary");
+  if (typeof canaryRegistered !== "number" || !Number.isInteger(canaryRegistered) || canaryRegistered < 0) throw new Error("Invalid silent measurement registration result");
+  if (process.env.JARVIS_ATTENTION_ENABLED !== "true") return { kind: "disabled", pruned, canaryRegistered };
   let allowAutomatic = false;
   if (process.env.JARVIS_AUTOMATIC_ATTENTION_ENABLED === "true") {
     const health = await createAdminClient().rpc("work_scheduler_health");
@@ -27,10 +49,14 @@ export async function processWorkAttention(workerId: string, sender?: Sender) {
     const value = health.data as { automaticPromotionReady?: boolean };
     allowAutomatic = value.automaticPromotionReady === true;
   }
-  const attention = await claimWorkAttention(workerId, allowAutomatic);
-  if (!attention) return { kind: "idle", pruned };
+  const attention = schedulerSlot
+    ? await canaryRpc("claim_measured_work_attention", { p_worker_id: workerId, p_slot: schedulerSlot, p_allow_automatic: allowAutomatic }) as MeasuredAttention | null
+    : await claimWorkAttention(workerId, allowAutomatic) as MeasuredAttention | null;
+  if (!attention) return { kind: "idle", pruned, canaryRegistered };
   let accepted = 0, failed = 0, uncertain = 0;
   try {
+    const measurement = await completeSilentWorkMeasurement(attention, workerId);
+    if (measurement) return { ...measurement, pruned, canaryRegistered };
     const targets = await getClaimedWorkSubscriptions(attention.id);
     const configured = !!sender || !!(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
     if (configured) for (const target of targets) {
@@ -39,7 +65,7 @@ export async function processWorkAttention(workerId: string, sender?: Sender) {
       let status: "accepted" | "failed" | "gone" | "uncertain" = "uncertain"; let error: string | undefined;
       try {
         const code = await (sender ?? defaultSender)(target, { title: "JARVIS 업무 알림", body: "이어갈 업무가 있습니다. 앱에서 확인해 주세요.",
-          url: `/jarvis?work=${attention.contextId}`, deliveryId: attempt.deliveryId, attentionId: attention.id });
+          url: `/jarvis?work=${attention.contextId}`, deliveryId: attempt.deliveryId, attentionId: attention.id, observationToken: attempt.observationToken });
         status = code === 404 || code === 410 ? "gone" : code >= 200 && code < 300 ? "accepted" : "failed";
         if (status !== "accepted") error = `Push HTTP ${code}`;
       } catch (e) {
@@ -55,7 +81,7 @@ export async function processWorkAttention(workerId: string, sender?: Sender) {
       }
     }
     await finishWorkAttention(attention.id, workerId, failed ? "failed" : "ready", !configured ? "Push not configured; available in app" : uncertain ? "Push result uncertain; available in app" : undefined);
-    return { kind: "processed", attentionId: attention.id, accepted, failed, uncertain, pushSkipped: !configured || targets.length === 0, pruned };
+    return { kind: "processed", measurementScope: "user_attention", attentionId: attention.id, accepted, failed, uncertain, pushSkipped: !configured || targets.length === 0, pruned, canaryRegistered };
   } catch (error) {
     await finishWorkAttention(attention.id, workerId, "failed", error instanceof Error ? error.message : "Work attention failed");
     throw error;

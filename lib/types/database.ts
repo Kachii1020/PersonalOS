@@ -307,10 +307,13 @@ export type Database = {
           due_at: string
           first_claimed_at: string | null
           id: string
+          is_measurement: boolean
           kind: string
           last_error: string | null
           locked_by: string | null
           locked_until: string | null
+          measurement_finished_at: string | null
+          measurement_slot: string | null
           next_attempt_at: string
           owner_id: string
           quota_reserved_at: string | null
@@ -329,10 +332,13 @@ export type Database = {
           due_at: string
           first_claimed_at?: string | null
           id?: string
+          is_measurement?: boolean
           kind: string
           last_error?: string | null
           locked_by?: string | null
           locked_until?: string | null
+          measurement_finished_at?: string | null
+          measurement_slot?: string | null
           next_attempt_at?: string
           owner_id: string
           quota_reserved_at?: string | null
@@ -351,10 +357,13 @@ export type Database = {
           due_at?: string
           first_claimed_at?: string | null
           id?: string
+          is_measurement?: boolean
           kind?: string
           last_error?: string | null
           locked_by?: string | null
           locked_until?: string | null
+          measurement_finished_at?: string | null
+          measurement_slot?: string | null
           next_attempt_at?: string
           owner_id?: string
           quota_reserved_at?: string | null
@@ -371,6 +380,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "work_contexts"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attention_items_measurement_slot_fkey"
+            columns: ["measurement_slot"]
+            isOneToOne: false
+            referencedRelation: "work_scheduler_probes"
+            referencedColumns: ["slot"]
           },
         ]
       }
@@ -1253,6 +1269,8 @@ export type Database = {
           error: string | null
           finished_at: string | null
           id: string
+          observation_expires_at: string | null
+          observation_token_hash: string | null
           opened_at: string | null
           owner_id: string
           provider_state: string
@@ -1269,6 +1287,8 @@ export type Database = {
           error?: string | null
           finished_at?: string | null
           id?: string
+          observation_expires_at?: string | null
+          observation_token_hash?: string | null
           opened_at?: string | null
           owner_id: string
           provider_state: string
@@ -1285,6 +1305,8 @@ export type Database = {
           error?: string | null
           finished_at?: string | null
           id?: string
+          observation_expires_at?: string | null
+          observation_token_hash?: string | null
           opened_at?: string | null
           owner_id?: string
           provider_state?: string
@@ -2010,6 +2032,41 @@ export type Database = {
         }
         Relationships: []
       }
+      work_attention_canary_state: {
+        Row: {
+          context_id: string | null
+          enabled: boolean
+          first_due_at: string | null
+          measurement_started_at: string | null
+          planned_through: string | null
+          singleton: boolean
+        }
+        Insert: {
+          context_id?: string | null
+          enabled?: boolean
+          first_due_at?: string | null
+          measurement_started_at?: string | null
+          planned_through?: string | null
+          singleton?: boolean
+        }
+        Update: {
+          context_id?: string | null
+          enabled?: boolean
+          first_due_at?: string | null
+          measurement_started_at?: string | null
+          planned_through?: string | null
+          singleton?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "work_attention_canary_state_context_id_fkey"
+            columns: ["context_id"]
+            isOneToOne: false
+            referencedRelation: "work_contexts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       work_context_actions: {
         Row: {
           approval_id: string | null
@@ -2133,6 +2190,7 @@ export type Database = {
           forgotten_at: string | null
           goal: string
           id: string
+          is_measurement: boolean
           last_progress_at: string
           missing_fields: string[]
           next_step: string
@@ -2153,6 +2211,7 @@ export type Database = {
           forgotten_at?: string | null
           goal: string
           id?: string
+          is_measurement?: boolean
           last_progress_at?: string
           missing_fields?: string[]
           next_step?: string
@@ -2173,6 +2232,7 @@ export type Database = {
           forgotten_at?: string | null
           goal?: string
           id?: string
+          is_measurement?: boolean
           last_progress_at?: string
           missing_fields?: string[]
           next_step?: string
@@ -2291,6 +2351,14 @@ export type Database = {
         Args: { p_approval_id: string; p_worker_id: string }
         Returns: Json
       }
+      begin_user_work_delivery: {
+        Args: {
+          p_attention_id: string
+          p_subscription_id: string
+          p_worker_id: string
+        }
+        Returns: Json
+      }
       begin_work_delivery: {
         Args: {
           p_attention_id: string
@@ -2349,6 +2417,14 @@ export type Database = {
       }
       claim_calendar_reconciliation: {
         Args: { p_approval_id: string; p_owner_id: string; p_worker_id: string }
+        Returns: Json
+      }
+      claim_measured_work_attention: {
+        Args: {
+          p_allow_automatic?: boolean
+          p_slot: string
+          p_worker_id: string
+        }
         Returns: Json
       }
       claim_next_agent_run: {
@@ -2449,6 +2525,10 @@ export type Database = {
         Args: { p_approval_id: string; p_result: Json; p_worker_id: string }
         Returns: undefined
       }
+      configure_work_attention_canary: {
+        Args: { p_enabled: boolean }
+        Returns: undefined
+      }
       configure_work_scheduler: {
         Args: { p_enabled: boolean; p_secret_name: string; p_url: string }
         Returns: undefined
@@ -2541,6 +2621,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_claimed_user_work_subscriptions: {
+        Args: { p_attention_id: string }
+        Returns: Json
+      }
       get_claimed_work_subscriptions: {
         Args: { p_attention_id: string }
         Returns: Json
@@ -2573,6 +2657,10 @@ export type Database = {
           p_request_id: string
         }
         Returns: string
+      }
+      observe_work_delivery: {
+        Args: { p_delivery_id: string; p_event: string; p_token: string }
+        Returns: boolean
       }
       prepare_jarvis_approval: {
         Args: { p_proposal: Json; p_run_id: string; p_worker_id: string }
@@ -2624,6 +2712,7 @@ export type Database = {
         }
         Returns: Json
       }
+      seed_work_attention_canary: { Args: never; Returns: number }
       work_attention_valid: {
         Args: {
           a: Database["public"]["Tables"]["attention_items"]["Row"]

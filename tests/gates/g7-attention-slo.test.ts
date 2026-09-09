@@ -83,7 +83,7 @@ ${snapshot("after")}
   assert.equal(late.attentionTimelyStarts, 0); assert.equal(late.attentionTimelyRatio, 0);
   assert.equal(late.automaticPromotionReady, false, "Healthy wakeups cannot substitute for actual due-item first claims");
   const timely = stage("all-on-time").health!;
-  assert.equal(timely.attentionTimelyRatio, 1); assert.equal(timely.automaticPromotionReady, true);
+  assert.equal(timely.attentionTimelyRatio, 1); assert.equal(timely.automaticPromotionReady, false, "User samples alone cannot substitute for 168 actual silent queue canaries");
   const degraded = stage("recent-wakeup-loss").health!;
   assert.ok(degraded.timelyRatio < 0.99); assert.equal(degraded.automaticPromotionReady, false);
   console.log(JSON.stringify({ scope: "SYNTHETIC historical policy test only; not real seven-day SLO, cron delivery, Push or automatic-promotion authorization", late, timely, degraded, rollbackVerified: true }));

@@ -7,6 +7,13 @@ const STATIC_CACHE = "personal-os-static-v2";
 const PAGE_CACHE = "personal-os-pages-v1";
 const STATIC = /\.(?:woff2?|css|js|svg|png|ico)$/;
 const IMMUTABLE_PREFIX = "/_next/static/";
+// Bump this when the worker's observable delivery contract changes.
+const WORKER_VERSION = "personal-os-sw-2026-09-09-delivery-v2";
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type !== "PERSONAL_OS_SW_VERSION_REQUEST" || !event.ports?.[0]) return;
+  event.ports[0].postMessage({ type: "PERSONAL_OS_SW_VERSION", version: WORKER_VERSION, workDeliveryCallbacks: true });
+});
 
 self.addEventListener("install", () => {
   self.skipWaiting();
@@ -71,13 +78,14 @@ self.addEventListener("push", (event) => {
     if (text) data.body = text;
   }
   const deliveryId = typeof data.deliveryId === "string" && /^[0-9a-f-]{36}$/i.test(data.deliveryId) ? data.deliveryId : null;
+  const observationToken = typeof data.observationToken === "string" && /^[0-9a-f]{64}$/.test(data.observationToken) ? data.observationToken : null;
   event.waitUntil(Promise.all([
     self.registration.showNotification(data.title, {
       body: data.body,
       tag: data.attentionId ? `work-${data.attentionId}` : undefined,
-      data: { url: safePushTarget(data.url), deliveryId },
+      data: { url: safePushTarget(data.url), deliveryId, observationToken },
     }),
-    observeWorkDelivery(deliveryId, "received"),
+    observeWorkDelivery(deliveryId, observationToken, "received"),
   ]));
 });
 
@@ -85,11 +93,11 @@ function safePushTarget(value) {
   try { const url = new URL(value || "/", self.location.origin); return url.origin === self.location.origin ? url.pathname + url.search : "/"; }
   catch { return "/"; }
 }
-async function observeWorkDelivery(id, event) {
-  if (!id) return;
+async function observeWorkDelivery(id, token, event) {
+  if (!id || typeof token !== "string" || !/^[0-9a-f]{64}$/.test(token)) return;
   try {
-    const response = await fetch(`/api/jarvis/work-deliveries/${encodeURIComponent(id)}`, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event }) });
-    if (!response.ok) console.warn("Work delivery observation not recorded; authentication or network may be unavailable.");
+    const response = await fetch(`/api/jarvis/work-deliveries/${encodeURIComponent(id)}`, { method: "POST", credentials: "omit", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ event, token }) });
+    if (!response.ok) console.warn("Work delivery observation not recorded; capability or network may be unavailable.");
   } catch { console.warn("Work delivery observation unavailable; do not infer receipt from provider acceptance."); }
 }
 
@@ -97,7 +105,7 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const target = safePushTarget(event.notification.data?.url);
   event.waitUntil(
-    Promise.all([observeWorkDelivery(event.notification.data?.deliveryId, "opened"), self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+    Promise.all([observeWorkDelivery(event.notification.data?.deliveryId, event.notification.data?.observationToken, "opened"), self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
       for (const client of windows) {
         if ("focus" in client) {
           client.navigate?.(target);

@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { savePushSubscription, deletePushSubscription, sendTestPush } from "@/app/(dashboard)/settings/actions";
 
 type Status = "checking" | "unsupported" | "need-install" | "off" | "on";
+type WorkerReadiness = { status: string; expectedVersion: string; version: string | null; workDeliveryCallbacks: boolean };
+const workerLabels: Record<string, string> = { checking: "확인 중", installing: "업데이트 중", ready: "준비됨", outdated: "업데이트 확인 중", unconfirmed: "아직 확인되지 않음", registration_failed: "연결을 확인하지 못함", unsupported: "지원되지 않음" };
 
 type Diag = {
   standalone: boolean;
@@ -26,6 +28,17 @@ export function PushSettings({
   const [diag, setDiag] = useState<Diag | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [workerReadiness, setWorkerReadiness] = useState<WorkerReadiness | null>(null);
+
+  useEffect(() => {
+    const refreshReadiness = () => {
+      const value = (window as Window & { personalOsServiceWorker?: WorkerReadiness }).personalOsServiceWorker;
+      if (value && typeof value.status === "string" && typeof value.expectedVersion === "string") setWorkerReadiness(value);
+    };
+    refreshReadiness();
+    window.addEventListener("personalos:service-worker", refreshReadiness);
+    return () => window.removeEventListener("personalos:service-worker", refreshReadiness);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,6 +140,7 @@ export function PushSettings({
         <DiagRow label="VAPID" ok={vapidReady} yes="설정됨" no="없음 — npm run vapid:generate" />
         <DiagRow label="홈 화면 앱" ok={diag?.standalone ?? false} yes="예" no="아니오 (iPhone은 필수)" />
         <DiagRow label="서비스 워커" ok={diag?.serviceWorker ?? false} yes="가능" no="없음" />
+        <DiagRow label="알림 수신 기록 연결" ok={workerReadiness?.status === "ready" && workerReadiness.workDeliveryCallbacks && workerReadiness.version === workerReadiness.expectedVersion} yes="준비됨" no={workerLabels[workerReadiness?.status ?? "checking"] ?? "아직 확인되지 않음"} />
         <DiagRow
           label="서버 구독"
           ok={subscribedOnServer}
@@ -140,6 +154,8 @@ export function PushSettings({
           </li>
         )}
       </ul>
+      <p className="text-xs text-text-muted">앱을 열면 알림 기록 연결을 자동으로 확인합니다. ‘준비됨’은 실제 알림 수신·열람이 확인됐다는 뜻은 아닙니다.</p>
+      {workerReadiness && <details className="text-xs text-text-muted"><summary className="cursor-pointer">알림 연결 정보</summary><p className="mt-1 break-all">현재 버전: {workerReadiness.version ?? "확인되지 않음"}</p><p className="break-all">필요한 버전: {workerReadiness.expectedVersion}</p></details>}
 
       {status === "unsupported" && (
         <p className="text-sm text-text-muted">

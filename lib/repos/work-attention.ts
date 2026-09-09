@@ -4,6 +4,7 @@ import type { Database } from "@/lib/types/database";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { requireWorkOwner, WorkRequestError } from "./work-contexts";
 import type { AttentionItem } from "@/lib/jarvis/work-types";
+import type { WorkDeliveryObservation } from "@/lib/jarvis/work-delivery-observation";
 
 type AttentionRpc = "list_work_attention" | "mutate_work_attention" | "ack_work_delivery" | "claim_work_attention" | "begin_work_delivery" | "finish_work_delivery" | "finish_work_attention" | "prune_work_contexts" | "get_claimed_work_subscriptions";
 async function rpc<N extends AttentionRpc>(client: SupabaseClient<Database>, name: N, args?: Database["public"]["Functions"][N]["Args"]): Promise<unknown> {
@@ -24,7 +25,12 @@ export async function acknowledgeWorkDelivery(id: string, event: "received" | "o
   const { client } = await requireWorkOwner(); await rpc(client, "ack_work_delivery", { p_delivery_id: id, p_event: event });
 }
 export type ClaimedWorkAttention = AttentionItem & { ownerId: string; lockedUntil: string };
-export type WorkDeliveryAttempt = { deliveryId: string; attemptToken: string; attempt: number; subscriptionId: string };
+export type WorkDeliveryAttempt = { deliveryId: string; attemptToken: string; attempt: number; subscriptionId: string; observationToken: string };
+export async function observeWorkDelivery(input: WorkDeliveryObservation): Promise<boolean> {
+  const { data, error } = await createAdminClient().rpc("observe_work_delivery", { p_delivery_id: input.deliveryId, p_token: input.token, p_event: input.event });
+  if (error) throw new Error("Observation unavailable");
+  return data === true;
+}
 export async function claimWorkAttention(workerId: string, allowAutomatic = false): Promise<ClaimedWorkAttention | null> {
   return await rpc(createAdminClient(), "claim_work_attention", { p_worker_id: workerId, p_allow_automatic: allowAutomatic }) as ClaimedWorkAttention | null;
 }
