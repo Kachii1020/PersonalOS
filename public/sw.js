@@ -7,6 +7,13 @@ const STATIC_CACHE = "personal-os-static-v2";
 const PAGE_CACHE = "personal-os-pages-v1";
 const STATIC = /\.(?:woff2?|css|js|svg|png|ico)$/;
 const IMMUTABLE_PREFIX = "/_next/static/";
+// Bump this when the worker's observable delivery contract changes.
+const WORKER_VERSION = "personal-os-sw-2026-09-09-delivery-v1";
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type !== "PERSONAL_OS_SW_VERSION_REQUEST" || !event.ports?.[0]) return;
+  event.ports[0].postMessage({ type: "PERSONAL_OS_SW_VERSION", version: WORKER_VERSION, workDeliveryCallbacks: true });
+});
 
 self.addEventListener("install", () => {
   self.skipWaiting();

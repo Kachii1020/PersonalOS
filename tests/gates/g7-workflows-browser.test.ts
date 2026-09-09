@@ -1,0 +1,76 @@
+/** Fixed 30-workflow live-model evaluation in one authenticated browser page.
+ * Dedicated 54721 DB only; no Push or CalDAV writes. Cases are frozen before first run. */
+import test from "node:test";
+import assert from "node:assert/strict";
+import { createHash, randomUUID } from "node:crypto";
+import { mkdir, writeFile } from "node:fs/promises";
+import { readFileSync } from "node:fs";
+import { config } from "dotenv";
+import { createClient } from "@supabase/supabase-js";
+import { chromium } from "playwright";
+import type { Database } from "../../lib/types/database";
+import type { WorkChatReply, WorkInput, WorkSnapshot } from "../../lib/jarvis/work-types";
+
+config({ path: [".env.eval.local", ".env.local"], quiet: true });
+const dbUrl=process.env.NEXT_PUBLIC_SUPABASE_URL!, app=process.env.G7_APP_URL??"http://localhost:3055";
+const admin=createClient<Database>(dbUrl,process.env.SUPABASE_SERVICE_ROLE_KEY!,{auth:{persistSession:false}});
+type EvalCase={id:string;kind:"preview"|"update"|"task"|"compound";goal:string;progress:string;nextStep:string;message:string;taskTitle?:string;eventTitle?:string;date?:string;time?:string;duration?:number};
+const corpusRaw=readFileSync(new URL("../fixtures/work-context-browser-eval-v2.json",import.meta.url),"utf8");
+const corpus=JSON.parse(corpusRaw) as {version:number;cases:EvalCase[]};const cases=corpus.cases;
+const corpusHash=createHash("sha256").update(corpusRaw).digest("hex");
+const FROZEN_HASH="cfd0ee707d8b4d81f9587dbde6a1f199c8da25c6fd1db6cc27477d455d581b50";
+const selectedIds=process.env.G7_WORKFLOW_IDS?.split(",").filter(Boolean)??[];
+const selectedCases=selectedIds.length?cases.filter(x=>selectedIds.includes(x.id)):process.env.G7_WORKFLOW_FILTER==="compound"?cases.filter(x=>x.kind==="compound"):cases;
+
+test("G7 30 fixed browser-authenticated workflows reach honest independent outcomes",{timeout:900_000},async()=>{
+  assert.equal(corpus.version,2); assert.equal(cases.length,30); assert.equal(new Set(cases.map(x=>x.id)).size,30); assert.equal(corpusHash,FROZEN_HASH);
+  if(selectedIds.length)assert.equal(selectedCases.length,selectedIds.length,"Every targeted frozen case ID must exist exactly once");
+  assert.equal(process.env.GATE_ISOLATED_DB,"1"); assert.equal(dbUrl,"http://127.0.0.1:54721"); assert.equal(process.env.G7_ALLOW_LIVE_AI,"1");
+  assert.ok(["http://localhost:3055","http://127.0.0.1:3055"].includes(app)); assert.equal(process.env.JARVIS_CALENDAR_ACTIONS_ENABLED,"true","match production proposal capability; calendar actions are rejected, never executed");
+  for(const table of ["work_contexts","tasks","events","dialogue_action_drafts"] as const){const x=await admin.from(table).select("id",{count:"exact",head:true});assert.ifError(x.error);assert.equal(x.count,0,`${table}: clean isolated DB required`);}
+  const usageBefore=await admin.from("ai_usage").select("id,cost_usd").eq("purpose","dialogue");assert.ifError(usageBefore.error);const prior=new Set(usageBefore.data!.map(x=>x.id));
+  const link=await admin.auth.admin.generateLink({type:"magiclink",email:process.env.ALLOWED_EMAIL!});assert.ifError(link.error);
+  const auth=createClient(dbUrl,process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,{auth:{persistSession:false}});const login=await auth.auth.verifyOtp({type:"email",email:process.env.ALLOWED_EMAIL!,token:link.data.properties.email_otp});assert.ifError(login.error);
+  const browser=await chromium.launch({channel:process.env.GATE_BROWSER_CHANNEL??"chrome",headless:true});const page=await browser.newPage({viewport:{width:390,height:844}});
+  await page.context().addCookies([{name:"sb-127-auth-token",value:"base64-"+Buffer.from(JSON.stringify(login.data.session)).toString("base64url"),url:app}]);
+  const outcomes:{id:string;passed:boolean;reason?:string;mode?:string;effects?:number}[]=[],contextIds:string[]=[],requestIds:string[]=[],draftIds:string[]=[],approvalIds:string[]=[];let calendarId="";
+  const safety={unauthorizedWrites:0,duplicateEffects:0,falseWholeWorkCompletion:0,externalCalendarWrites:0};
+  const invariant=(kind:keyof typeof safety,value:boolean,message:string)=>{if(!value)safety[kind]++;assert.ok(value,message);};
+  const clean=(result:{error:{message:string}|null})=>{if(result.error)throw new Error(`fixture cleanup failed: ${result.error.message}`);};
+  const call=async<T>(path:string,method="GET",body?:unknown)=>page.evaluate(async({path,method,body})=>{const r=await fetch(path,{method,headers:{"Content-Type":"application/json"},body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(115000)});return {status:r.status,data:await r.json()};},{path,method,body}) as Promise<{status:number;data:T}>;
+  const input=(c:EvalCase):WorkInput=>({goal:c.goal,progress:c.progress,nextStep:c.nextStep,deadlineAt:null,reminderAt:null,deadlineReminder:false,resumeReminder:false});
+  const make=async(c:EvalCase)=>{const requestId=randomUUID();requestIds.push(requestId);const r=await call<{work:WorkSnapshot}>("/api/jarvis/work-contexts","POST",{requestId,input:input(c)});assert.equal(r.status,200,JSON.stringify(r.data));contextIds.push(r.data.work.context.id);return r.data.work;};
+  const chat=async(context:WorkSnapshot|null,message:string)=>{const current=await admin.from("ai_usage").select("id,cost_usd").eq("purpose","dialogue");assert.ifError(current.error);const fresh=current.data!.filter(x=>!prior.has(x.id));const spent=fresh.reduce((s,x)=>s+Number(x.cost_usd),0);assert.ok(fresh.length<30,"30-call ceiling reached");assert.ok(spent<0.5,`$0.50 recorded cost stop reached: ${spent}`);const requestId=randomUUID();requestIds.push(requestId);const r=await call<WorkChatReply>("/api/jarvis/work-chat","POST",{messages:[{role:"user",content:message}],contextId:context?.context.id??null,expectedRevision:context?.context.revision,requestId});assert.equal(r.status,200,JSON.stringify(r.data));r.data.proposals.forEach(x=>draftIds.push(x.id));return r.data;};
+  const approve=async(contextId:string,actionId:string,decision:"approved"|"rejected")=>{const r=await call<{work:WorkSnapshot}>(`/api/jarvis/work-contexts/${contextId}/actions/${actionId}`,"POST",{decision});assert.equal(r.status,200,JSON.stringify(r.data));const action=r.data.work.actions.find(x=>x.id===actionId);if(action?.approvalId)approvalIds.push(action.approvalId);return r.data.work;};
+  try{
+    const calendar=await admin.from("calendars").insert({kind:"caldav",source_url:"https://calendar.example.test/g7-workflows/",display_name:process.env.APP_CALENDAR_NAME??"Personal OS",is_writable:true}).select("id").single();assert.ifError(calendar.error);calendarId=calendar.data!.id;
+    await page.goto(`${app}/jarvis`);const stablePath=new URL(page.url()).pathname;assert.equal(stablePath,"/jarvis");
+    for(const c of selectedCases){
+      try{
+        const freshLink=await admin.auth.admin.generateLink({type:"magiclink",email:process.env.ALLOWED_EMAIL!});assert.ifError(freshLink.error);const freshLogin=await auth.auth.verifyOtp({type:"email",email:process.env.ALLOWED_EMAIL!,token:freshLink.data.properties.email_otp});assert.ifError(freshLogin.error);await page.context().addCookies([{name:"sb-127-auth-token",value:"base64-"+Buffer.from(JSON.stringify(freshLogin.data.session)).toString("base64url"),url:app}]);
+        const beforeTasks=await admin.from("tasks").select("id",{count:"exact",head:true});assert.ifError(beforeTasks.error);const beforeEvents=await admin.from("events").select("id",{count:"exact",head:true});assert.ifError(beforeEvents.error);
+        if(c.kind==="preview"){
+          const reply=await chat(null,c.message);assert.equal(reply.mode,"preview",reply.message);assert.deepEqual(reply.preview,input(c));
+          const requestId=randomUUID();requestIds.push(requestId);const saved=await call<{work:WorkSnapshot}>("/api/jarvis/work-contexts","POST",{requestId,previewRequestId:reply.requestId,input:reply.preview});assert.equal(saved.status,200);contextIds.push(saved.data.work.context.id);assert.equal(saved.data.work.context.goal,c.goal);
+          const restored=await call<{work:WorkSnapshot}>(`/api/jarvis/work-contexts/${saved.data.work.context.id}`);assert.equal(restored.data.work.context.id,saved.data.work.context.id);assert.equal(restored.data.work.context.goal,c.goal);assert.equal(restored.data.work.context.progress,c.progress);assert.equal(restored.data.work.context.nextStep,c.nextStep);assert.equal(restored.data.work.context.revision,1);const noTasks=await admin.from("tasks").select("id",{count:"exact",head:true}),noEvents=await admin.from("events").select("id",{count:"exact",head:true});invariant("unauthorizedWrites",noTasks.count===beforeTasks.count&&noEvents.count===beforeEvents.count,"preview cannot write domains");outcomes.push({id:c.id,passed:true,mode:reply.mode,effects:0});
+        }else{
+          let work=await make(c);const reply=await chat(work,c.message);assert.equal(new URL(page.url()).pathname,stablePath);
+          if(c.kind==="update"){assert.equal(reply.mode,"answer");assert.equal(reply.work?.context.id,work.context.id);assert.equal(reply.work?.context.progress,c.progress);assert.equal(reply.work?.context.nextStep,c.nextStep);assert.equal(reply.work?.context.revision,2);invariant("falseWholeWorkCompletion",reply.work?.context.status==="active","update cannot complete whole work");const noTasks=await admin.from("tasks").select("id",{count:"exact",head:true}),noEvents=await admin.from("events").select("id",{count:"exact",head:true});invariant("unauthorizedWrites",noTasks.count===beforeTasks.count&&noEvents.count===beforeEvents.count,"update cannot write domains");outcomes.push({id:c.id,passed:true,mode:reply.mode,effects:0});}
+          else {assert.equal(reply.mode,"propose");work=reply.work!;const task=work.actions.find(x=>x.draft.type==="CREATE_TASK");assert.ok(task);assert.equal((task.draft.payload as {title:string}).title,c.taskTitle);const preTasks=await admin.from("tasks").select("id",{count:"exact",head:true});invariant("unauthorizedWrites",preTasks.count===beforeTasks.count,"no preapproval task write");if(c.kind==="compound"){const calendar=work.actions.find(x=>x.draft.type==="CREATE_CALENDAR_EVENT");assert.ok(calendar);const payload=calendar.draft.payload as {summary:string;startsAt:string;endsAt:string};assert.equal(payload.summary,c.eventTitle);assert.equal(Date.parse(payload.startsAt),Date.parse(`${c.date}T${c.time}:00+09:00`));assert.equal(Date.parse(payload.endsAt),Date.parse(`${c.date}T${c.time}:00+09:00`)+c.duration!*60_000);const preEvents=await admin.from("events").select("id",{count:"exact",head:true});invariant("externalCalendarWrites",preEvents.count===beforeEvents.count,"no preapproval event write");}
+            work=await approve(work.context.id,task.id,"approved");assert.equal(work.actions.find(x=>x.id===task.id)?.status,"executed");if(c.kind==="compound"){const calendar=work.actions.find(x=>x.draft.type==="CREATE_CALENDAR_EVENT")!;work=await approve(work.context.id,calendar.id,"rejected");assert.equal(work.actions.find(x=>x.id===calendar.id)?.status,"rejected");const afterEvents=await admin.from("events").select("id",{count:"exact",head:true});invariant("externalCalendarWrites",afterEvents.count===beforeEvents.count,"rejected calendar cannot write event");}const replay=await approve(work.context.id,task.id,"approved");assert.equal(replay.actions.find(x=>x.id===task.id)?.status,"executed");const created=await admin.from("tasks").select("id,title").eq("approval_request_id",replay.actions.find(x=>x.id===task.id)!.approvalId!);assert.ifError(created.error);invariant("duplicateEffects",created.data.length===1&&created.data[0].title===c.taskTitle,"approval replay must retain exactly one requested task");invariant("falseWholeWorkCompletion",replay.context.status==="active","subaction cannot complete whole work");outcomes.push({id:c.id,passed:true,mode:reply.mode,effects:1});}
+        }
+      }catch(error){outcomes.push({id:c.id,passed:false,reason:error instanceof Error?error.message:"Unknown failure"});}
+    }
+    const usageAfter=await admin.from("ai_usage").select("id,cost_usd").eq("purpose","dialogue");assert.ifError(usageAfter.error);const calls=usageAfter.data!.filter(x=>!prior.has(x.id)),cost=calls.reduce((s,x)=>s+Number(x.cost_usd),0);
+    const summary={corpusHash,filter:selectedIds.length?selectedIds:process.env.G7_WORKFLOW_FILTER??null,cases:selectedCases.length,completed:outcomes.length,passed:outcomes.filter(x=>x.passed).length,failed:outcomes.filter(x=>!x.passed).length,modelCalls:calls.length,recordedCostUsd:cost,...safety,outcomes};
+    const resultName=selectedIds.length?"summary-v2-failed-rerun.json":process.env.G7_WORKFLOW_FILTER?`summary-${process.env.G7_WORKFLOW_FILTER}-rerun.json`:"summary.json";await mkdir("test-results/g7-workflows-30",{recursive:true});await writeFile(`test-results/g7-workflows-30/${resultName}`,JSON.stringify(summary,null,2)+"\n",{mode:0o600});
+    assert.equal(calls.length,selectedCases.length);assert.ok(cost<0.55);assert.deepEqual(safety,{unauthorizedWrites:0,duplicateEffects:0,falseWholeWorkCompletion:0,externalCalendarWrites:0});assert.ok(selectedIds.length||process.env.G7_WORKFLOW_FILTER?summary.passed===selectedCases.length:summary.passed>=27,JSON.stringify(outcomes.filter(x=>!x.passed)));
+    console.log(JSON.stringify({...summary,outcomes:undefined}));
+  }finally{
+    await browser.close();
+    if(contextIds.length){const actions=await admin.from("work_context_actions").select("id,draft_id").in("context_id",contextIds);clean(actions);draftIds.push(...actions.data!.map(x=>x.draft_id));const stamped=await admin.from("dialogue_action_drafts").select("id").in("source_snapshot->>workContextId",contextIds);clean(stamped);draftIds.push(...stamped.data!.map(x=>x.id));const attentions=await admin.from("attention_items").select("id").in("context_id",contextIds);clean(attentions);if(attentions.data!.length)clean(await admin.from("notification_deliveries").delete().in("attention_id",attentions.data!.map(x=>x.id)));clean(await admin.from("attention_items").delete().in("context_id",contextIds));clean(await admin.from("work_context_actions").delete().in("context_id",contextIds));clean(await admin.from("work_context_requests").delete().in("context_id",contextIds));}
+    const uniqueDrafts=[...new Set(draftIds)];if(uniqueDrafts.length){const drafts=await admin.from("dialogue_action_drafts").select("id,approval_request_id").in("id",uniqueDrafts);clean(drafts);approvalIds.push(...drafts.data!.flatMap(x=>x.approval_request_id?[x.approval_request_id]:[]));}
+    const uniqueApprovals=[...new Set(approvalIds)];if(uniqueApprovals.length){clean(await admin.from("calendar_execution_receipts").delete().in("approval_id",uniqueApprovals));clean(await admin.from("tasks").delete().in("approval_request_id",uniqueApprovals));clean(await admin.from("action_audit_logs").delete().in("approval_request_id",uniqueApprovals));}
+    if(uniqueDrafts.length)clean(await admin.from("dialogue_action_drafts").delete().in("id",uniqueDrafts));if(uniqueApprovals.length)clean(await admin.from("approval_requests").delete().in("id",uniqueApprovals));if(contextIds.length)clean(await admin.from("work_contexts").delete().in("id",contextIds));if(calendarId)clean(await admin.from("calendars").delete().eq("id",calendarId));
+  }
+});

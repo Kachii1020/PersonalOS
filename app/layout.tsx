@@ -44,11 +44,60 @@ const bootScript = `
  * 개발 서버의 청크 경로는 해시가 없어서 캐시-우선으로 잡으면 낡은 번들이 계속 살아남는다.
  */
 const swScript = `
-if ("serviceWorker" in navigator) {
+(function () {
+  var expectedVersion = "personal-os-sw-2026-09-09-delivery-v1";
+  var registration = null;
+  var checkSerial = 0;
+  function publish(status, version, callbacks) {
+    var state = { status: status, expectedVersion: expectedVersion, version: version || null, workDeliveryCallbacks: callbacks === true };
+    window.personalOsServiceWorker = state;
+    window.dispatchEvent(new CustomEvent("personalos:service-worker", { detail: state }));
+  }
+  if (!("serviceWorker" in navigator)) { publish("unsupported"); return; }
+  publish("checking");
+  function verify() {
+    var serial = ++checkSerial;
+    var worker = navigator.serviceWorker.controller || (registration && registration.active);
+    if (!worker) { publish("installing"); return; }
+    var channel = new MessageChannel();
+    var timer = setTimeout(function () {
+      channel.port1.close();
+      if (serial === checkSerial) publish("unconfirmed");
+    }, 5000);
+    channel.port1.onmessage = function (event) {
+      var data = event.data;
+      if (!data || data.type !== "PERSONAL_OS_SW_VERSION") return;
+      clearTimeout(timer); channel.port1.close();
+      if (serial !== checkSerial) return;
+      var callbacks = data.workDeliveryCallbacks === true;
+      publish(data.version === expectedVersion && callbacks ? "ready" : "outdated", typeof data.version === "string" ? data.version : null, callbacks);
+    };
+    try { worker.postMessage({ type: "PERSONAL_OS_SW_VERSION_REQUEST" }, [channel.port2]); }
+    catch (error) { clearTimeout(timer); channel.port1.close(); if (serial === checkSerial) publish("unconfirmed"); }
+  }
+  function update() {
+    if (!registration) return;
+    registration.update().then(verify).catch(function () {
+      console.warn("Service worker update unavailable; delivery callback readiness is not assumed.");
+      verify();
+    });
+  }
+  navigator.serviceWorker.addEventListener("controllerchange", verify);
+  document.addEventListener("visibilitychange", function () { if (document.visibilityState === "visible") update(); });
   window.addEventListener("load", function () {
-    navigator.serviceWorker.register("/sw.js").catch(function () {});
+    navigator.serviceWorker.register("/sw.js", { updateViaCache: "none" }).then(function (value) {
+      registration = value;
+      registration.addEventListener("updatefound", function () {
+        var installing = registration.installing;
+        if (installing) installing.addEventListener("statechange", function () { if (installing.state === "activated") verify(); });
+      });
+      verify(); update();
+    }).catch(function () {
+      publish("registration_failed");
+      console.warn("Service worker registration failed; delivery callbacks are not ready.");
+    });
   });
-}
+})();
 `;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

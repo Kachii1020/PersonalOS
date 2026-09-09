@@ -72,8 +72,14 @@ Review correction: wake-up timing alone cannot promote automatic notifications. 
 ## Still required for full Phase 7
 
 - Real 7-day schedule observation including missed slots, actual attention queue delays, failures and denominator; **no 99% timing claim**. Short successful probes cannot replace it.
-- 30 independent supported model/browser workflows and physical iPhone→Mac cross-device work resumption remain unexecuted.
+- Physical iPhone→Mac cross-device work resumption remains unexecuted.
 - Automatic deadline/stale-work notification promotion still requires the real seven-day gate. The limited direct-reminder cron is live, but replacement of any older time-sensitive GitHub scheduling path is not claimed or performed.
+
+## Full-acceptance follow-up — 2026-09-09 JST
+
+- Callback diagnosis: the first Phase 7 Push was accepted and manually opened, but production request logs contained zero `/api/jarvis/work-deliveries/*` calls. The callback code had only just shipped, so the observed behavior is consistent with the device running the older installed service worker; it is not evidence of an authenticated callback failure. The follow-up forces no-cache worker update on app load/foreground, verifies a version/capability handshake, and shows readiness in Push settings. Old deliveries are not reconstructed and readiness is not called receipt.
+- The original numeric-template 30-case run was rejected as insufficiently independent despite a combined 30/30 after environment corrections. The meaningfully varied frozen v2 corpus hash is `cfd0ee707d8b4d81f9587dbde6a1f199c8da25c6fd1db6cc27477d455d581b50`: 10 preview/save/restore, 10 explicit updates, 5 approved task/replay and 5 task-success/calendar-rejected flows. Its accepted run completed 30 with **22 passed / 8 failed (73.3%)**, below the 90% gate; observed unauthorized writes, duplicate effects, false work completion and external writes were all 0. A final targeted attempt timed out after 5 model calls and was not used as acceptance. All exploratory/interrupted/v2 attempts in this follow-up totaled 82 calls / $1.1497, 52 calls and $0.6997 above the estimate. No further model retry is claimed. Detailed summary: `docs/evidence/workflow-eval-20260909.json`.
+- Migration 0025 introduces a default-off, service-only silent hourly attention canary. It pre-registers future samples, uses the same attention claim/finish queue, is hidden by owner RLS, takes no daily quota and cannot reserve Push. Health keeps missing/unclaimed samples in the denominator and still requires seven actual elapsed days plus 168 hourly samples. Isolated clean reset passed; actual DB configuration registered 192 future rows, owner visibility 0, manual claims 0, Push reservations 0, observed samples 0 and automatic promotion false. This is configuration evidence, not elapsed observation.
 
 ## Rollout / rollback
 
