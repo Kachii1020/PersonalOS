@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { canSendWorkAttention, effectiveAttentionDue, groundWorkIntent, reduceWorkContext, usesAutomaticAttention, validateWorkInput, validateWorkIntent, type WorkIntent } from "../lib/jarvis/work-context";
+import { canSendWorkAttention, effectiveAttentionDue, groundWorkIntent, parseDeterministicWorkRequest, reduceWorkContext, usesAutomaticAttention, validateWorkInput, validateWorkIntent, type WorkIntent } from "../lib/jarvis/work-context";
 import { buildWorkPrompt } from "../lib/ai/prompts/work-context";
 import { groundDialogueIntent } from "../lib/jarvis/dialogue-grounding";
 import type { WorkContext, WorkInput } from "../lib/jarvis/work-types";
@@ -12,6 +12,13 @@ const context: WorkContext = { ...input, id: "context-1", ownerId: "owner-1", re
 const quote = (text: string, messageIndex = 0): InputQuote => ({ text, messageIndex });
 const intent = (patch: Partial<WorkIntent> = {}): WorkIntent => ({ operation: "preview", goal: null, progress: null, nextStep: null, deadline: null, reminder: null, deadlineReminder: null, resumeReminder: null, status: null, actions: [], ...patch });
 const user = (content: string) => [{ role: "user" as const, content }];
+
+test("deterministic work grammar handles exact save and simple task but never extra text",()=>{
+  const saved=parseDeterministicWorkRequest(user('“여행 준비”를 진행 업무로 저장해. 현재 진행은 “항공편을 골랐다”이고, 다음 행동은 “숙소 비교”야.'),null);
+  assert.equal(saved?.operation,"preview");assert.equal(saved?.input?.goal,"여행 준비");assert.equal(saved?.input?.progress,"항공편을 골랐다");assert.equal(saved?.input?.nextStep,"숙소 비교");
+  const action=parseDeterministicWorkRequest(user('“자료 검토” 할 일을 추가해.'),context);assert.equal(action?.operation,"actions");assert.equal(action?.actions?.[0].intent.kind,"create_task");assert.equal(action?.actions?.[0].intent.title?.text,"자료 검토");
+  assert.equal(parseDeterministicWorkRequest(user('“자료 검토” 할 일을 추가해. 그리고 메일도 보내'),context),null);assert.equal(parseDeterministicWorkRequest(user('“자료 검토” 할 일을 추가해.'),null),null);
+});
 
 test("limited release distinguishes direct reminder and deadline from automatic conditions", () => {
   assert.equal(usesAutomaticAttention({ ...input, reminderAt: "2030-01-13T12:00:00Z" }), false);

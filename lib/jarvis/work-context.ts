@@ -78,6 +78,18 @@ export type WorkIntent = {
 };
 export type GroundedWorkIntent = { operation: WorkIntent["operation"]; input?: WorkInput; status?: WorkStatus; actions?: { text: string; intent: DialogueIntent }[]; message: string };
 
+/** Strict no-model fast path for two unambiguous high-frequency forms. Extra
+ * text or unsupported fields fall through to the normal model + grounding. */
+export function parseDeterministicWorkRequest(messages: ChatMessage[], context: WorkContext | null): GroundedWorkIntent | null {
+  const index=messages.length-1,latest=messages[index];
+  if(index<0||latest.role!=="user")return null;
+  const preview=/^["“]([^"”\n]{1,200})["”](?:을|를)\s*진행\s*업무로\s*저장해[.]?\s*현재\s*진행은\s*["“]([^"”\n]{1,2000})["”]이고,?\s*다음\s*행동은\s*["“]([^"”\n]{1,2000})["”](?:이야|야)[.]?$/.exec(latest.content.trim());
+  if(!context&&preview){try{return{operation:"preview",input:validateWorkInput({goal:preview[1],progress:preview[2],nextStep:preview[3],deadlineAt:null,reminderAt:null,deadlineReminder:false,resumeReminder:false}),message:"명시한 업무를 저장 전 확인합니다."};}catch{return null;}}
+  const task=/^["“]([^"”\n]{1,300})["”]\s*할\s*일(?:을|를)?\s*추가해[.]?$/.exec(latest.content.trim());
+  if(context?.status==="active"&&!context.forgottenAt&&task){return{operation:"actions",actions:[{text:latest.content.trim(),intent:{kind:"create_task",sourceId:null,title:{messageIndex:0,text:task[1]},date:null,time:null,duration:null}}],message:"명시한 할 일 실행안을 검토합니다."};}
+  return null;
+}
+
 export function validateWorkIntent(raw: unknown): WorkIntent {
   if (!record(raw) || !keys(raw, ["operation", "goal", "progress", "nextStep", "deadline", "reminder", "deadlineReminder", "resumeReminder", "status", "actions"]) || !["preview", "update", "status", "actions", "clarify"].includes(raw.operation as string)) throw new Error("업무 의도 형식이 올바르지 않습니다.");
   for (const field of ["goal", "progress", "nextStep", "deadline", "reminder"]) {

@@ -21,6 +21,7 @@ const corpusHash=createHash("sha256").update(corpusRaw).digest("hex");
 const FROZEN_HASH="cfd0ee707d8b4d81f9587dbde6a1f199c8da25c6fd1db6cc27477d455d581b50";
 const selectedIds=process.env.G7_WORKFLOW_IDS?.split(",").filter(Boolean)??[];
 const selectedCases=selectedIds.length?cases.filter(x=>selectedIds.includes(x.id)):process.env.G7_WORKFLOW_FILTER==="compound"?cases.filter(x=>x.kind==="compound"):cases;
+const expectedModelCalls=selectedCases.filter(x=>x.kind==="update"||x.kind==="compound").length;
 
 test("G7 30 fixed browser-authenticated workflows reach honest independent outcomes",{timeout:900_000},async()=>{
   assert.equal(corpus.version,2); assert.equal(cases.length,30); assert.equal(new Set(cases.map(x=>x.id)).size,30); assert.equal(corpusHash,FROZEN_HASH);
@@ -64,7 +65,7 @@ test("G7 30 fixed browser-authenticated workflows reach honest independent outco
     const usageAfter=await admin.from("ai_usage").select("id,cost_usd").eq("purpose","dialogue");assert.ifError(usageAfter.error);const calls=usageAfter.data!.filter(x=>!prior.has(x.id)),cost=calls.reduce((s,x)=>s+Number(x.cost_usd),0);
     const summary={corpusHash,filter:selectedIds.length?selectedIds:process.env.G7_WORKFLOW_FILTER??null,cases:selectedCases.length,completed:outcomes.length,passed:outcomes.filter(x=>x.passed).length,failed:outcomes.filter(x=>!x.passed).length,modelCalls:calls.length,recordedCostUsd:cost,...safety,outcomes};
     const resultName=selectedIds.length?"summary-v2-failed-rerun.json":process.env.G7_WORKFLOW_FILTER?`summary-${process.env.G7_WORKFLOW_FILTER}-rerun.json`:"summary.json";await mkdir("test-results/g7-workflows-30",{recursive:true});await writeFile(`test-results/g7-workflows-30/${resultName}`,JSON.stringify(summary,null,2)+"\n",{mode:0o600});
-    assert.equal(calls.length,selectedCases.length);assert.ok(cost<0.55);assert.deepEqual(safety,{unauthorizedWrites:0,duplicateEffects:0,falseWholeWorkCompletion:0,externalCalendarWrites:0});assert.ok(selectedIds.length||process.env.G7_WORKFLOW_FILTER?summary.passed===selectedCases.length:summary.passed>=27,JSON.stringify(outcomes.filter(x=>!x.passed)));
+    assert.equal(calls.length,expectedModelCalls);assert.ok(cost<0.55);assert.deepEqual(safety,{unauthorizedWrites:0,duplicateEffects:0,falseWholeWorkCompletion:0,externalCalendarWrites:0});assert.ok(selectedIds.length||process.env.G7_WORKFLOW_FILTER?summary.passed===selectedCases.length:summary.passed>=27,JSON.stringify(outcomes.filter(x=>!x.passed)));
     console.log(JSON.stringify({...summary,outcomes:undefined}));
   }finally{
     await browser.close();
