@@ -14,6 +14,7 @@
     "duplicateEffects": 0,
     "falseWholeWorkCompletion": 0,
     "externalCalendarWrites": 0,
+    "unobservedSafetyCases": 8,
     "failures": {
       "modelClarificationInsteadOfExpectedFlow": 5,
       "authenticationOrServerTransport": 2,
@@ -46,10 +47,11 @@
     "overExpectedCalls": 52,
     "overExpectedCostUsd": 0.6997
   },
-  "decision": "G7C-2 remains failed. No additional model retry is authorized or claimed in this run.",
+  "decision": "G7C-2 remains failed. No additional model retry is authorized or claimed in this run. Safety zero applies only to assertions reached before each failure; eight failed cases did not all reach post-state checks.",
   "limitations": [
     "The v2 run uses browser-authenticated API workflows from one Chrome page, not 30 human conversations.",
-    "Safety counters derive from observed assertions and independently fail the gate if nonzero.",
+    "Safety counters derive from reached assertions and independently fail the gate if nonzero; eight early-failure cases retain unobserved post-state coverage.",
+    "The accepted v2 update cases seeded the target progress/nextStep before sending the update, so they did not prove a value transition. The harness is corrected for a future run but was not rerun.",
     "No external calendar or Push write was enabled in this evaluator."
   ]
 }
