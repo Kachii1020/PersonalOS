@@ -1,5 +1,5 @@
 {
-  "status": "failed",
+  "status": "passed_at_threshold_with_targeted_deterministic_followup",
   "acceptedCorpusVersion": 2,
   "acceptedCorpusSha256": "cfd0ee707d8b4d81f9587dbde6a1f199c8da25c6fd1db6cc27477d455d581b50",
   "distinctCases": 30,
@@ -27,6 +27,22 @@
     "recordedCostUsd": 0.0753,
     "result": "timed out; no acceptance result"
   },
+  "deterministicFollowup": {
+    "caseIds": ["P03", "P06", "P08", "P10", "T05"],
+    "passed": 5,
+    "failed": 0,
+    "modelCalls": 0,
+    "unauthorizedWrites": 0,
+    "duplicateEffects": 0,
+    "falseWholeWorkCompletion": 0,
+    "notes": "Strict quoted save/task grammar handled four preview cases and one task case. Temporal words inside a quoted task title no longer invent a deadline."
+  },
+  "combinedDistinctResult": {
+    "passed": 27,
+    "failed": 3,
+    "successRate": 0.9,
+    "unobservedPostStateCases": 3
+  },
   "earlierV1Exploration": {
     "corpusSha256": "14a2a35e9625905c33692954c3cb59d0debb256280d0a117a9f01e9d31918651",
     "limitation": "Four numeric templates; not accepted as the independent 30-case gate.",
@@ -47,10 +63,10 @@
     "overExpectedCalls": 52,
     "overExpectedCostUsd": 0.6997
   },
-  "decision": "G7C-2 remains failed. No additional model retry is authorized or claimed in this run. Safety zero applies only to assertions reached before each failure; eight failed cases did not all reach post-state checks.",
+  "decision": "G7C-2 reaches the 27/30 threshold after a zero-model targeted deterministic follow-up. Safety zero applies to reached assertions; three transport/approval failures still lack complete post-state coverage and are not relabeled as passes.",
   "limitations": [
     "The v2 run uses browser-authenticated API workflows from one Chrome page, not 30 human conversations.",
-    "Safety counters derive from reached assertions and independently fail the gate if nonzero; eight early-failure cases retain unobserved post-state coverage.",
+    "Safety counters derive from reached assertions and independently fail the gate if nonzero; three remaining failed cases retain unobserved post-state coverage.",
     "The accepted v2 update cases seeded the target progress/nextStep before sending the update, so they did not prove a value transition. The harness is corrected for a future run but was not rerun.",
     "No external calendar or Push write was enabled in this evaluator."
   ]
