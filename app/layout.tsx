@@ -45,7 +45,7 @@ const bootScript = `
  */
 const swScript = `
 (function () {
-  var expectedVersion = "personal-os-sw-2026-09-09-delivery-v1";
+  var expectedVersion = "personal-os-sw-2026-09-09-delivery-v2";
   var registration = null;
   var checkSerial = 0;
   function publish(status, version, callbacks) {

@@ -8,10 +8,11 @@ const layoutCode = readFileSync(new URL("../app/layout.tsx", import.meta.url), "
 const bootstrap = /const swScript = `([\s\S]*?)`;/m.exec(layoutCode)![1];
 const version = /const WORKER_VERSION = "([^"]+)"/.exec(workerCode)![1];
 const deliveryId = "217d81fd-c2d7-44d4-a1bd-b565b3b7db27";
+const observationToken = "b".repeat(64);
 
 function worker() {
   const listeners = new Map<string, (event: unknown) => void>();
-  const observations: { path: string; body: string }[] = [];
+  const observations: { path: string; body: string; credentials?: string }[] = [];
   const warnings: string[] = [];
   const notifications: unknown[] = [];
   const navigation: string[] = [];
@@ -20,7 +21,7 @@ function worker() {
       skipWaiting: () => Promise.resolve(), registration: { showNotification: (...args: unknown[]) => { notifications.push(args); return Promise.resolve(); } },
       clients: { claim: () => Promise.resolve(), matchAll: () => Promise.resolve([]), openWindow: (target: string) => { navigation.push(target); return Promise.resolve(); } } },
     caches: { keys: () => Promise.resolve([]), delete: () => Promise.resolve(true) },
-    fetch: async (path: string, request: { body: string }) => { observations.push({ path, body: request.body }); return { ok: false, status: 401 }; },
+    fetch: async (path: string, request: { body: string; credentials?: string }) => { observations.push({ path, body: request.body, credentials: request.credentials }); return { ok: false, status: 401 }; },
   });
   return { listeners, observations, notifications, navigation, warnings };
 }
@@ -34,14 +35,15 @@ test("worker version handshake advertises capability without fabricating deliver
 
 test("only actual push and notification click events attempt their respective callbacks", async () => {
   const f = worker(); let pending: Promise<unknown> = Promise.resolve();
-  f.listeners.get("push")!({ data: { json: () => ({ title: "JARVIS", deliveryId, url: "/jarvis?work=opaque" }) }, waitUntil: (promise: Promise<unknown>) => { pending = promise; } });
+  f.listeners.get("push")!({ data: { json: () => ({ title: "JARVIS", deliveryId, observationToken, url: "/jarvis?work=opaque" }) }, waitUntil: (promise: Promise<unknown>) => { pending = promise; } });
   await pending;
   assert.equal(f.notifications.length, 1); assert.equal(f.observations.length, 1);
   assert.equal(f.observations[0].path, `/api/jarvis/work-deliveries/${deliveryId}`);
-  assert.deepEqual(JSON.parse(f.observations[0].body), { event: "received" });
-  f.listeners.get("notificationclick")!({ notification: { close() {}, data: { deliveryId, url: "/jarvis?work=opaque" } }, waitUntil: (promise: Promise<unknown>) => { pending = promise; } });
+  assert.deepEqual(JSON.parse(f.observations[0].body), { event: "received", token: observationToken });
+  assert.equal(f.observations[0].credentials, "omit");
+  f.listeners.get("notificationclick")!({ notification: { close() {}, data: { deliveryId, observationToken, url: "/jarvis?work=opaque" } }, waitUntil: (promise: Promise<unknown>) => { pending = promise; } });
   await pending;
-  assert.deepEqual(JSON.parse(f.observations[1].body), { event: "opened" });
+  assert.deepEqual(JSON.parse(f.observations[1].body), { event: "opened", token: observationToken });
   assert.deepEqual(f.navigation, ["/jarvis?work=opaque"]);
   assert.equal(f.warnings.length, 2, "401 callbacks remain visibly unrecorded, never retried as fabricated success");
 });
@@ -50,6 +52,8 @@ test("legacy pushes without a delivery ID do not invent tracking IDs", async () 
   const f = worker(); let pending: Promise<unknown> = Promise.resolve();
   f.listeners.get("push")!({ data: { json: () => ({ title: "Legacy push" }) }, waitUntil: (promise: Promise<unknown>) => { pending = promise; } });
   await pending; assert.equal(f.observations.length, 0); assert.equal(f.notifications.length, 1);
+  f.listeners.get("push")!({ data: { json: () => ({ title: "Old Phase7 push", deliveryId }) }, waitUntil: (promise: Promise<unknown>) => { pending = promise; } });
+  await pending; assert.equal(f.observations.length, 0, "Old deliveries without a token cannot be reconstructed");
 });
 
 function page(replyVersion: string | null) {

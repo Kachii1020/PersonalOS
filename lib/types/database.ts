@@ -1269,6 +1269,8 @@ export type Database = {
           error: string | null
           finished_at: string | null
           id: string
+          observation_expires_at: string | null
+          observation_token_hash: string | null
           opened_at: string | null
           owner_id: string
           provider_state: string
@@ -1285,6 +1287,8 @@ export type Database = {
           error?: string | null
           finished_at?: string | null
           id?: string
+          observation_expires_at?: string | null
+          observation_token_hash?: string | null
           opened_at?: string | null
           owner_id: string
           provider_state: string
@@ -1301,6 +1305,8 @@ export type Database = {
           error?: string | null
           finished_at?: string | null
           id?: string
+          observation_expires_at?: string | null
+          observation_token_hash?: string | null
           opened_at?: string | null
           owner_id?: string
           provider_state?: string
@@ -2651,6 +2657,10 @@ export type Database = {
           p_request_id: string
         }
         Returns: string
+      }
+      observe_work_delivery: {
+        Args: { p_delivery_id: string; p_event: string; p_token: string }
+        Returns: boolean
       }
       prepare_jarvis_approval: {
         Args: { p_proposal: Json; p_run_id: string; p_worker_id: string }

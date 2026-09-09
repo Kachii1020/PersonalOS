@@ -6,7 +6,7 @@ import type { ClaimedWorkAttention } from "./work-attention";
 import type { Database } from "@/lib/types/database";
 
 type PushTarget = { endpoint: string; p256dh: string; auth: string };
-type Sender = (target: PushTarget, payload: { title: string; body: string; url: string; deliveryId: string; attentionId: string }) => Promise<number>;
+type Sender = (target: PushTarget, payload: { title: string; body: string; url: string; deliveryId: string; attentionId: string; observationToken: string }) => Promise<number>;
 type MeasuredAttention = ClaimedWorkAttention & { isMeasurement?: boolean };
 type CanaryRpcName = "seed_work_attention_canary" | "claim_measured_work_attention";
 async function canaryRpc<N extends CanaryRpcName>(name: N, args?: Database["public"]["Functions"][N]["Args"]): Promise<unknown> {
@@ -65,7 +65,7 @@ export async function processWorkAttention(workerId: string, sender?: Sender, sc
       let status: "accepted" | "failed" | "gone" | "uncertain" = "uncertain"; let error: string | undefined;
       try {
         const code = await (sender ?? defaultSender)(target, { title: "JARVIS 업무 알림", body: "이어갈 업무가 있습니다. 앱에서 확인해 주세요.",
-          url: `/jarvis?work=${attention.contextId}`, deliveryId: attempt.deliveryId, attentionId: attention.id });
+          url: `/jarvis?work=${attention.contextId}`, deliveryId: attempt.deliveryId, attentionId: attention.id, observationToken: attempt.observationToken });
         status = code === 404 || code === 410 ? "gone" : code >= 200 && code < 300 ? "accepted" : "failed";
         if (status !== "accepted") error = `Push HTTP ${code}`;
       } catch (e) {
