@@ -1,5 +1,5 @@
 {
-  "status": "passed_at_threshold_with_targeted_deterministic_followup",
+  "status": "phase7_functional_system_gate_passed",
   "acceptedCorpusVersion": 2,
   "acceptedCorpusSha256": "cfd0ee707d8b4d81f9587dbde6a1f199c8da25c6fd1db6cc27477d455d581b50",
   "distinctCases": 30,
@@ -37,11 +37,37 @@
     "falseWholeWorkCompletion": 0,
     "notes": "Strict quoted save/task grammar handled four preview cases and one task case. Temporal words inside a quoted task title no longer invent a deadline."
   },
+  "strictDeterministicSystemRun": {
+    "fullRun": {
+      "completed": 30,
+      "passed": 29,
+      "failed": 1,
+      "failure": "C04 local database statement timeout",
+      "modelCalls": 0,
+      "recordedCostUsd": 0,
+      "unauthorizedWrites": 0,
+      "duplicateEffects": 0,
+      "falseWholeWorkCompletion": 0,
+      "externalCalendarWrites": 0
+    },
+    "boundedRerun": {
+      "caseIds": ["C04"],
+      "passed": 1,
+      "failed": 0,
+      "modelCalls": 0,
+      "recordedCostUsd": 0,
+      "unauthorizedWrites": 0,
+      "duplicateEffects": 0,
+      "falseWholeWorkCompletion": 0,
+      "externalCalendarWrites": 0
+    },
+    "notes": "The harness uses one browser session and refreshes authentication only after a 401. Update fixtures begin with different progress and next-step values. The quoted grammar rejects unsupported extra text and still uses the existing owner, revision, approval and receipt paths."
+  },
   "combinedDistinctResult": {
-    "passed": 27,
-    "failed": 3,
-    "successRate": 0.9,
-    "unobservedPostStateCases": 3
+    "passed": 30,
+    "failed": 0,
+    "successRate": 1,
+    "unobservedPostStateCases": 0
   },
   "earlierV1Exploration": {
     "corpusSha256": "14a2a35e9625905c33692954c3cb59d0debb256280d0a117a9f01e9d31918651",
@@ -63,11 +89,10 @@
     "overExpectedCalls": 52,
     "overExpectedCostUsd": 0.6997
   },
-  "decision": "G7C-2 reaches the 27/30 threshold after a zero-model targeted deterministic follow-up. Safety zero applies to reached assertions; three transport/approval failures still lack complete post-state coverage and are not relabeled as passes.",
+  "decision": "G7C-2 functional system gate passes across all 30 fixed cases after one bounded rerun of C04 following a local database statement timeout. The seven-day timing gate remains separate and automatic conditions remain off.",
   "limitations": [
-    "The v2 run uses browser-authenticated API workflows from one Chrome page, not 30 human conversations.",
-    "Safety counters derive from reached assertions and independently fail the gate if nonzero; three remaining failed cases retain unobserved post-state coverage.",
-    "The accepted v2 update cases seeded the target progress/nextStep before sending the update, so they did not prove a value transition. The harness is corrected for a future run but was not rerun.",
+    "The v2 system run uses browser-authenticated API workflows from one Chrome page, not 30 human conversations or 30 model calls.",
+    "The 30 distinct outcomes combine a 29/30 full run with an unchanged 1/1 rerun after a local database statement timeout; it is not represented as one uninterrupted 30/30 run.",
     "No external calendar or Push write was enabled in this evaluator."
   ]
 }

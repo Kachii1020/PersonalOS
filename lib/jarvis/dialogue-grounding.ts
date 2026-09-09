@@ -169,7 +169,8 @@ export function groundDialogueIntent(intent: DialogueIntent, messages: ChatMessa
     }
   }
   if (unsupportedTimezone(latest) && (isWrite || intent.kind === "read_calendar")) return clarify("현재 일정 요청은 일본 시간(Asia/Tokyo)만 지원합니다. 일본 날짜와 시각으로 입력해 주세요.");
-  const temporalText=intent.kind==="read_tasks"||intent.kind==="read_career"?latest.replace(/제목(?:에|이)?\s*["“'][^"”'\r\n]*["”']/g," "):intent.title?latest.replace(intent.title.text," "):latest;
+  const quotedTitle=intent.title?[`"${intent.title.text}"`,`“${intent.title.text}”`,`'${intent.title.text}'`,`‘${intent.title.text}’`].find(value=>latest.includes(value)):null;
+  const temporalText=intent.kind==="read_tasks"||intent.kind==="read_career"?latest.replace(/제목(?:에|이)?\s*["“'][^"”'\r\n]*["”']/g," "):quotedTitle?latest.replace(quotedTitle," "):latest;
   const latestTokens = temporalTokens(temporalText);
   if (isWrite && (latestTokens.time.length > 1 || latestTokens.duration.length > 1)) return clarify("시각 또는 소요 시간이 여러 개 있습니다. 원하는 시각과 소요 시간을 하나씩 입력해 주세요.");
   for (const field of ["date", "time", "duration"] as const) {

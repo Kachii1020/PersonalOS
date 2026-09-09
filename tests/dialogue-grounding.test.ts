@@ -149,6 +149,7 @@ test("task deadlines are never guessed when a date or time is missing", () => {
 
 test("temporal words inside an explicitly quoted title do not invent a deadline",()=>{
   for(const title of ["이번 주 우선순위 확정","다음 주 계획 검토","14:30 회의록 정리"]){const result=groundDialogueIntent(intent({kind:"create_task",title:quote(title)}),user(`\"${title}\" 할 일을 추가해.`),now,[]);assert.equal(result.needsClarification,false,title);assert.equal(result.title,title);assert.equal(result.startsAt,null);}
+  assert.equal(groundDialogueIntent(intent({kind:"create_task",title:quote("내일 10:00에 보고서")}),user("내일 10:00에 보고서 할 일을 추가해."),now,[]).needsClarification,true,"an unquoted model title cannot absorb an explicit deadline");
 });
 
 test("task title bound matches the task executor's 200-character limit", () => {
