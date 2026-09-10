@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/design/cn";
 import { QuizCard } from "@/components/widgets/quiz-card";
 import { DomainLessonCard } from "@/components/widgets/domain-lesson-card";
+import { DOMAIN_SHORT } from "@/lib/ai/prompts/quiz";
 
 type QuizQuestion = {
   id: string;
@@ -80,7 +81,7 @@ export function QuizFlow({ questions, lessons, reviewCount }: Props) {
               }}
               disabled={i > step && !(i === 2 && allAnswered)}
               className={cn(
-                "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all",
+                "flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all",
                 active && "bg-accent text-bg",
                 done && "bg-accent/10 text-accent",
                 !active && !done && "text-text-muted",
@@ -108,8 +109,7 @@ export function QuizFlow({ questions, lessons, reviewCount }: Props) {
             </>
           ) : (
             <Card className="py-8 text-center">
-              <p className="text-sm text-text-muted">도메인 레슨이 아직 생성되지 않았습니다.</p>
-              <p className="mt-1 text-xs text-text-muted">설정에서 레슨을 생성하면 여기에 표시됩니다.</p>
+              <p className="text-sm text-text-muted">오늘 세트에 해당하는 레슨이 없습니다. 퀴즈로 넘어가세요.</p>
             </Card>
           )}
 
@@ -125,7 +125,7 @@ export function QuizFlow({ questions, lessons, reviewCount }: Props) {
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="flex items-center gap-1 text-xs text-text-muted transition-colors hover:text-text"
+              className="flex cursor-pointer items-center gap-1 text-xs text-text-muted transition-colors hover:text-text"
             >
               <SkipForward className="size-3.5" />
               건너뛰기
@@ -210,7 +210,7 @@ export function QuizFlow({ questions, lessons, reviewCount }: Props) {
           <button
             type="button"
             onClick={() => { setStep(0); setAnswered(new Map()); }}
-            className="w-full text-center text-xs text-text-muted transition-colors hover:text-text"
+            className="w-full cursor-pointer text-center text-xs text-text-muted transition-colors hover:text-text"
           >
             다시 풀기
           </button>
@@ -219,14 +219,3 @@ export function QuizFlow({ questions, lessons, reviewCount }: Props) {
     </div>
   );
 }
-
-const DOMAIN_SHORT: Record<string, string> = {
-  ib: "IB",
-  accounting: "회계",
-  macro: "거시",
-  ai_ml: "ML",
-  system_design: "설계",
-  japanese: "日本語",
-  devops: "DevOps",
-  ai_engineering: "AI Eng",
-};

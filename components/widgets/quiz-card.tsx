@@ -5,17 +5,7 @@ import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/design/cn";
 import { submitAnswer, type AnswerResult } from "@/app/(dashboard)/quiz/actions";
-
-const DOMAIN_LABEL: Record<string, string> = {
-  ib: "투자은행",
-  accounting: "회계",
-  macro: "거시경제",
-  ai_ml: "머신러닝",
-  system_design: "시스템 설계",
-  japanese: "일본어",
-  devops: "DevOps",
-  ai_engineering: "AI 엔지니어링",
-};
+import { domainTitle } from "@/lib/ai/prompts/quiz";
 
 type Props = {
   index: number;
@@ -51,7 +41,7 @@ export function QuizCard({ index, question, onAnswered }: Props) {
       <CardHeader>
         <CardTitle>
           <span className="num mr-2 text-text-muted">{index + 1}.</span>
-          {DOMAIN_LABEL[question.domain] ?? question.domain}
+          {domainTitle(question.domain)}
         </CardTitle>
         <span className="flex items-center gap-2">
           {question.isReview && <Badge tone="accent">복습</Badge>}

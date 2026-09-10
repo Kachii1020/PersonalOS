@@ -1,14 +1,7 @@
 import { Card, CardHeader, CardHint, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/design/cn";
-
-const DOMAIN_LABEL: Record<string, string> = {
-  ib: "투자은행",
-  accounting: "회계",
-  macro: "거시경제",
-  ai_ml: "머신러닝",
-  system_design: "시스템 설계",
-};
+import { domainTitle } from "@/lib/ai/prompts/quiz";
 
 type Props = {
   entry: {
@@ -34,7 +27,7 @@ export function WrongAnswerCard({ entry }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{DOMAIN_LABEL[entry.domain] ?? entry.domain}</CardTitle>
+        <CardTitle>{domainTitle(entry.domain)}</CardTitle>
         <span className="flex items-center gap-2">
           <Badge>난이도 {entry.difficulty}</Badge>
           <CardHint>{dateStr}</CardHint>
