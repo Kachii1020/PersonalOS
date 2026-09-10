@@ -19,6 +19,7 @@ Status: **local implementation and focused integration verification complete**. 
 | iPhone/Mac | Not run | pending user-assisted run |
 | Hosted migration | Pass | Dry-run listed only 0027; remote migration history then matched local through 0027. CLI catalog caching was interrupted after apply, so equality was verified separately |
 | Vercel preparation | Pass, disabled | OpenAI key and signing secret stored as sensitive in Production/Preview; voice budget set to 5; both voice flags explicitly false |
+| Branch preview | Ready | `dpl_AMZwHAuPU3uNdBqXY6r9L4744YaL`; PTT and automatic flags enabled only for `codex/phase8-voice-jarvis`. Vercel deployment protection prevents an unauthenticated iPhone URL test |
 | Production feature | Off | Code is not merged or promoted and both voice modes remain unavailable |
 
 Operational seven-day attention observation remains separate from this phase and automatic deadline/stale-work attention remains off.
