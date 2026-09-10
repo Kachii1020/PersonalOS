@@ -17,7 +17,9 @@ Status: **local implementation and focused integration verification complete**. 
 | Mobile visual QA | Pass | Authenticated 390×844 screenshot showed no horizontal overflow and kept text input/approval UI available |
 | Phase 7 workflow regression | Pass | Fixed v2 corpus 30/30, zero model calls, unauthorized writes, duplicates, false completion and external calendar writes all zero |
 | iPhone/Mac | Not run | pending user-assisted run |
-| Production | Not changed | flags remain absent/off |
+| Hosted migration | Pass | Dry-run listed only 0027; remote migration history then matched local through 0027. CLI catalog caching was interrupted after apply, so equality was verified separately |
+| Vercel preparation | Pass, disabled | OpenAI key and signing secret stored as sensitive in Production/Preview; voice budget set to 5; both voice flags explicitly false |
+| Production feature | Off | Code is not merged or promoted and both voice modes remain unavailable |
 
 Operational seven-day attention observation remains separate from this phase and automatic deadline/stale-work attention remains off.
 
@@ -26,5 +28,5 @@ Operational seven-day attention observation remains separate from this phase and
 - The first client-secret implementation used the obsolete planned endpoint and received 404. The official current `/v1/realtime/client_secrets` contract then succeeded.
 - The current `gpt-live-transcribe` endpoint returned `invalid_value: Turn detection is not supported for this transcription model`. Automatic mode therefore uses Web Audio RMS and an explicit buffer commit; server VAD is not claimed.
 - Live provider requests were executed, including short transcription sessions and short TTS generations. Provider-dashboard actual cost was not read, so no dollar total is claimed. Local reservation rows created by gates were removed with their test sessions.
-- The OpenAI key currently exists only in the ignored Phase 8 local env. It has not been copied to Vercel. Provider-side $5 spend control has not been confirmed.
+- The OpenAI key is stored in the ignored Phase 8 local env and as a sensitive Vercel Production/Preview variable. The login selected by the user exposed a different OpenAI organization/project from the project that issued this key; that Google account is Free trial with no payment method and offered no matching project spend setting. No new billing method or key was created there. Provider-side $5 spend control for the issuing project remains unconfirmed, so voice stays off.
 - Fixed 40-audio accuracy, 24 complete browser conversations, latency percentiles, ten interruption samples and real iPhone/Mac microphone routing remain not run. These are release gates, not inferred from the focused transport checks.
