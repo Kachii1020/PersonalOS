@@ -1,7 +1,7 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import type { JsonValue } from "./types";
 import type { SpeechPayload, SpeechTicket, VoiceMode, VoiceSessionState, VoiceUiEvent, WorkMutationConfirmation, WorkMutationPayload } from "./voice-types";
-import type { WorkChatReply, WorkSnapshot } from "./work-types";
+import type { WorkChatReply, WorkContext, WorkSnapshot } from "./work-types";
 
 export const VOICE_MODEL = "gpt-live-transcribe" as const;
 export const VOICE_TTS_MODEL = "gpt-4o-mini-tts-2025-12-15" as const;
@@ -24,6 +24,7 @@ export function validateVoiceMode(value:unknown):VoiceMode {
   return value;
 }
 export function voiceTurnDetection(mode:VoiceMode){return mode==="automatic"?{type:"client_vad" as const,rmsThreshold:0.03 as const,silenceDurationMs:700 as const}:null;}
+export function voiceTranscriptionKeywords(context?:Pick<WorkContext,"goal"|"nextStep">|null){const values=["JARVIS","Personal OS","GitHub","Waseda","Zoom","CalDAV","TypeScript","Mac","iPhone",context?.goal,context?.nextStep];return[...new Set(values.flatMap(value=>typeof value==="string"?value.split(/[,.·/]/):[]).map(value=>value.trim()).filter(value=>value.length>1&&value.length<=80&&!/[<>\r\n]/.test(value)))].slice(0,20);}
 
 const transitions:Record<VoiceSessionState,VoiceSessionState[]>={idle:["permission"],permission:["connecting","stopped"],connecting:["listening","stopped"],listening:["transcribing","stopped"],transcribing:["processing","listening","stopped"],processing:["speaking","listening","stopped"],speaking:["listening","stopped"],stopped:["permission"]};
 export function reduceVoiceState(state:VoiceSessionState,event:VoiceUiEvent):VoiceSessionState {

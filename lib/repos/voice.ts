@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { createTranscriptionSecret, generateSpeech } from "@/lib/ai/voice-client";
 import { answerWorkChat } from "./work-chat";
 import { getWorkSnapshot, mutateWorkContext, requireWorkOwner } from "./work-contexts";
-import { buildActionSpeech, buildReplySpeech, sha256, signMutation, signSpeech, validateVoiceMode, verifyMutation, verifySpeech, voiceTurnDetection, VOICE_MAX_SECONDS, VOICE_MAX_TURNS, VOICE_MODEL, voiceBudgetUsd, voiceEnabled } from "@/lib/jarvis/voice";
+import { buildActionSpeech, buildReplySpeech, sha256, signMutation, signSpeech, validateVoiceMode, verifyMutation, verifySpeech, voiceTranscriptionKeywords, voiceTurnDetection, VOICE_MAX_SECONDS, VOICE_MAX_TURNS, VOICE_MODEL, voiceBudgetUsd, voiceEnabled } from "@/lib/jarvis/voice";
 import type { SpeechTicket, StartVoiceSessionInput, StartVoiceSessionReply, VoiceConfirmReply, VoiceTurnInput, VoiceTurnReply, WorkMutationConfirmation } from "@/lib/jarvis/voice-types";
 
 type RpcError={code:string;message:string};type RpcResult={data:unknown;error:RpcError|null};
@@ -19,9 +19,9 @@ function expiry(minutes=2){return new Date(Date.now()+minutes*60_000).toISOStrin
 function speechTicket(sessionId:string,row:VoiceTurnRow,speech:string):SpeechTicket|null{const attempt=row.tts_attempts+1;if(attempt>4)return null;return signSpeech({sessionId,turnId:row.id,attempt:attempt as 1|2|3|4,text:speech,expiresAt:expiry()});}
 
 export async function startVoiceSession(input:StartVoiceSessionInput):Promise<StartVoiceSessionReply>{
-  requireEnabled();const owner=await requireWorkOwner();const mode=validateVoiceMode(input.mode);if(input.contextId){const contextId=id(input.contextId,"업무");if(!await getWorkSnapshot(contextId))throw new VoiceRequestError("선택한 업무를 찾을 수 없습니다.",404);}
+  requireEnabled();const owner=await requireWorkOwner();const mode=validateVoiceMode(input.mode);const selected=input.contextId?await getWorkSnapshot(id(input.contextId,"업무")):null;if(input.contextId&&!selected)throw new VoiceRequestError("선택한 업무를 찾을 수 없습니다.",404);
   const session=await rpc<VoiceSessionRow>("begin_voice_session",{p_owner_id:owner.ownerId,p_mode:mode,p_model:VOICE_MODEL,p_budget:voiceBudgetUsd()});
-  try{const provider=await createTranscriptionSecret(mode,sha256(owner.ownerId));const providerExpiry=provider.expiresAt?.getTime()??Infinity;const expiresAt=new Date(Math.min(Date.parse(session.expires_at),providerExpiry)).toISOString();return{sessionId:session.id,clientSecret:provider.value,expiresAt,maxTurns:VOICE_MAX_TURNS,maxDurationSeconds:VOICE_MAX_SECONDS,transcriptionModel:VOICE_MODEL,turnDetection:voiceTurnDetection(mode)};}
+  try{const provider=await createTranscriptionSecret(mode,sha256(owner.ownerId),voiceTranscriptionKeywords(selected?.context));const providerExpiry=provider.expiresAt?.getTime()??Infinity;const expiresAt=new Date(Math.min(Date.parse(session.expires_at),providerExpiry)).toISOString();return{sessionId:session.id,clientSecret:provider.value,expiresAt,maxTurns:VOICE_MAX_TURNS,maxDurationSeconds:VOICE_MAX_SECONDS,transcriptionModel:VOICE_MODEL,turnDetection:voiceTurnDetection(mode)};}
   catch(error){await rpc("finish_voice_session",{p_owner_id:owner.ownerId,p_session_id:session.id,p_reason:"provider_error"}).catch(()=>undefined);throw error;}
 }
 
