@@ -10,7 +10,7 @@ Status: **implementation, disabled production preparation and provider hard cap 
 | Local migration | Pass | Clean isolated reset applied 0001–0029; final DB gate passed 1/1 |
 | Unit/type/lint/build | Pass | 284 unit tests, typecheck, lint and production build; main's work-tick test was moved off a server-only import before this clean run |
 | DB security/budget | Pass | one active owner session, owner RLS, eight-turn cap, request replay, $5 fail-closed, speech replay and ended-session rejection |
-| Cross-device session replacement | Pass | second session without explicit replacement returned PT409; explicit replacement left the prior row `ended/replaced`, created one active session and retained both budget reservations |
+| Cross-device session replacement | Pass | DB gate: second session without explicit replacement returned PT409; explicit replacement left the prior row `ended/replaced`, created one active session and retained both budget reservations. Browser gate: visible 409 explanation → explicit replacement button → real OpenAI Realtime connection (`listening`), with one active DB session; test rows removed |
 | Voice confirmation/action flow | Pass | Browser-authenticated update stayed revision 1 until signed screen confirmation, then revision 2; approved task executed once on replay; result speech derived from executed state |
 | Live transcription/TTS contract | Pass | Real OpenAI PTT and automatic client-secret creation, deterministic Phase 7 turn, and non-empty `audio/pcm` TTS response |
 | Browser PTT transport | Pass with accuracy limitation | Real WebRTC delivered and correlated a final transcript. One 1.5 s looping fixture was clipped to `자`; it is transport evidence, not an accuracy pass |
