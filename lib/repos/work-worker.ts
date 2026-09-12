@@ -4,7 +4,7 @@ import { claimWorkAttention, beginWorkDelivery, finishWorkDelivery, finishWorkAt
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ClaimedWorkAttention } from "./work-attention";
 import type { Database } from "@/lib/types/database";
-import { retryIdempotentDatabase } from "@/lib/jobs/db-retry";
+import { keepNonCriticalDatabaseFailureVisible, retryIdempotentDatabase } from "@/lib/jobs/db-retry";
 
 type PushTarget = { endpoint: string; p256dh: string; auth: string };
 type Sender = (target: PushTarget, payload: { title: string; body: string; url: string; deliveryId: string; attentionId: string; observationToken: string }) => Promise<number>;
@@ -14,12 +14,10 @@ function retryWorkDatabase<T>(stage: string, operation: () => Promise<T>) {
   return retryIdempotentDatabase(operation, { onRetry: (attempt) => console.warn(`[work-tick] ${stage} transient retry ${attempt}/3`) });
 }
 export async function runNonBlockingWorkMaintenance<T>(stage: string, fallback: T, operation: () => Promise<T>) {
-  try {
-    return { value: await retryWorkDatabase(stage, operation), failure: null };
-  } catch (error) {
+  const result = await keepNonCriticalDatabaseFailureVisible(() => retryWorkDatabase(stage, operation), fallback, (error) => {
     console.error(`[work-tick] ${stage} 유지보수 실패:`, error instanceof Error ? error.message : "Unknown maintenance failure");
-    return { value: fallback, failure: stage };
-  }
+  });
+  return { value: result.value, failure: result.failed ? stage : null };
 }
 async function canaryRpc<N extends CanaryRpcName>(name: N, args?: Database["public"]["Functions"][N]["Args"]): Promise<unknown> {
   const result = await createAdminClient().rpc(name, args);

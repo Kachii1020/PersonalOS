@@ -2476,6 +2476,7 @@ export type Database = {
           p_mode: string
           p_model: string
           p_owner_id: string
+          p_replace?: boolean
         }
         Returns: {
           end_reason: string | null

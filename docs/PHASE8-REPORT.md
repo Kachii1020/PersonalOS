@@ -7,9 +7,10 @@ Status: **implementation, disabled production preparation and provider hard cap 
 | Check | Result | Evidence / limit |
 |---|---|---|
 | Specification | Ready | `docs/PHASE8-SPEC.md` |
-| Local migration | Pass | Clean isolated reset applied 0001–0027; final DB gate passed 1/1 |
-| Unit/type/lint/build | Pass | 277 unit tests, typecheck, lint and production build; initial sandbox font DNS failure was retried with network and passed |
+| Local migration | Pass | Clean isolated reset applied 0001–0029; final DB gate passed 1/1 |
+| Unit/type/lint/build | Pass | 284 unit tests, typecheck, lint and production build; main's work-tick test was moved off a server-only import before this clean run |
 | DB security/budget | Pass | one active owner session, owner RLS, eight-turn cap, request replay, $5 fail-closed, speech replay and ended-session rejection |
+| Cross-device session replacement | Pass | second session without explicit replacement returned PT409; explicit replacement left the prior row `ended/replaced`, created one active session and retained both budget reservations |
 | Voice confirmation/action flow | Pass | Browser-authenticated update stayed revision 1 until signed screen confirmation, then revision 2; approved task executed once on replay; result speech derived from executed state |
 | Live transcription/TTS contract | Pass | Real OpenAI PTT and automatic client-secret creation, deterministic Phase 7 turn, and non-empty `audio/pcm` TTS response |
 | Browser PTT transport | Pass with accuracy limitation | Real WebRTC delivered and correlated a final transcript. One 1.5 s looping fixture was clipped to `자`; it is transport evidence, not an accuracy pass |
@@ -19,8 +20,9 @@ Status: **implementation, disabled production preparation and provider hard cap 
 | Frozen-text synthetic voice 01 | Fail | Frozen text corpus `c4e4d243…`; 28/40 critical-token passes, 12 failures, 40 TTS + 40 Realtime sessions, 270.55 generated audio seconds |
 | Frozen-text synthetic voice 02 | Fail | Same text corpus after startup padding and bounded product keyword hints; 29/40, 11 failures, 40 TTS + 40 Realtime sessions, 351.10 generated audio seconds |
 | High-accuracy file comparison | Fail | Same 40 texts regenerated to audio and transcribed with `gpt-transcribe`: 31/40, 9 failures, 40 TTS + 40 file transcription calls, 349.50 generated audio seconds. It did not justify adding a second transcription path |
+| Balanced-delay Realtime probe | Fail, stopped early | Same frozen text and scoring with official descriptive prompt and `medium` delay. K03, K04 and M05 failed, so the run stopped at the third failure: 22/25 passed, 25 TTS + 25 Realtime sessions. The remaining 15 cases were not called because 38/40 was already impossible |
 | iPhone/Mac | Not run | pending user-assisted run |
-| Hosted migration | Pass | Dry-run listed only 0027; remote migration history then matched local through 0027. CLI catalog caching was interrupted after apply, so equality was verified separately |
+| Hosted migration | Pass | Clean local reset applied through 0029; remote migration history was re-read after applying 0029 and matched local through 0029 |
 | Vercel preparation | Pass, disabled | OpenAI key and signing secret stored as sensitive in Production/Preview; app voice budget set to 5; Production voice flags explicitly false |
 | Branch preview | Ready | `dpl_AMZwHAuPU3uNdBqXY6r9L4744YaL`; PTT and automatic flags enabled only for `codex/phase8-voice-jarvis`. Vercel deployment protection prevents an unauthenticated iPhone URL test |
 | Production feature | Off | Code is not merged or promoted and both voice modes remain unavailable |
@@ -34,5 +36,6 @@ Operational seven-day attention observation remains separate from this phase and
 - Live provider requests were executed, including two fixed 40-case TTS→Realtime runs. The visible project spend moved from `$1.01` before the runs to `$1.29` after them; this `$0.28` difference is observational and may include reporting delay, so it is not assigned as exact per-call billing. Local reservation rows created by app gates were removed with their test sessions.
 - The OpenAI key is stored in the ignored Phase 8 local env and as a sensitive Vercel Production/Preview variable. After switching to the original Platform login, the visible `Default project` ID matched the key target (`proj_rgSnMAWCWenjcNLHAiohswWq`). The user saved a project spend limit and the page was re-read after all three evaluations showing `$1.30 / $5.00`, hard-limit behavior and a 100% ($5) alert. The page warns enforcement is not instantaneous, so a small overrun remains possible.
 - The second Realtime failures were K03/K04/K09/K16, M03/M05/M07/M10 and N03/N07/N10. They include Korean initial-word substitutions, mixed proper nouns and numeric homophones. The file-model failures were K03/K07/K14/K17/M01/M03/M06/M07/M08. No case is relabeled through post-hoc corpus changes.
+- The `medium` delay plus descriptive multilingual work-context prompt improved the partial run to 22/25, but K03/K04/M05 made the 38/40 threshold impossible. The process was stopped immediately; no completed 40-case score or generated-audio duration is claimed. Official documentation says higher delay can improve word error rate but must be benchmarked with representative microphones, so this remains a tuning signal rather than acceptance evidence.
 - These evaluations froze text and scoring before execution, but regenerated TTS audio on every run. They are reproducible synthetic baselines, **not** the spec's fixed recorded-audio holdout or evidence of human microphone accuracy. The required 38/40 fixed-audio gate remains unmet.
 - 24 complete browser conversations, latency percentiles, ten interruption samples and real iPhone/Mac microphone routing remain not run. These are release gates, not inferred from the focused transport checks.

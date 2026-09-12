@@ -3,7 +3,7 @@ import type { WorkChatReply, WorkInput, WorkSnapshot, WorkStatus } from "./work-
 
 export type VoiceMode = "push_to_talk" | "automatic";
 export type VoiceSessionState = "idle" | "permission" | "connecting" | "listening" | "transcribing" | "processing" | "speaking" | "stopped";
-export type StartVoiceSessionInput = { mode: VoiceMode; contextId?: string | null };
+export type StartVoiceSessionInput = { mode: VoiceMode; contextId?: string | null; replaceExisting?: boolean };
 export type StartVoiceSessionReply = {
   sessionId: string; clientSecret: string; expiresAt: string; maxTurns: 8; maxDurationSeconds: 300;
   transcriptionModel: "gpt-live-transcribe";

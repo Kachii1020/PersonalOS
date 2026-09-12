@@ -24,3 +24,16 @@ export async function retryIdempotentDatabase<T>(
   }
   throw lastError;
 }
+
+export async function keepNonCriticalDatabaseFailureVisible<T>(
+  operation: () => Promise<T>,
+  fallback: T,
+  onFailure: (error: unknown) => void,
+): Promise<{ value: T; failed: boolean }> {
+  try {
+    return { value: await operation(), failed: false };
+  } catch (error) {
+    onFailure(error);
+    return { value: fallback, failed: true };
+  }
+}
