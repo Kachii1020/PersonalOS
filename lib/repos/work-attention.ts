@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { requireWorkOwner, WorkRequestError } from "./work-contexts";
 import type { AttentionItem } from "@/lib/jarvis/work-types";
 import type { WorkDeliveryObservation } from "@/lib/jarvis/work-delivery-observation";
+import { retryIdempotentDatabase } from "@/lib/jobs/db-retry";
 
 type AttentionRpc = "list_work_attention" | "mutate_work_attention" | "ack_work_delivery" | "claim_work_attention" | "begin_work_delivery" | "finish_work_delivery" | "finish_work_attention" | "prune_work_contexts" | "get_claimed_work_subscriptions";
 async function rpc<N extends AttentionRpc>(client: SupabaseClient<Database>, name: N, args?: Database["public"]["Functions"][N]["Args"]): Promise<unknown> {
@@ -38,10 +39,10 @@ export async function beginWorkDelivery(attentionId: string, workerId: string, s
   return await rpc(createAdminClient(), "begin_work_delivery", { p_attention_id: attentionId, p_worker_id: workerId, p_subscription_id: subscriptionId }) as WorkDeliveryAttempt | null;
 }
 export async function finishWorkDelivery(input: { deliveryId: string; workerId: string; attemptToken: string; status: "accepted" | "failed" | "gone" | "uncertain"; error?: string }): Promise<void> {
-  await rpc(createAdminClient(), "finish_work_delivery", { p_delivery_id: input.deliveryId, p_worker_id: input.workerId, p_attempt_token: input.attemptToken, p_status: input.status, p_error: input.error });
+  await retryIdempotentDatabase(() => rpc(createAdminClient(), "finish_work_delivery", { p_delivery_id: input.deliveryId, p_worker_id: input.workerId, p_attempt_token: input.attemptToken, p_status: input.status, p_error: input.error }));
 }
 export async function finishWorkAttention(attentionId: string, workerId: string, status: "ready" | "failed", error?: string): Promise<void> {
-  await rpc(createAdminClient(), "finish_work_attention", { p_attention_id: attentionId, p_worker_id: workerId, p_status: status, p_error: error });
+  await retryIdempotentDatabase(() => rpc(createAdminClient(), "finish_work_attention", { p_attention_id: attentionId, p_worker_id: workerId, p_status: status, p_error: error }));
 }
 export async function pruneWorkContextsForJob(): Promise<number> {
   return await rpc(createAdminClient(), "prune_work_contexts") as number;
@@ -53,6 +54,6 @@ export async function pruneWorkContextsForJob(): Promise<number> {
 export async function getClaimedWorkSubscriptions(attentionId: string): Promise<{ id: string; endpoint: string; p256dh: string; auth: string }[]> {
   // The service RPC keeps claim/owner checks at the same DB
   // boundary as the secret subscription projection; no client gets these keys.
-  const result = await rpc(createAdminClient(), "get_claimed_work_subscriptions", { p_attention_id: attentionId });
+  const result = await retryIdempotentDatabase(() => rpc(createAdminClient(), "get_claimed_work_subscriptions", { p_attention_id: attentionId }));
   return (result ?? []) as { id: string; endpoint: string; p256dh: string; auth: string }[];
 }

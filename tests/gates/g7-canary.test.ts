@@ -49,9 +49,10 @@ test("worker returns silent results before subscription lookup or provider setup
 });
 
 test("manual ticks cannot count as scheduler-proven canary claims", () => {
-  assert.match(worker, /schedulerSlot\s*\? await canaryRpc\("claim_measured_work_attention"/);
+  assert.match(worker, /schedulerSlot\s*\? await retryWorkDatabase\("claim", \(\) => canaryRpc\("claim_measured_work_attention"/);
   assert.match(worker, /: await claimWorkAttention\(workerId, allowAutomatic\)/);
-  assert.match(route, /processWorkAttention\(`work-tick-.*undefined, slot \?\? undefined\)/);
+  assert.match(route, /slot \? `work-tick-\$\{slot\}` : `work-tick-\$\{crypto\.randomUUID\(\)\}`/);
+  assert.match(route, /processWorkAttention\(workerId, undefined, slot \?\? undefined\)/);
   assert.match(migration, /not is_measurement or \(canary_slot is not null/);
   assert.match(migration, /p_slot is null or p_slot>clock_timestamp\(\)/);
   assert.match(migration, /worker_started_at is not null and worker_finished_at is null/);

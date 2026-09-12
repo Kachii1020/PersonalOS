@@ -4,11 +4,23 @@ import { claimWorkAttention, beginWorkDelivery, finishWorkDelivery, finishWorkAt
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { ClaimedWorkAttention } from "./work-attention";
 import type { Database } from "@/lib/types/database";
+import { retryIdempotentDatabase } from "@/lib/jobs/db-retry";
 
 type PushTarget = { endpoint: string; p256dh: string; auth: string };
 type Sender = (target: PushTarget, payload: { title: string; body: string; url: string; deliveryId: string; attentionId: string; observationToken: string }) => Promise<number>;
 type MeasuredAttention = ClaimedWorkAttention & { isMeasurement?: boolean };
 type CanaryRpcName = "seed_work_attention_canary" | "claim_measured_work_attention";
+function retryWorkDatabase<T>(stage: string, operation: () => Promise<T>) {
+  return retryIdempotentDatabase(operation, { onRetry: (attempt) => console.warn(`[work-tick] ${stage} transient retry ${attempt}/3`) });
+}
+export async function runNonBlockingWorkMaintenance<T>(stage: string, fallback: T, operation: () => Promise<T>) {
+  try {
+    return { value: await retryWorkDatabase(stage, operation), failure: null };
+  } catch (error) {
+    console.error(`[work-tick] ${stage} 유지보수 실패:`, error instanceof Error ? error.message : "Unknown maintenance failure");
+    return { value: fallback, failure: stage };
+  }
+}
 async function canaryRpc<N extends CanaryRpcName>(name: N, args?: Database["public"]["Functions"][N]["Args"]): Promise<unknown> {
   const result = await createAdminClient().rpc(name, args);
   if (result.error) throw new Error(`Silent attention measurement failed: ${result.error.message}`);
@@ -24,8 +36,10 @@ export async function completeSilentWorkMeasurement(attention: MeasuredAttention
     accepted: 0, failed: 0, uncertain: 0, pushSkipped: true };
 }
 export async function acknowledgeWorkTick(slot: string, finished: boolean) {
-  const result = await createAdminClient().rpc("ack_work_tick", { p_slot: slot, p_finished: finished });
-  if (result.error) throw new Error(`Worker acknowledgment failed: ${result.error.message}`);
+  await retryWorkDatabase(finished ? "acknowledge-finish" : "acknowledge-start", async () => {
+    const result = await createAdminClient().rpc("ack_work_tick", { p_slot: slot, p_finished: finished });
+    if (result.error) throw new Error(`Worker acknowledgment failed: ${result.error.message}`);
+  });
 }
 const defaultSender: Sender = async (target, payload) => {
   webpush.setVapidDetails(`mailto:${process.env.ALLOWED_EMAIL ?? "personal-os@localhost"}`, process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!, process.env.VAPID_PRIVATE_KEY!);
@@ -34,29 +48,49 @@ const defaultSender: Sender = async (target, payload) => {
 };
 /** One attention per request; durable attempts are reserved immediately before send. */
 export async function processWorkAttention(workerId: string, sender?: Sender, schedulerSlot?: string) {
-  const pruned = await pruneWorkContextsForJob();
-  const chatPrune = await createAdminClient().rpc("prune_work_chat");
-  if (chatPrune.error) throw new Error("만료된 업무 응답 정리에 실패했습니다.");
+  const runMaintenance = !schedulerSlot || new Date(schedulerSlot).getUTCMinutes() === 0;
+  const maintenanceFailures: string[] = [];
+  const pruneResult = runMaintenance
+    ? await runNonBlockingWorkMaintenance("prune-contexts", 0, () => pruneWorkContextsForJob())
+    : { value: 0, failure: null };
+  const pruned = pruneResult.value;
+  if (pruneResult.failure) maintenanceFailures.push(pruneResult.failure);
+  if (runMaintenance) {
+    const chatResult = await runNonBlockingWorkMaintenance("prune-chat", undefined, async () => {
+      const chatPrune = await createAdminClient().rpc("prune_work_chat");
+      if (chatPrune.error) throw new Error(`만료된 업무 응답 정리에 실패했습니다: ${chatPrune.error.message}`);
+    });
+    if (chatResult.failure) maintenanceFailures.push(chatResult.failure);
+  }
   // Future registration is not a successful observation. Actual claims are
   // available only through the scheduler-slot wrapper below.
-  const canaryRegistered = await canaryRpc("seed_work_attention_canary");
-  if (typeof canaryRegistered !== "number" || !Number.isInteger(canaryRegistered) || canaryRegistered < 0) throw new Error("Invalid silent measurement registration result");
-  if (process.env.JARVIS_ATTENTION_ENABLED !== "true") return { kind: "disabled", pruned, canaryRegistered };
+  const canaryResult = runMaintenance
+    ? await runNonBlockingWorkMaintenance("seed-canary", 0, async () => {
+      const value = await canaryRpc("seed_work_attention_canary");
+      if (typeof value !== "number" || !Number.isInteger(value) || value < 0) throw new Error("Invalid silent measurement registration result");
+      return value;
+    })
+    : { value: 0, failure: null };
+  const canaryRegistered = canaryResult.value;
+  if (canaryResult.failure) maintenanceFailures.push(canaryResult.failure);
+  if (process.env.JARVIS_ATTENTION_ENABLED !== "true") return { kind: "disabled", pruned, canaryRegistered, maintenanceFailures };
   let allowAutomatic = false;
   if (process.env.JARVIS_AUTOMATIC_ATTENTION_ENABLED === "true") {
-    const health = await createAdminClient().rpc("work_scheduler_health");
-    if (health.error) throw new Error("정시성 측정을 확인하지 못했습니다. 자동 조건 알림은 보류합니다.");
-    const value = health.data as { automaticPromotionReady?: boolean };
+    const value = await retryWorkDatabase("scheduler-health", async () => {
+      const health = await createAdminClient().rpc("work_scheduler_health");
+      if (health.error) throw new Error(`정시성 측정을 확인하지 못했습니다: ${health.error.message}`);
+      return health.data as { automaticPromotionReady?: boolean };
+    });
     allowAutomatic = value.automaticPromotionReady === true;
   }
   const attention = schedulerSlot
-    ? await canaryRpc("claim_measured_work_attention", { p_worker_id: workerId, p_slot: schedulerSlot, p_allow_automatic: allowAutomatic }) as MeasuredAttention | null
+    ? await retryWorkDatabase("claim", () => canaryRpc("claim_measured_work_attention", { p_worker_id: workerId, p_slot: schedulerSlot, p_allow_automatic: allowAutomatic })) as MeasuredAttention | null
     : await claimWorkAttention(workerId, allowAutomatic) as MeasuredAttention | null;
-  if (!attention) return { kind: "idle", pruned, canaryRegistered };
+  if (!attention) return { kind: "idle", pruned, canaryRegistered, maintenanceFailures };
   let accepted = 0, failed = 0, uncertain = 0;
   try {
     const measurement = await completeSilentWorkMeasurement(attention, workerId);
-    if (measurement) return { ...measurement, pruned, canaryRegistered };
+    if (measurement) return { ...measurement, pruned, canaryRegistered, maintenanceFailures };
     const targets = await getClaimedWorkSubscriptions(attention.id);
     const configured = !!sender || !!(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY);
     if (configured) for (const target of targets) {
@@ -81,7 +115,7 @@ export async function processWorkAttention(workerId: string, sender?: Sender, sc
       }
     }
     await finishWorkAttention(attention.id, workerId, failed ? "failed" : "ready", !configured ? "Push not configured; available in app" : uncertain ? "Push result uncertain; available in app" : undefined);
-    return { kind: "processed", measurementScope: "user_attention", attentionId: attention.id, accepted, failed, uncertain, pushSkipped: !configured || targets.length === 0, pruned, canaryRegistered };
+    return { kind: "processed", measurementScope: "user_attention", attentionId: attention.id, accepted, failed, uncertain, pushSkipped: !configured || targets.length === 0, pruned, canaryRegistered, maintenanceFailures };
   } catch (error) {
     await finishWorkAttention(attention.id, workerId, "failed", error instanceof Error ? error.message : "Work attention failed");
     throw error;
