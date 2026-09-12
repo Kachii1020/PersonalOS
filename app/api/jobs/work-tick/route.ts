@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const result = await processWorkAttention(workerId, undefined, slot ?? undefined);
     stage = "acknowledge-finish";
     if (slot) await acknowledgeWorkTick(slot,true);
-    if (result.kind !== "idle" || result.pruned > 0 || result.canaryRegistered > 0) {
+    if (result.kind !== "idle" || result.pruned > 0 || result.canaryRegistered > 0 || result.maintenanceFailures.length > 0) {
       await recordJobRun({ jobName: "work-tick", startedAt, status: "ok", meta: { slot, trigger: slot ? "scheduler" : "manual", ...result } });
     }
     return NextResponse.json(result);
