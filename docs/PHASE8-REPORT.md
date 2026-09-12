@@ -23,8 +23,8 @@ Status: **implementation, disabled production preparation and provider hard cap 
 | Balanced-delay Realtime probe | Fail, stopped early | Same frozen text and scoring with official descriptive prompt and `medium` delay. K03, K04 and M05 failed, so the run stopped at the third failure: 22/25 passed, 25 TTS + 25 Realtime sessions. The remaining 15 cases were not called because 38/40 was already impossible |
 | iPhone/Mac | Not run | pending user-assisted run |
 | Hosted migration | Pass | Clean local reset applied through 0029; remote migration history was re-read after applying 0029 and matched local through 0029 |
-| Vercel preparation | Pass, disabled | OpenAI key and signing secret stored as sensitive in Production/Preview; app voice budget set to 5; Production voice flags explicitly false |
-| Branch preview | Ready | `dpl_CqvSGdEey9sKpNKSh3GUykfuDabb`; PTT and automatic flags enabled only for `codex/phase8-voice-jarvis`. Vercel deployment protection prevents an unauthenticated iPhone URL test |
+| Vercel preparation | Pass, disabled | OpenAI key and signing secret stored as sensitive in Production/Preview; app voice budget set to 5; Production voice flags explicitly false. Supabase, owner and Anthropic credentials plus context/inline flags are scoped only to the Phase 8 preview branch; Apple, cron and Learn/Quiz credentials were not copied |
+| Branch preview | Ready | `dpl_EMWot2S52QpM8kG3Uuou2nLv6vo`; branch-environment redeploy returned `/jarvis` 307→`/login` and `/login` HTTP 200, replacing the prior middleware 500. PTT and automatic flags remain enabled only for `codex/phase8-voice-jarvis` |
 | Production feature | Off | Code is not merged or promoted and both voice modes remain unavailable |
 
 Operational seven-day attention observation remains separate from this phase and automatic deadline/stale-work attention remains off.
