@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { isTransientDatabaseError, retryIdempotentDatabase } from "../lib/jobs/db-retry";
+import { runNonBlockingWorkMaintenance } from "../lib/repos/work-worker";
 
 test("work tick retries transient database gateway failures only", async () => {
   let calls = 0;
@@ -24,6 +25,19 @@ test("work tick does not retry deterministic failures", async () => {
   assert.equal(calls, 1);
 });
 
+test("non-critical maintenance remains visible without blocking delivery", async () => {
+  const original = console.error;
+  const messages: string[] = [];
+  console.error = (...args) => messages.push(args.map(String).join(" "));
+  try {
+    const result = await runNonBlockingWorkMaintenance("prune-chat", 0, async () => { throw new Error("Gateway Timeout"); });
+    assert.deepEqual(result, { value: 0, failure: "prune-chat" });
+    assert.equal(messages.some((message) => message.includes("prune-chat 유지보수 실패")), true);
+  } finally {
+    console.error = original;
+  }
+});
+
 test("scheduler claim retry is serialized and returns the same live lease", () => {
   const migration = readFileSync(new URL("../supabase/migrations/0028_work_tick_retry.sql", import.meta.url), "utf8");
   const route = readFileSync(new URL("../app/api/jobs/work-tick/route.ts", import.meta.url), "utf8");
@@ -41,5 +55,6 @@ test("per-minute idle ticks avoid maintenance and duplicate job history writes",
   const worker = readFileSync(new URL("../lib/repos/work-worker.ts", import.meta.url), "utf8");
   assert.match(worker, /getUTCMinutes\(\) === 0/);
   assert.match(route, /result\.kind !== "idle"/);
+  assert.match(route, /result\.maintenanceFailures\.length > 0/);
   assert.match(route, /console\.error\(`\[work-tick\] \$\{stage\} 실패:/);
 });
