@@ -2008,6 +2008,117 @@ export type Database = {
         }
         Relationships: []
       }
+      voice_sessions: {
+        Row: {
+          end_reason: string | null
+          ended_at: string | null
+          expires_at: string
+          id: string
+          last_activity_at: string
+          mode: string
+          owner_id: string
+          started_at: string
+          status: string
+          stt_reserved_usd: number
+          transcription_model: string
+        }
+        Insert: {
+          end_reason?: string | null
+          ended_at?: string | null
+          expires_at?: string
+          id?: string
+          last_activity_at?: string
+          mode: string
+          owner_id: string
+          started_at?: string
+          status?: string
+          stt_reserved_usd?: number
+          transcription_model: string
+        }
+        Update: {
+          end_reason?: string | null
+          ended_at?: string | null
+          expires_at?: string
+          id?: string
+          last_activity_at?: string
+          mode?: string
+          owner_id?: string
+          started_at?: string
+          status?: string
+          stt_reserved_usd?: number
+          transcription_model?: string
+        }
+        Relationships: []
+      }
+      voice_turns: {
+        Row: {
+          completed_at: string | null
+          context_id: string | null
+          error_code: string | null
+          id: string
+          outcome: string | null
+          owner_id: string
+          provider_item_hash: string
+          reply_hash: string | null
+          request_id: string
+          session_id: string
+          started_at: string
+          status: string
+          transcript_hash: string
+          tts_attempts: number
+          tts_reserved_usd: number
+        }
+        Insert: {
+          completed_at?: string | null
+          context_id?: string | null
+          error_code?: string | null
+          id?: string
+          outcome?: string | null
+          owner_id: string
+          provider_item_hash: string
+          reply_hash?: string | null
+          request_id: string
+          session_id: string
+          started_at?: string
+          status?: string
+          transcript_hash: string
+          tts_attempts?: number
+          tts_reserved_usd?: number
+        }
+        Update: {
+          completed_at?: string | null
+          context_id?: string | null
+          error_code?: string | null
+          id?: string
+          outcome?: string | null
+          owner_id?: string
+          provider_item_hash?: string
+          reply_hash?: string | null
+          request_id?: string
+          session_id?: string
+          started_at?: string
+          status?: string
+          transcript_hash?: string
+          tts_attempts?: number
+          tts_reserved_usd?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "voice_turns_context_id_fkey"
+            columns: ["context_id"]
+            isOneToOne: false
+            referencedRelation: "work_contexts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "voice_turns_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "voice_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       weekly_reviews: {
         Row: {
           content: Json | null
@@ -2359,6 +2470,33 @@ export type Database = {
         }
         Returns: Json
       }
+      begin_voice_session: {
+        Args: {
+          p_budget: number
+          p_mode: string
+          p_model: string
+          p_owner_id: string
+        }
+        Returns: {
+          end_reason: string | null
+          ended_at: string | null
+          expires_at: string
+          id: string
+          last_activity_at: string
+          mode: string
+          owner_id: string
+          started_at: string
+          status: string
+          stt_reserved_usd: number
+          transcription_model: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "voice_sessions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       begin_work_delivery: {
         Args: {
           p_attention_id: string
@@ -2593,6 +2731,42 @@ export type Database = {
         }
         Returns: Json
       }
+      finish_voice_session: {
+        Args: { p_owner_id: string; p_reason: string; p_session_id: string }
+        Returns: undefined
+      }
+      finish_voice_turn: {
+        Args: {
+          p_context_id: string
+          p_outcome: string
+          p_owner_id: string
+          p_reply_hash: string
+          p_turn_id: string
+        }
+        Returns: {
+          completed_at: string | null
+          context_id: string | null
+          error_code: string | null
+          id: string
+          outcome: string | null
+          owner_id: string
+          provider_item_hash: string
+          reply_hash: string | null
+          request_id: string
+          session_id: string
+          started_at: string
+          status: string
+          transcript_hash: string
+          tts_attempts: number
+          tts_reserved_usd: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "voice_turns"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       finish_work_attention: {
         Args: {
           p_attention_id: string
@@ -2628,6 +2802,32 @@ export type Database = {
       get_claimed_work_subscriptions: {
         Args: { p_attention_id: string }
         Returns: Json
+      }
+      get_voice_turn_for_owner: {
+        Args: { p_owner_id: string; p_session_id: string; p_turn_id: string }
+        Returns: {
+          completed_at: string | null
+          context_id: string | null
+          error_code: string | null
+          id: string
+          outcome: string | null
+          owner_id: string
+          provider_item_hash: string
+          reply_hash: string | null
+          request_id: string
+          session_id: string
+          started_at: string
+          status: string
+          transcript_hash: string
+          tts_attempts: number
+          tts_reserved_usd: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "voice_turns"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       get_work_snapshot: { Args: { p_context_id: string }; Returns: Json }
       is_allowed_user: { Args: never; Returns: boolean }
@@ -2692,6 +2892,7 @@ export type Database = {
         }
       }
       prune_dialogue_drafts: { Args: never; Returns: number }
+      prune_voice_metadata: { Args: never; Returns: number }
       prune_work_chat: { Args: never; Returns: number }
       prune_work_contexts: { Args: never; Returns: number }
       queue_due_career_sources: { Args: { p_limit?: number }; Returns: number }
@@ -2703,6 +2904,71 @@ export type Database = {
         Args: { p_draft_id: string }
         Returns: string
       }
+      reserve_voice_speech: {
+        Args: {
+          p_attempt: number
+          p_budget: number
+          p_owner_id: string
+          p_reply_hash: string
+          p_turn_id: string
+        }
+        Returns: {
+          completed_at: string | null
+          context_id: string | null
+          error_code: string | null
+          id: string
+          outcome: string | null
+          owner_id: string
+          provider_item_hash: string
+          reply_hash: string | null
+          request_id: string
+          session_id: string
+          started_at: string
+          status: string
+          transcript_hash: string
+          tts_attempts: number
+          tts_reserved_usd: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "voice_turns"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      reserve_voice_turn: {
+        Args: {
+          p_context_id: string
+          p_owner_id: string
+          p_provider_hash: string
+          p_request_id: string
+          p_session_id: string
+          p_transcript_hash: string
+        }
+        Returns: {
+          completed_at: string | null
+          context_id: string | null
+          error_code: string | null
+          id: string
+          outcome: string | null
+          owner_id: string
+          provider_item_hash: string
+          reply_hash: string | null
+          request_id: string
+          session_id: string
+          started_at: string
+          status: string
+          transcript_hash: string
+          tts_attempts: number
+          tts_reserved_usd: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "voice_turns"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reserve_work_chat: {
         Args: {
           p_context_id?: string
@@ -2713,6 +2979,28 @@ export type Database = {
         Returns: Json
       }
       seed_work_attention_canary: { Args: never; Returns: number }
+      touch_voice_session: {
+        Args: { p_owner_id: string; p_session_id: string }
+        Returns: {
+          end_reason: string | null
+          ended_at: string | null
+          expires_at: string
+          id: string
+          last_activity_at: string
+          mode: string
+          owner_id: string
+          started_at: string
+          status: string
+          stt_reserved_usd: number
+          transcription_model: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "voice_sessions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       work_attention_valid: {
         Args: {
           a: Database["public"]["Tables"]["attention_items"]["Row"]

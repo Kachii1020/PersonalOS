@@ -23,7 +23,7 @@ const hash = (text: string) => createHash("sha256").update(text).digest("hex");
 function subRequest(id: string, kind: string) {
   const h = hash(id + ":" + kind); return `${h.slice(0,8)}-${h.slice(8,12)}-4${h.slice(13,16)}-8${h.slice(17,20)}-${h.slice(20,32)}`;
 }
-export async function answerWorkChat(input: WorkChatInput): Promise<WorkChatReply> {
+export async function answerWorkChat(input: WorkChatInput, options: { mutationPolicy?: "commit" | "confirm" } = {}): Promise<WorkChatReply> {
   requireWorkEnabled();
   const owner = await requireWorkOwner();
   if (!/^[0-9a-f-]{36}$/i.test(input.requestId)) throw new DialogueRequestError("요청 ID가 필요합니다.");
@@ -37,7 +37,8 @@ export async function answerWorkChat(input: WorkChatInput): Promise<WorkChatRepl
     return { mode: snapshot ? "answer" : "clarify", message: snapshot ? "저장한 업무를 불러왔습니다. 현재 상태와 다음 행동을 확인해 주세요." : "이어갈 업무를 목록에서 선택해 주세요. 여러 업무 중 하나를 추측하지 않습니다.", work: snapshot, preview: null, proposals: [], requestId: input.requestId };
   }
   const admin = createAdminClient();
-  const fingerprint = hash(JSON.stringify({ messages, contextId: input.contextId ?? null, expectedRevision: input.expectedRevision ?? null }));
+  const mutationPolicy=options.mutationPolicy??"commit";
+  const fingerprint = hash(JSON.stringify({ messages, contextId: input.contextId ?? null, expectedRevision: input.expectedRevision ?? null, ...(mutationPolicy==="confirm"?{mutationPolicy}: {}) }));
   const reserved = await admin.rpc("reserve_work_chat", { p_owner_id: owner.ownerId, ...(input.contextId ? {p_context_id:input.contextId}:{}), p_request_id: input.requestId, p_hash: fingerprint });
   if (reserved.error) throw new DialogueRequestError("같은 요청이 처리 중이거나 변경되었습니다. 잠시 후 같은 요청을 확인해 주세요.", 409);
   const claim = reserved.data as unknown as { token?: string; cached?: WorkChatReply };
@@ -71,6 +72,7 @@ export async function answerWorkChat(input: WorkChatInput): Promise<WorkChatRepl
     if (grounded.operation === "preview") return await finish({ ...reply("저장할 업무와 알림을 확인하고 ‘업무 저장’을 눌러 주세요.", "preview"), preview: grounded.input! });
     if (!snapshot) return await finish(reply("먼저 진행 업무를 저장하거나 선택해 주세요.", "clarify"));
     if (grounded.operation === "update" || grounded.operation === "status") {
+      if(mutationPolicy==="confirm")return await finish({...reply("음성으로 인식한 업무 변경을 화면에서 확인해 주세요."),confirmation:{operation:grounded.operation,contextId:snapshot.context.id,expectedRevision:snapshot.context.revision,requestId:subRequest(input.requestId,grounded.operation),input:grounded.operation==="update"?grounded.input!:{status:grounded.status!}}});
       snapshot = await mutateWorkContext({ operation: grounded.operation, contextId: snapshot.context.id, expectedRevision: snapshot.context.revision,
         requestId: subRequest(input.requestId, grounded.operation), input: grounded.operation === "update" ? grounded.input! : { status: grounded.status! } });
       return await finish(reply("명시한 업무 상태를 저장했습니다. 연결된 할 일·일정은 자동으로 변경하지 않았습니다."));

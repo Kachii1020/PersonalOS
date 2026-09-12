@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { PayloadPreview, observedTime } from "./display";
+import { VoicePanel } from "./voice-panel";
 import type { AttentionItem, WorkChatReply, WorkContext, WorkInput, WorkSnapshot, WorkStatus } from "@/lib/jarvis/work-types";
 import type { ChatMessage } from "@/lib/jarvis/dialogue-types";
 import type { JsonValue } from "@/lib/jarvis/types";
@@ -29,7 +30,7 @@ function SourceReference({ reference }: { reference: JsonValue }) {
   return <div className="mt-2 text-xs text-text-muted"><p>연결된 {kind}{title ? `: ${title}` : ""} · {reference.available === true ? state ?? "원본 확인됨" : "현재 원본을 찾을 수 없습니다"}{observed ? ` · ${observed} 확인` : ""}</p>{href && reference.available === true && <Link className="text-accent underline" href={href}>{kind} 원본 목록 열기</Link>}</div>;
 }
 
-export function WorkWorkspace({ inlineApprovalsEnabled = false, automaticAttentionEnabled = false }: { inlineApprovalsEnabled?: boolean; automaticAttentionEnabled?: boolean }) {
+export function WorkWorkspace({ inlineApprovalsEnabled = false, automaticAttentionEnabled = false, voiceEnabled = false, automaticVoiceEnabled = false }: { inlineApprovalsEnabled?: boolean; automaticAttentionEnabled?: boolean; voiceEnabled?:boolean; automaticVoiceEnabled?:boolean }) {
   const [contexts, setContexts] = useState<WorkContext[]>([]);
   const [work, setWork] = useState<WorkSnapshot | null>(null);
   const [attention, setAttention] = useState<AttentionItem[]>([]);
@@ -86,6 +87,7 @@ export function WorkWorkspace({ inlineApprovalsEnabled = false, automaticAttenti
     setHistory([...messages,{role:"assistant" as const,content:response.message}].slice(-6));setInput("");request.current=null;
     if(response.work){const u=new URL(window.location.href);u.searchParams.set("work",response.work.context.id);window.history.replaceState(null,"",u);}
   }
+  function applyVoiceReply(transcript:string,response:import("@/lib/jarvis/voice-types").VoiceTurnReply){setWork(response.work);setPreview(response.preview);setPreviewRequestId(response.preview?response.requestId:null);setMessage(response.message);setHistory(current=>[...current,{role:"user" as const,content:transcript},{role:"assistant" as const,content:response.message}].slice(-6));if(response.work){const u=new URL(window.location.href);u.searchParams.set("work",response.work.context.id);window.history.replaceState(null,"",u);}}
   async function savePreview() {
     if(!preview)return; const fingerprint=JSON.stringify(preview);
     if(mutation.current?.fingerprint!==fingerprint)mutation.current={fingerprint,id:crypto.randomUUID()};
@@ -104,6 +106,7 @@ export function WorkWorkspace({ inlineApprovalsEnabled = false, automaticAttenti
   const partial=!!work?.actions.some(a=>a.status==="executed")&&work.actions.some(a=>["failed","expired","rejected","stale"].includes(a.status));
   return <div className="mx-auto max-w-3xl space-y-4">
     <header><h1 className="text-xl font-semibold">업무 이어하기 · JARVIS</h1><p className="mt-2 text-sm text-text-muted">목표·진행·다음 행동을 기억하고, 각 실행안의 결과를 확인합니다.</p></header>
+    {voiceEnabled&&<VoicePanel history={history} contextId={work?.context.id??null} expectedRevision={work?.context.revision} automaticEnabled={automaticVoiceEnabled} onReply={applyVoiceReply} onWork={(next,note)=>{setWork(next);setMessage(note);request.current=null;mutation.current=null;}}/>}
     <Card><div className="flex flex-wrap gap-2"><label className="min-w-48 flex-1 text-sm">진행 업무<select aria-label="진행 업무 선택" className={fieldClass} value={work?.context.id??""} disabled={busy} onChange={e=>{const id=e.target.value;void run(async()=>{if(id)await choose(id);else chooseNewWork();});}}><option value="">새 업무 / 업무 선택</option>{contexts.map(c=><option key={c.id} value={c.id}>{c.goal} · {statusLabels[c.status]}</option>)}</select></label><Button disabled={busy} onClick={()=>void run(refreshSelectedWork)}>새로고침</Button></div></Card>
     {work&&<Card><h2 className="font-semibold">{work.context.goal}</h2><p className="text-xs text-text-muted">{statusLabels[work.context.status]} · 버전 {work.context.revision} · {observedTime(work.context.updatedAt)}</p><dl className="mt-3 space-y-2 text-sm"><dt className="text-text-muted">확인된 진행</dt><dd className="whitespace-pre-wrap">{work.context.progress||"아직 명시하지 않았습니다."}</dd><dt className="text-text-muted">다음 행동</dt><dd>{work.context.nextStep||"다음 행동을 입력해 주세요."}</dd></dl>
       <div className="mt-4 flex flex-wrap gap-2">{["active","paused"].includes(work.context.status)&&<><Button disabled={busy} onClick={()=>void run(()=>changeStatus("status",work.context.status==="active"?"paused":"active"))}>{work.context.status==="active"?"업무 일시 중지":"업무 재개"}</Button><Button disabled={busy} onClick={()=>void run(()=>changeStatus("status","completed"))}>업무 완료로 표시</Button><Button disabled={busy} onClick={()=>void run(()=>changeStatus("status","cancelled"))}>업무 취소</Button></>}<Button disabled={busy} onClick={()=>{if(window.confirm("이 업무 맥락과 미래 알림에서 제외합니다. 기존 할 일·일정·감사 기록은 유지합니다."))void run(()=>changeStatus("forget"));}}>업무 잊기</Button></div><p className="mt-2 text-xs text-text-muted">업무 상태 변경은 연결된 할 일·일정을 자동 완료하거나 삭제하지 않습니다.</p>
@@ -120,7 +123,7 @@ export function WorkWorkspace({ inlineApprovalsEnabled = false, automaticAttenti
       {work.actions.map(action=><Card key={action.id}>
         <h3 className="font-medium">{action.draft.title}</h3><p className="my-2 text-sm">{statusLabels[action.status]??action.status}</p><PayloadPreview payload={action.draft.payload}/>
         {["proposed","pending"].includes(action.status)&&<div className="mt-3 flex gap-2">
-          <Button variant="primary" disabled={busy||!inlineApprovalsEnabled||(!action.draft.canRequestApproval&&action.status!=="pending")} onClick={()=>void run(async()=>{if(!inlineApprovalsEnabled)return;const r=await api<{work:WorkSnapshot}>(`/api/jarvis/work-contexts/${work.context.id}/actions/${action.id}`,"POST",{decision:"approved"});setWork(r.work);})}>승인하고 실행</Button>
+          <Button variant="primary" disabled={busy||!inlineApprovalsEnabled||(!action.draft.canRequestApproval&&action.status!=="pending")} onClick={()=>void run(async()=>{if(!inlineApprovalsEnabled)return;const r=await api<{work:WorkSnapshot}>(`/api/jarvis/work-contexts/${work.context.id}/actions/${action.id}`,"POST",{decision:"approved"});setWork(r.work);window.dispatchEvent(new CustomEvent("jarvis-voice-action-result",{detail:{contextId:work.context.id,actionId:action.id}}));})}>승인하고 실행</Button>
           <Button disabled={busy||!inlineApprovalsEnabled} onClick={()=>void run(async()=>{if(!inlineApprovalsEnabled)return;const r=await api<{work:WorkSnapshot}>(`/api/jarvis/work-contexts/${work.context.id}/actions/${action.id}`,"POST",{decision:"rejected"});setWork(r.work);})}>거절</Button>
         </div>}
         {action.error&&<p className="mt-2 text-sm text-negative">{action.error}</p>}{action.result&&<div className="mt-3 text-sm"><PayloadPreview payload={action.result}/><Link className="text-accent underline" href={action.draft.type==="CREATE_TASK"?"/tasks":"/calendar"}>실제 기록 열기</Link></div>}
