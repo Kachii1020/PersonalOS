@@ -24,7 +24,7 @@ Status: **implementation, disabled production preparation and provider hard cap 
 | iPhone/Mac | Not run | pending user-assisted run |
 | Hosted migration | Pass | Clean local reset applied through 0029; remote migration history was re-read after applying 0029 and matched local through 0029 |
 | Vercel preparation | Pass, disabled | OpenAI key and signing secret stored as sensitive in Production/Preview; app voice budget set to 5; Production voice flags explicitly false |
-| Branch preview | Ready | `dpl_AMZwHAuPU3uNdBqXY6r9L4744YaL`; PTT and automatic flags enabled only for `codex/phase8-voice-jarvis`. Vercel deployment protection prevents an unauthenticated iPhone URL test |
+| Branch preview | Ready | `dpl_CqvSGdEey9sKpNKSh3GUykfuDabb`; PTT and automatic flags enabled only for `codex/phase8-voice-jarvis`. Vercel deployment protection prevents an unauthenticated iPhone URL test |
 | Production feature | Off | Code is not merged or promoted and both voice modes remain unavailable |
 
 Operational seven-day attention observation remains separate from this phase and automatic deadline/stale-work attention remains off.
