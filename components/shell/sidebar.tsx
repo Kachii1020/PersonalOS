@@ -164,6 +164,7 @@ function NavRow({
         </button>
       )}
       <Link
+        prefetch={false}
         href={item.href}
         title={collapsed ? item.label : undefined}
         aria-current={active ? "page" : undefined}
