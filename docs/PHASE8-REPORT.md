@@ -21,10 +21,10 @@ Status: **implementation, disabled production preparation and provider hard cap 
 | Frozen-text synthetic voice 02 | Fail | Same text corpus after startup padding and bounded product keyword hints; 29/40, 11 failures, 40 TTS + 40 Realtime sessions, 351.10 generated audio seconds |
 | High-accuracy file comparison | Fail | Same 40 texts regenerated to audio and transcribed with `gpt-transcribe`: 31/40, 9 failures, 40 TTS + 40 file transcription calls, 349.50 generated audio seconds. It did not justify adding a second transcription path |
 | Balanced-delay Realtime probe | Fail, stopped early | Same frozen text and scoring with official descriptive prompt and `medium` delay. K03, K04 and M05 failed, so the run stopped at the third failure: 22/25 passed, 25 TTS + 25 Realtime sessions. The remaining 15 cases were not called because 38/40 was already impossible |
-| iPhone/Mac | Not run | pending user-assisted run |
+| iPhone/Mac | Partial | Mac Safari callback allowlist was added and a newly generated Supabase link preserved the exact Phase 8 Preview `/auth/callback`; authenticated microphone/PTT and iPhone runs remain pending |
 | Hosted migration | Pass | Clean local reset applied through 0029; remote migration history was re-read after applying 0029 and matched local through 0029 |
 | Vercel preparation | Pass, disabled | OpenAI key and signing secret stored as sensitive in Production/Preview; app voice budget set to 5; Production voice flags explicitly false. Supabase, owner and Anthropic credentials plus context/inline flags are scoped only to the Phase 8 preview branch; Apple, cron and Learn/Quiz credentials were not copied |
-| Branch preview | Ready | `dpl_EMWot2S52QpM8kG3Uuou2nLv6vo`; branch-environment redeploy returned `/jarvis` 307→`/login` and `/login` HTTP 200, replacing the prior middleware 500. PTT and automatic flags remain enabled only for `codex/phase8-voice-jarvis` |
+| Branch preview | Ready | branch-environment redeploy returned `/jarvis` 307→`/login` and `/login` HTTP 200, replacing the prior middleware 500. Supabase Auth reissued an admin-checked magic link whose `redirect_to` exactly matched the stable Phase 8 Preview callback. PTT and automatic flags remain enabled only for `codex/phase8-voice-jarvis` |
 | Production feature | Off | Code is not merged or promoted and both voice modes remain unavailable |
 
 Operational seven-day attention observation remains separate from this phase and automatic deadline/stale-work attention remains off.
