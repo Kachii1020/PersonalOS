@@ -1,8 +1,8 @@
 # Phase 7 implementation evidence
 
-Status: **Phase 7 functional acceptance passed locally** for work continuity, individual approvals and direct reminders. PR/main/production alignment is still pending in this report revision. The separate seven-day automatic-attention gate has not passed and no 99% timing claim is made.
+Status: **Phase 7 functional acceptance complete and deployed** for work continuity, individual approvals and direct reminders. The separate seven-day automatic-attention gate has not passed and no 99% timing claim is made; automatic deadline/stale-work attention remains off and does not block the voice phase.
 Branch: `codex/phase7-full-acceptance`.
-PR: https://github.com/Kachii1020/PersonalOS/pull/32; PR #30 remains the limited-release baseline.
+PR: https://github.com/Kachii1020/PersonalOS/pull/32 merged as `90d72a10c90484f276d1ce2b98c91dd1ece21b4c`. The functional code reached production as READY deployment `dpl_59hgAbaAwiysJ3rX2wwg3aM7BCcz` on the canonical alias. PR #30 remains the limited-release baseline.
 Local gates used the dedicated `personalos-dialogue-eval` database (API 54721, DB 54722). The separately identified production rollout below used the hosted project and current user only; no local fixture was pointed at production.
 
 ## Implemented scope
