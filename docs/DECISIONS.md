@@ -465,3 +465,9 @@ AGENTS.md에 인증 담당 에이전트가 없어서 ui-shell 범위로 넣었�
 - **결정**: OpenAI Realtime은 전사 전용 WebRTC transport로만 사용하고, 판단·승인·실행·결과는 기존 Phase 7 서버가 담당한다. TTS는 서버가 검증된 결과에서 만든 문장만 읽는다.
 - **이유**: 음성 모델이 실행 사실을 바꾸거나 승인으로 오인되는 경로 없이 PTT·자동 턴·끼어들기를 제공하기 위해서다. 실제 API에서 `gpt-live-transcribe` server VAD가 거절되어 자동 턴은 foreground Web Audio RMS와 explicit commit으로 구현했다.
 - **버린 대안**: Realtime speech-to-speech가 직접 tool을 실행하는 구조, 브라우저 기본 SpeechRecognition, 백그라운드 호출어를 포함한 네이티브 동시 구현.
+
+## 2026-09-14 — 음성 turn 실패와 공급자 오류 노출 경계
+
+- **결정**: Anthropic 호출 오류를 중앙 client에서 정규화하고, 공개 표식이 있는 도메인 예외만 HTTP 문구를 노출한다. 음성 turn 실패는 원문 대신 제한된 예외 코드만 `failed` 상태와 기록한다.
+- **이유**: 실기기 PTT에서 전사는 성공했지만 Anthropic 선불 크레딧 소진 400이 원문 JSON·request ID와 함께 화면에 노출됐고, 예약된 `voice_turns` 행은 `processing`에 남았다.
+- **버린 대안**: 모든 공급자 400을 사용자 입력 오류로 그대로 노출, 실패 turn 삭제, 크레딧 소진을 음성 예산 소진으로 잘못 표시.

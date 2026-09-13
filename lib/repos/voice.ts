@@ -1,4 +1,5 @@
 import "server-only";
+import { PublicHttpError } from "@/lib/http/public-error";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createTranscriptionSecret, generateSpeech } from "@/lib/ai/voice-client";
 import { answerWorkChat } from "./work-chat";
@@ -10,7 +11,7 @@ type RpcError={code:string;message:string};type RpcResult={data:unknown;error:Rp
 type VoiceRpcClient={rpc:(name:string,args:Record<string,unknown>)=>PromiseLike<RpcResult>};
 type VoiceSessionRow={id:string;expires_at:string;status:string};
 type VoiceTurnRow={id:string;session_id:string;status:string;tts_attempts:number;reply_hash:string|null};
-export class VoiceRequestError extends Error{constructor(message:string,readonly status=400){super(message);this.name="VoiceRequestError";}}
+export class VoiceRequestError extends PublicHttpError{constructor(message:string,status=400){super(message,status,"VoiceRequestError");}}
 function id(value:unknown,label:string){if(typeof value!=="string"||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value))throw new VoiceRequestError(`${label} ID를 확인해 주세요.`);return value;}
 function text(value:unknown,label:string,max:number){if(typeof value!=="string"||!value.trim()||value.length>max||/[\0\r\n]/.test(value))throw new VoiceRequestError(`${label}을 확인해 주세요.`);return value.trim();}
 async function rpc<T>(name:string,args:Record<string,unknown>):Promise<T>{const result=await(createAdminClient() as unknown as VoiceRpcClient).rpc(name,args);if(result.error){const status=result.error.code==="PT402"?402:result.error.code==="PT409"?409:400;throw new VoiceRequestError(result.error.message,status);}return result.data as T;}
@@ -34,13 +35,18 @@ export async function processVoiceTurn(input:VoiceTurnInput):Promise<VoiceTurnRe
   if(!Array.isArray(input.messages)||!input.messages.length)throw new VoiceRequestError("확정된 전사가 없습니다.");const latest=input.messages.at(-1);if(latest?.role!=="user"||!latest.content.trim())throw new VoiceRequestError("확정된 전사가 없습니다.");
   const contextId=input.contextId?id(input.contextId,"업무"):null;
   const row=await rpc<VoiceTurnRow>("reserve_voice_turn",{p_owner_id:owner.ownerId,p_session_id:sessionId,p_request_id:requestId,p_provider_hash:sha256(providerItem),p_transcript_hash:sha256(latest.content),p_context_id:contextId});
+  if(row.status==="failed")throw new VoiceRequestError("이전에 실패한 음성 요청입니다. 원인을 해결한 뒤 다시 말해 주세요.",409);
   try{
     const reply=await answerWorkChat({messages:input.messages,contextId,expectedRevision:input.expectedRevision,requestId},{mutationPolicy:"confirm"});const spoken=buildReplySpeech(reply);const replyHash=sha256(spoken);
     const finished=await rpc<VoiceTurnRow>("finish_voice_turn",{p_owner_id:owner.ownerId,p_turn_id:row.id,p_reply_hash:replyHash,p_outcome:reply.mode,p_context_id:reply.work?.context.id??contextId});
     const candidate=reply.confirmation;const confirmation=candidate?signMutation({...candidate,sessionId,turnId:row.id,expiresAt:expiry()}):null;
     const clean={...reply};delete clean.confirmation;
     return{...clean,voice:{turnId:row.id,speech:speechTicket(sessionId,finished,spoken),confirmation}};
-  }catch(error){throw error;}
+  }catch(error){
+    await rpc("fail_voice_turn",{p_owner_id:owner.ownerId,p_turn_id:row.id,p_error_code:error instanceof Error?error.name:"VoiceTurnError"})
+      .catch(markError=>console.error("[voice-turn] 실패 상태 기록 실패",markError instanceof Error?markError.name:"VoiceTurnRecordError"));
+    throw error;
+  }
 }
 
 async function ownedTurn(ownerId:string,sessionId:string,turnId:string){const checkedSession=id(sessionId,"음성 세션");await rpc("touch_voice_session",{p_owner_id:ownerId,p_session_id:checkedSession});const row=await rpc<VoiceTurnRow|null>("get_voice_turn_for_owner",{p_owner_id:ownerId,p_session_id:checkedSession,p_turn_id:id(turnId,"음성 turn")});if(!row)throw new VoiceRequestError("음성 turn을 찾을 수 없습니다.",404);return row;}

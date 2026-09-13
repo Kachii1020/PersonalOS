@@ -3,6 +3,7 @@ import { requireWorkOwner } from "@/lib/repos/work-contexts";
 import { requireWorkEnabled } from "@/lib/repos/work-chat";
 import { DialogueRequestError } from "@/lib/repos/jarvis-dialogue";
 import { recordJobRun } from "@/lib/repos/job-runs";
+import { httpErrorResult } from "@/lib/http/public-error";
 
 export async function workHttp(request: NextRequest, callback: (body: Record<string, unknown>) => Promise<unknown>) {
   const startedAt = new Date();
@@ -20,9 +21,11 @@ export async function workHttp(request: NextRequest, callback: (body: Record<str
     }
     return NextResponse.json(await callback(body));
   } catch (error) {
-    const status = error instanceof SyntaxError ? 400 : error instanceof Error && error.name === "BudgetExceededError" ? 402
-      : error && typeof error === "object" && "status" in error && typeof error.status === "number" ? error.status : 503;
+    const { status, message } = httpErrorResult(error, {
+      budget: "AI 예산을 모두 사용했습니다. 추가 실행은 하지 않았습니다.",
+      unavailable: "업무 처리에 실패했습니다. 같은 요청으로 다시 확인하세요.",
+    });
     if (status >= 500 || status === 402) await recordJobRun({ jobName: "work-api", startedAt, status: "failed", error: error instanceof Error ? error.name : "WorkError" });
-    return NextResponse.json({ error: status >= 500 ? "업무 처리에 실패했습니다. 같은 요청으로 다시 확인하세요." : error instanceof Error ? error.message : "요청을 확인하세요." }, { status });
+    return NextResponse.json({ error: message }, { status });
   }
 }

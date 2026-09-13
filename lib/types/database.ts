@@ -2723,6 +2723,32 @@ export type Database = {
         }
         Returns: undefined
       }
+      fail_voice_turn: {
+        Args: { p_error_code: string; p_owner_id: string; p_turn_id: string }
+        Returns: {
+          completed_at: string | null
+          context_id: string | null
+          error_code: string | null
+          id: string
+          outcome: string | null
+          owner_id: string
+          provider_item_hash: string
+          reply_hash: string | null
+          request_id: string
+          session_id: string
+          started_at: string
+          status: string
+          transcript_hash: string
+          tts_attempts: number
+          tts_reserved_usd: number
+        }
+        SetofOptions: {
+          from: "*"
+          to: "voice_turns"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       finish_calendar_execution: {
         Args: {
           p_approval_id: string

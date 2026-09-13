@@ -1,4 +1,5 @@
 import "server-only";
+import { PublicHttpError } from "@/lib/http/public-error";
 import { createHash } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
@@ -23,7 +24,7 @@ import { getWorkSnapshotForClient } from "./work-contexts";
 type Client = SupabaseClient<Database>;
 type CalendarRow = Database["public"]["Tables"]["calendars"]["Row"];
 type EventRow = Database["public"]["Tables"]["events"]["Row"];
-export class DialogueRequestError extends Error { constructor(message: string, readonly status = 400) { super(message); this.name = "DialogueRequestError"; } }
+export class DialogueRequestError extends PublicHttpError { constructor(message: string, status = 400) { super(message, status, "DialogueRequestError"); } }
 const hash = (text: string) => createHash("sha256").update(text).digest("hex");
 const DAY = 86_400_000;
 const jstDate = (now: Date) => new Date(now.getTime() + 9 * 3_600_000).toISOString().slice(0, 10);
