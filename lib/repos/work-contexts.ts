@@ -1,4 +1,5 @@
 import "server-only";
+import { PublicHttpError } from "@/lib/http/public-error";
 import { createHash } from "node:crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/types/database";
@@ -8,8 +9,8 @@ import type { JsonValue } from "@/lib/jarvis/types";
 import type { AttentionItem, WorkAction, WorkContext, WorkInput, WorkSnapshot, WorkStatus } from "@/lib/jarvis/work-types";
 import { usesAutomaticAttention, validateWorkInput } from "@/lib/jarvis/work-context";
 
-export class WorkRequestError extends Error {
-  constructor(message: string, readonly status: 400 | 401 | 403 | 404 | 409 = 400) { super(message); this.name = "WorkRequestError"; }
+export class WorkRequestError extends PublicHttpError {
+  constructor(message: string, status: 400 | 401 | 403 | 404 | 409 = 400) { super(message, status, "WorkRequestError"); }
 }
 type Client = SupabaseClient<Database>;
 type WorkRpcName = "list_work_contexts" | "get_work_snapshot" | "mutate_work_context" | "link_work_drafts";

@@ -1,8 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { isTransientDatabaseError, retryIdempotentDatabase } from "../lib/jobs/db-retry";
-import { runNonBlockingWorkMaintenance } from "../lib/repos/work-worker";
+import { isTransientDatabaseError, keepNonCriticalDatabaseFailureVisible, retryIdempotentDatabase } from "../lib/jobs/db-retry";
 
 test("work tick retries transient database gateway failures only", async () => {
   let calls = 0;
@@ -26,16 +25,10 @@ test("work tick does not retry deterministic failures", async () => {
 });
 
 test("non-critical maintenance remains visible without blocking delivery", async () => {
-  const original = console.error;
   const messages: string[] = [];
-  console.error = (...args) => messages.push(args.map(String).join(" "));
-  try {
-    const result = await runNonBlockingWorkMaintenance("prune-chat", 0, async () => { throw new Error("Gateway Timeout"); });
-    assert.deepEqual(result, { value: 0, failure: "prune-chat" });
-    assert.equal(messages.some((message) => message.includes("prune-chat 유지보수 실패")), true);
-  } finally {
-    console.error = original;
-  }
+  const result = await keepNonCriticalDatabaseFailureVisible(async () => { throw new Error("Gateway Timeout"); }, 0, (error) => messages.push(String(error)));
+  assert.deepEqual(result, { value: 0, failed: true });
+  assert.equal(messages.some((message) => message.includes("Gateway Timeout")), true);
 });
 
 test("scheduler claim retry is serialized and returns the same live lease", () => {

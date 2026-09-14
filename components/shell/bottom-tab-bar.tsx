@@ -43,6 +43,7 @@ function TabItem({ item, active }: { item: NavItem; active: boolean }) {
 
   return (
     <Link
+      prefetch={false}
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={cn(

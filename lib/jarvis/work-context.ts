@@ -32,6 +32,15 @@ export function usesAutomaticAttention(input: WorkInput): boolean {
 }
 
 export type WorkOperation = { type: "update"; expectedRevision: number; now: Date; input: WorkInput } | { type: "status"; expectedRevision: number; now: Date; status: WorkStatus } | { type: "forget"; expectedRevision: number; now: Date };
+export function parseWorkResumeRequest(text: string): { title: string | null } | null {
+  const match = text.trim().match(/^(?:(.+?)\s+)?(?:이어\s*하자|이어\s*하기|이어서|이어\s*줘)[.!?\s]*$/);
+  if (!match) return null;
+  const title = match[1]?.trim().replace(/^["'“”‘’]+|["'“”‘’]+$/g, "") ?? "";
+  return { title: title && normalizedWorkGoal(title)!=="업무" ? title : null };
+}
+export function normalizedWorkGoal(value: string): string {
+  return value.normalize("NFKC").toLocaleLowerCase("ko-KR").replace(/[\s"'“”‘’.,!?·_-]+/g, "");
+}
 export function reduceWorkContext(current: WorkContext, operation: WorkOperation): WorkContext {
   if (!Number.isInteger(operation.expectedRevision) || operation.expectedRevision !== current.revision) throw new Error("업무가 다른 곳에서 변경되었습니다. 최신 상태를 다시 확인해 주세요.");
   if (!Number.isFinite(operation.now.getTime()) || current.forgottenAt) throw new Error("잊은 업무 또는 잘못된 시각은 변경할 수 없습니다.");

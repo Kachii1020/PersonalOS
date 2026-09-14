@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { callStructured } from "@/lib/ai/client";
 import { buildWorkPrompt, WORK_SCHEMA, WORK_SYSTEM } from "@/lib/ai/prompts/work-context";
-import { groundWorkIntent, parseDeterministicWorkRequest, usesAutomaticAttention } from "@/lib/jarvis/work-context";
+import { groundWorkIntent, normalizedWorkGoal, parseDeterministicWorkRequest, parseWorkResumeRequest, usesAutomaticAttention } from "@/lib/jarvis/work-context";
 import type { WorkChatInput, WorkChatReply } from "@/lib/jarvis/work-types";
 import type { DialogueDraft } from "@/lib/jarvis/dialogue-types";
 import { answerDialogue, DialogueRequestError, projectWorkBoundEventSources, validateChatMessages } from "./jarvis-dialogue";
@@ -23,7 +23,7 @@ const hash = (text: string) => createHash("sha256").update(text).digest("hex");
 function subRequest(id: string, kind: string) {
   const h = hash(id + ":" + kind); return `${h.slice(0,8)}-${h.slice(8,12)}-4${h.slice(13,16)}-8${h.slice(17,20)}-${h.slice(20,32)}`;
 }
-export async function answerWorkChat(input: WorkChatInput): Promise<WorkChatReply> {
+export async function answerWorkChat(input: WorkChatInput, options: { mutationPolicy?: "commit" | "confirm" } = {}): Promise<WorkChatReply> {
   requireWorkEnabled();
   const owner = await requireWorkOwner();
   if (!/^[0-9a-f-]{36}$/i.test(input.requestId)) throw new DialogueRequestError("요청 ID가 필요합니다.");
@@ -31,13 +31,21 @@ export async function answerWorkChat(input: WorkChatInput): Promise<WorkChatRepl
   let snapshot = input.contextId ? await getWorkSnapshot(input.contextId) : null;
   if (input.contextId && !snapshot) throw new DialogueRequestError("선택한 업무가 없거나 이미 잊은 상태입니다. 다른 업무로 자동 전환하지 않습니다.",404);
   const latest = messages.at(-1)!.content;
-  if (!snapshot && /^(?:이어하자|이어하기|업무 이어하기)[.!?\s]*$/.test(latest)) {
+  const resume = !snapshot ? parseWorkResumeRequest(latest) : null;
+  if (!snapshot && resume) {
     const candidates = (await listWorkContexts()).filter(context => context.status === "active" || context.status === "paused");
-    if (candidates.length === 1) snapshot = await getWorkSnapshot(candidates[0].id);
-    return { mode: snapshot ? "answer" : "clarify", message: snapshot ? "저장한 업무를 불러왔습니다. 현재 상태와 다음 행동을 확인해 주세요." : "이어갈 업무를 목록에서 선택해 주세요. 여러 업무 중 하나를 추측하지 않습니다.", work: snapshot, preview: null, proposals: [], requestId: input.requestId };
+    const matches = resume.title ? candidates.filter(context => normalizedWorkGoal(context.goal) === normalizedWorkGoal(resume.title!)) : candidates;
+    if (matches.length === 1) snapshot = await getWorkSnapshot(matches[0].id);
+    const message = snapshot
+      ? `${snapshot.context.goal} 업무를 불러왔습니다. 현재 진행은 ${snapshot.context.progress || "아직 명시되지 않았습니다"}. 다음 행동은 ${snapshot.context.nextStep || "아직 정하지 않았습니다"}.`
+      : resume.title
+        ? `${resume.title}와 정확히 일치하는 진행 업무를 하나로 확인하지 못했습니다. 화면의 업무 목록에서 선택해 주세요.`
+        : "이어갈 업무를 목록에서 선택해 주세요. 여러 업무 중 하나를 추측하지 않습니다.";
+    return { mode: snapshot ? "answer" : "clarify", message, work: snapshot, preview: null, proposals: [], requestId: input.requestId };
   }
   const admin = createAdminClient();
-  const fingerprint = hash(JSON.stringify({ messages, contextId: input.contextId ?? null, expectedRevision: input.expectedRevision ?? null }));
+  const mutationPolicy=options.mutationPolicy??"commit";
+  const fingerprint = hash(JSON.stringify({ messages, contextId: input.contextId ?? null, expectedRevision: input.expectedRevision ?? null, ...(mutationPolicy==="confirm"?{mutationPolicy}: {}) }));
   const reserved = await admin.rpc("reserve_work_chat", { p_owner_id: owner.ownerId, ...(input.contextId ? {p_context_id:input.contextId}:{}), p_request_id: input.requestId, p_hash: fingerprint });
   if (reserved.error) throw new DialogueRequestError("같은 요청이 처리 중이거나 변경되었습니다. 잠시 후 같은 요청을 확인해 주세요.", 409);
   const claim = reserved.data as unknown as { token?: string; cached?: WorkChatReply };
@@ -71,6 +79,7 @@ export async function answerWorkChat(input: WorkChatInput): Promise<WorkChatRepl
     if (grounded.operation === "preview") return await finish({ ...reply("저장할 업무와 알림을 확인하고 ‘업무 저장’을 눌러 주세요.", "preview"), preview: grounded.input! });
     if (!snapshot) return await finish(reply("먼저 진행 업무를 저장하거나 선택해 주세요.", "clarify"));
     if (grounded.operation === "update" || grounded.operation === "status") {
+      if(mutationPolicy==="confirm")return await finish({...reply("음성으로 인식한 업무 변경을 화면에서 확인해 주세요."),confirmation:{operation:grounded.operation,contextId:snapshot.context.id,expectedRevision:snapshot.context.revision,requestId:subRequest(input.requestId,grounded.operation),input:grounded.operation==="update"?grounded.input!:{status:grounded.status!}}});
       snapshot = await mutateWorkContext({ operation: grounded.operation, contextId: snapshot.context.id, expectedRevision: snapshot.context.revision,
         requestId: subRequest(input.requestId, grounded.operation), input: grounded.operation === "update" ? grounded.input! : { status: grounded.status! } });
       return await finish(reply("명시한 업무 상태를 저장했습니다. 연결된 할 일·일정은 자동으로 변경하지 않았습니다."));

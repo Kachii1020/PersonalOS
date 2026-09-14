@@ -1,6 +1,7 @@
 import "server-only";
 import Anthropic from "@anthropic-ai/sdk";
 import { assertWithinBudget } from "./budget";
+import { normalizeAnthropicError } from "./provider-errors";
 import { recordUsage, type AiPurpose } from "@/lib/repos/ai-usage";
 
 /**
@@ -108,20 +109,21 @@ export async function callStructured<T>(options: StructuredCallOptions): Promise
 
     const client = new Anthropic();
     const response = await client.beta.messages.create({
-      model: modelId,
-      max_tokens: options.maxTokens ?? 16000,
-      // 안전 분류기가 거절하면 Anthropic이 권장 대체 모델로 재실행한다.
-      // Opus 5 계열만 지원한다 — 다른 모델에 붙이면 400이다.
-      ...(FALLBACK_CAPABLE.has(modelId)
-        ? { betas: ["server-side-fallback-2026-07-01"] as const, fallbacks: "default" as const }
-        : {}),
-      system: options.system,
-      output_config: {
-        effort: options.effort ?? "medium",
-        format: { type: "json_schema", schema: options.schema },
-      },
-      messages: [{ role: "user", content: options.userMessage }],
-    }, options.timeoutMs === undefined ? undefined : { timeout: options.timeoutMs, maxRetries: 0 });
+        model: modelId,
+        max_tokens: options.maxTokens ?? 16000,
+        // 안전 분류기가 거절하면 Anthropic이 권장 대체 모델로 재실행한다.
+        // Opus 5 계열만 지원한다 — 다른 모델에 붙이면 400이다.
+        ...(FALLBACK_CAPABLE.has(modelId)
+          ? { betas: ["server-side-fallback-2026-07-01"] as const, fallbacks: "default" as const }
+          : {}),
+        system: options.system,
+        output_config: {
+          effort: options.effort ?? "medium",
+          format: { type: "json_schema", schema: options.schema },
+        },
+        messages: [{ role: "user", content: options.userMessage }],
+      }, options.timeoutMs === undefined ? undefined : { timeout: options.timeoutMs, maxRetries: 0 })
+      .catch((error: unknown) => { throw normalizeAnthropicError(error); });
 
     const spent = costUsd(response.model, response.usage);
     await recordUsage({

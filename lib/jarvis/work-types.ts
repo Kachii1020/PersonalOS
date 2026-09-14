@@ -28,5 +28,6 @@ export type WorkChatReply = {
   mode: "answer" | "clarify" | "preview" | "propose";
   message: string; work: WorkSnapshot | null; preview: WorkInput | null;
   proposals: DialogueDraft[]; requestId: string;
+  confirmation?: { operation:"update"|"status"; contextId:string; expectedRevision:number; requestId:string; input:WorkInput|{status:WorkStatus} } | null;
 };
 export type WorkChatInput = { messages: ChatMessage[]; contextId?: string | null; expectedRevision?: number; requestId: string };
