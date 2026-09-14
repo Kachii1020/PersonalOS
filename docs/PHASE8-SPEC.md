@@ -51,3 +51,25 @@ Environment: `JARVIS_VOICE_ENABLED=false`, `JARVIS_VOICE_AUTO_TURN_ENABLED=false
 Apply 0027 and deploy with both voice flags off. Configure the OpenAI key, app $5 budget, provider $5 project limit and signing secret. Validate preview, then production test-calendar/task flows, and enable both modes only after their gates pass. Roll back with `JARVIS_VOICE_ENABLED=false`; preserve Phase 7 data and all approval/receipt evidence and never reverse old migrations.
 
 The future full speech-to-speech phase may own conversational phrasing, but it still must call the Phase 7 server for work identity, state, approval and receipt truth and must pass the same zero-unsafe-action gate before promotion.
+
+## Phase 8.5 addendum — GPT-Live conversational shell
+
+Phase 8.5 replaces the *primary* foreground conversation transport, not the Phase 7 authority. The chained transcription→Phase 7→TTS implementation remains a separately visible fallback until the new path passes physical-device acceptance.
+
+```text
+Browser microphone ↔ GPT-Live (`gpt-live-1`, WebRTC, full duplex)
+                           ↕ client delegation
+                    PersonalOS voice API
+                           ↓
+       Phase 7 work-chat → visible approval → executor → receipt
+```
+
+- `JARVIS_LIVE_VOICE_ENABLED=false` independently gates the new panel and also requires the base `JARVIS_VOICE_ENABLED` flag. Production stays off during preview validation.
+- The trusted server exchanges the browser SDP through `POST /v1/live/sessions`. The standard project API key never reaches the browser. Session configuration fixes `delegation.type="client"`, `store=false`, no tools and no Responses backend.
+- Input and output transcript deltas remain browser-memory only. `session.delegation.created` contains metadata rather than task text, so the client correlates timestamped input deltas up to `offset_ms`, tolerates uneven event arrival, and submits the resulting bounded transcript to Phase 7.
+- Phase 7 returns its existing signed speech text and optional mutation confirmation. The client returns only that verified text with `session.commentary.append`; it never calls the old TTS endpoint on this path. Task/calendar approval remains the existing per-action screen button.
+- `session.close` is graceful: media and the event channel stay open until `session.closed` or a bounded finalization timeout. A close request immediately blocks late backend results from changing UI state or being spoken.
+- The existing five-minute/eight-work-delegation/one-active-owner limits remain. Migration 0032 reserves `$0.25` before a `gpt-live-1` session, matching five minutes at the documented `$0.05/minute` rate. The existing transcription path retains its `$0.10` reservation. Reservations are conservative app limits, not provider invoices.
+- PWA start remains an explicit user gesture. Background wake words, lock-screen listening and native presence remain Phase 9 and are not implied by this transport change.
+
+Phase 8.5 cannot be called released until a Preview run proves at least two spoken turns through client delegation, screen approval produces a verified result in the same live session, interruption is observed on Mac and iPhone, and no unsafe/duplicate execution occurs. A successful WebRTC connection alone is transport evidence only.

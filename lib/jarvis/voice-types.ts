@@ -23,6 +23,31 @@ export type SpeechTicket = { payload: SpeechPayload; signature: string };
 export type VoiceTurnReply = WorkChatReply & { voice: { turnId: string; speech: SpeechTicket | null; confirmation: WorkMutationConfirmation | null } };
 export type VoiceConfirmReply = { work: WorkSnapshot | null; speech: SpeechTicket | null };
 
+export type StartLiveVoiceSessionInput = {
+  sdp: string;
+  contextId?: string | null;
+  replaceExisting?: boolean;
+};
+export type StartLiveVoiceSessionReply = {
+  sessionId: string;
+  providerSessionId: string;
+  sdpAnswer: string;
+  expiresAt: string;
+  maxTurns: 8;
+  maxDurationSeconds: 300;
+  model: "gpt-live-1";
+};
+export type LiveVoiceDelegationInput = {
+  sessionId: string;
+  delegationId: string;
+  requestId: string;
+  transcript: string;
+  durationMs: number;
+  messages: ChatMessage[];
+  contextId?: string | null;
+  expectedRevision?: number;
+};
+
 export type VoiceUiEvent =
   | { type: "request_permission" } | { type: "permission_granted" } | { type: "connected" }
   | { type: "speech_started" } | { type: "speech_stopped" } | { type: "transcript_final" }

@@ -1,4 +1,4 @@
-**Phase 8 — 전면 PWA 음성 업무 세션 구현 중.** 승인 계약은 `docs/PHASE8-SPEC.md`. Phase 7의 업무·승인·영수증 경로가 유일한 실행 권한이며 Learn/Quiz는 유지한다. 음성 기능은 기본 OFF이고 7일 자동 알림 관찰은 별도다.
+**Phase 8.5 — 전면 PWA GPT-Live 음성 shell 구현·검증 중.** 승인 계약과 8.5 addendum은 `docs/PHASE8-SPEC.md`. GPT-Live는 대화만 담당하고 Phase 7의 업무·승인·영수증 경로가 유일한 실행 권한이다. 기존 Phase 8 음성은 fallback, 모든 음성 기능은 기본 OFF이며 Learn/Quiz와 7일 자동 알림 관찰은 별도다. 네이티브 호출/Phase 9는 아직 시작하지 않는다.
 
 **이전 Phase 4 종료.** G1·G2·G3 통과. G4는 7/8 통과 + 조건 8 운영자 면제 (2026-08-20) — 판정과 면제 사유는 `docs/G4-REPORT.md`. 업그레이드 Tier 3는 `docs/DEFERRED.md` 참고.
 

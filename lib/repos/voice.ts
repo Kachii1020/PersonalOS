@@ -2,10 +2,12 @@ import "server-only";
 import { PublicHttpError } from "@/lib/http/public-error";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createTranscriptionSecret, generateSpeech } from "@/lib/ai/voice-client";
+import { createLiveVoiceConnection } from "@/lib/ai/live-voice-client";
 import { answerWorkChat } from "./work-chat";
 import { getWorkSnapshot, mutateWorkContext, requireWorkOwner } from "./work-contexts";
 import { buildActionSpeech, buildReplySpeech, sha256, signMutation, signSpeech, validateVoiceMode, verifyMutation, verifySpeech, voiceTranscriptionKeywords, voiceTurnDetection, VOICE_MAX_SECONDS, VOICE_MAX_TURNS, VOICE_MODEL, voiceBudgetUsd, voiceEnabled } from "@/lib/jarvis/voice";
-import type { SpeechTicket, StartVoiceSessionInput, StartVoiceSessionReply, VoiceConfirmReply, VoiceTurnInput, VoiceTurnReply, WorkMutationConfirmation } from "@/lib/jarvis/voice-types";
+import { LIVE_VOICE_MAX_SECONDS, LIVE_VOICE_MAX_TURNS, LIVE_VOICE_MODEL, liveVoiceEnabled } from "@/lib/jarvis/live-voice";
+import type { LiveVoiceDelegationInput, SpeechTicket, StartLiveVoiceSessionInput, StartLiveVoiceSessionReply, StartVoiceSessionInput, StartVoiceSessionReply, VoiceConfirmReply, VoiceTurnInput, VoiceTurnReply, WorkMutationConfirmation } from "@/lib/jarvis/voice-types";
 
 type RpcError={code:string;message:string};type RpcResult={data:unknown;error:RpcError|null};
 type VoiceRpcClient={rpc:(name:string,args:Record<string,unknown>)=>PromiseLike<RpcResult>};
@@ -14,8 +16,10 @@ type VoiceTurnRow={id:string;session_id:string;status:string;tts_attempts:number
 export class VoiceRequestError extends PublicHttpError{constructor(message:string,status=400){super(message,status,"VoiceRequestError");}}
 function id(value:unknown,label:string){if(typeof value!=="string"||!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value))throw new VoiceRequestError(`${label} ID를 확인해 주세요.`);return value;}
 function text(value:unknown,label:string,max:number){if(typeof value!=="string"||!value.trim()||value.length>max||/[\0\r\n]/.test(value))throw new VoiceRequestError(`${label}을 확인해 주세요.`);return value.trim();}
+function sdp(value:unknown){if(typeof value!=="string"||!value.trim()||value.length>47_000||value.includes("\0")||!value.startsWith("v="))throw new VoiceRequestError("WebRTC 연결 제안을 확인해 주세요.");return value;}
 async function rpc<T>(name:string,args:Record<string,unknown>):Promise<T>{const result=await(createAdminClient() as unknown as VoiceRpcClient).rpc(name,args);if(result.error){if(result.error.code==="PT402")throw new VoiceRequestError("음성 월 예산을 모두 사용했습니다. 텍스트 JARVIS는 계속 사용할 수 있습니다.",402);if(result.error.code==="PT409")throw new VoiceRequestError("음성 세션 또는 요청 상태가 변경됐습니다. 새 세션으로 다시 시작해 주세요.",409);throw new VoiceRequestError("음성 상태를 확인하지 못했습니다. 잠시 후 다시 시도해 주세요.",503);}return result.data as T;}
 function requireEnabled(){if(!voiceEnabled())throw new VoiceRequestError("음성 JARVIS가 아직 활성화되지 않았습니다.",404);}
+function requireLiveEnabled(){if(!liveVoiceEnabled())throw new VoiceRequestError("자연 음성 JARVIS가 아직 활성화되지 않았습니다.",404);}
 function expiry(minutes=2){return new Date(Date.now()+minutes*60_000).toISOString();}
 function speechTicket(sessionId:string,row:VoiceTurnRow,speech:string):SpeechTicket|null{const attempt=row.tts_attempts+1;if(attempt>4)return null;return signSpeech({sessionId,turnId:row.id,attempt:attempt as 1|2|3|4,text:speech,expiresAt:expiry()});}
 
@@ -24,6 +28,31 @@ export async function startVoiceSession(input:StartVoiceSessionInput):Promise<St
   let session:VoiceSessionRow;try{session=await rpc<VoiceSessionRow>("begin_voice_session",{p_owner_id:owner.ownerId,p_mode:mode,p_model:VOICE_MODEL,p_budget:voiceBudgetUsd(),p_replace:input.replaceExisting===true});}catch(error){if(error instanceof VoiceRequestError&&error.status===409)throw new VoiceRequestError("다른 기기에서 음성 대화가 진행 중입니다.",409);throw error;}
   try{const provider=await createTranscriptionSecret(mode,sha256(owner.ownerId),voiceTranscriptionKeywords(selected?.context));const providerExpiry=provider.expiresAt?.getTime()??Infinity;const expiresAt=new Date(Math.min(Date.parse(session.expires_at),providerExpiry)).toISOString();return{sessionId:session.id,clientSecret:provider.value,expiresAt,maxTurns:VOICE_MAX_TURNS,maxDurationSeconds:VOICE_MAX_SECONDS,transcriptionModel:VOICE_MODEL,turnDetection:voiceTurnDetection(mode)};}
   catch(error){await rpc("finish_voice_session",{p_owner_id:owner.ownerId,p_session_id:session.id,p_reason:"provider_error"}).catch(()=>undefined);throw error;}
+}
+
+export async function startLiveVoiceSession(input:StartLiveVoiceSessionInput):Promise<StartLiveVoiceSessionReply>{
+  requireLiveEnabled();
+  const owner=await requireWorkOwner();
+  const offer=sdp(input.sdp);
+  if(input.replaceExisting!==undefined&&typeof input.replaceExisting!=="boolean")throw new VoiceRequestError("음성 세션 교체 선택을 확인해 주세요.");
+  const selected=input.contextId?await getWorkSnapshot(id(input.contextId,"업무")):null;
+  if(input.contextId&&!selected)throw new VoiceRequestError("선택한 업무를 찾을 수 없습니다.",404);
+  let session:VoiceSessionRow;
+  try{session=await rpc<VoiceSessionRow>("begin_voice_session",{p_owner_id:owner.ownerId,p_mode:"automatic",p_model:LIVE_VOICE_MODEL,p_budget:voiceBudgetUsd(),p_replace:input.replaceExisting===true});}
+  catch(error){if(error instanceof VoiceRequestError&&error.status===409)throw new VoiceRequestError("다른 기기에서 음성 대화가 진행 중입니다.",409);throw error;}
+  try{
+    const provider=await createLiveVoiceConnection(offer,sha256(owner.ownerId));
+    return{sessionId:session.id,providerSessionId:provider.providerSessionId,sdpAnswer:provider.sdpAnswer,expiresAt:session.expires_at,maxTurns:LIVE_VOICE_MAX_TURNS,maxDurationSeconds:LIVE_VOICE_MAX_SECONDS,model:provider.model};
+  }catch(error){await rpc("finish_voice_session",{p_owner_id:owner.ownerId,p_session_id:session.id,p_reason:"provider_error"}).catch(()=>undefined);throw error;}
+}
+
+export async function processLiveVoiceDelegation(input:LiveVoiceDelegationInput):Promise<VoiceTurnReply>{
+  requireLiveEnabled();
+  const transcript=text(input.transcript,"확정 전사",2_000);
+  const messages=Array.isArray(input.messages)?input.messages:[];
+  const latest=messages.at(-1);
+  if(latest?.role!=="user"||latest.content.trim()!==transcript)throw new VoiceRequestError("위임한 전사와 대화 기록이 일치하지 않습니다.");
+  return processVoiceTurn({sessionId:input.sessionId,providerItemId:input.delegationId,requestId:input.requestId,durationMs:input.durationMs,messages,contextId:input.contextId,expectedRevision:input.expectedRevision});
 }
 
 export async function touchVoiceSession(sessionId:string){requireEnabled();const owner=await requireWorkOwner();await rpc("touch_voice_session",{p_owner_id:owner.ownerId,p_session_id:id(sessionId,"음성 세션")});return{ok:true};}

@@ -1,14 +1,14 @@
 # Phase 8 implementation evidence
 
-Status: **implementation, disabled production preparation and provider hard cap complete**. The fixed audio accuracy gate failed and physical-device acceptance is not complete, so Phase 8 is not declared released.
+Status: **hybrid implementation and Phase 8.5 GPT-Live shell implemented locally; production remains disabled**. Physical-device acceptance and a real delegated spoken turn are not complete, so neither Phase 8 nor Phase 8.5 is declared released.
 
 ## Evidence ledger
 
 | Check | Result | Evidence / limit |
 |---|---|---|
 | Specification | Ready | `docs/PHASE8-SPEC.md` |
-| Local migration | Pass through 0031 | A clean synthetic stack under the user workspace applied 0001–0031 from scratch. The voice DB owner/RLS, replay, eight-turn, budget and playback-observation gate passed 1/1 |
-| Unit/type/lint/build | Pass | 295 unit tests, typecheck, lint and production build passed after the controller reconstruction |
+| Local migration | Pass through 0032 | A clean isolated stack applied 0001–0032 from scratch. The voice DB owner/RLS, replay, eight-turn, budget, replacement and playback-observation gate passed 1/1 |
+| Unit/type/lint/build | Pass | 301 unit tests, typecheck, lint and production build passed after the GPT-Live shell change |
 | DB security/budget | Pass | one active owner session, owner RLS, eight-turn cap, request replay, $5 fail-closed, speech replay and ended-session rejection |
 | Cross-device session replacement | Pass | DB gate: second session without explicit replacement returned PT409; explicit replacement left the prior row `ended/replaced`, created one active session and retained both budget reservations. Browser gate: visible 409 explanation → explicit replacement button → real OpenAI Realtime connection (`listening`), with one active DB session; test rows removed |
 | Voice confirmation/action flow | Pass | Browser-authenticated update stayed revision 1 until signed screen confirmation, then revision 2; approved task executed once on replay; result speech derived from executed state |
@@ -29,6 +29,12 @@ Status: **implementation, disabled production preparation and provider hard cap 
 | Vercel preparation | Pass, disabled | OpenAI key and signing secret stored as sensitive in Production/Preview; app voice budget set to 5; Production voice flags explicitly false. Supabase, owner and Anthropic credentials plus context/inline flags are scoped only to the Phase 8 preview branch; Apple, cron and Learn/Quiz credentials were not copied |
 | Branch preview | Ready, physical rerun pending | Vercel deployment `dpl_jexRe852p1Mkmjb8Sv3of86UXscu` passed for controller commit `a60a362`; the stable alias returned `/jarvis` 200. The existing Safari session remained in the route loading UI during this evidence pass, so no new physical playback result is claimed. PTT and automatic flags remain enabled only for `codex/phase8-voice-jarvis` |
 | Production feature | Off | Code is not merged or promoted and both voice modes remain unavailable |
+| Phase 8.5 client-delegation unit | Pass 6/6 | `gpt-live-1` client-only configuration, independent flags, timestamp ledger, server-only key boundary, no chained TTS call and close-time stale-result rejection |
+| Phase 8.5 browser races | Pass 2/2 | The actual React panel accepted an input transcript delta arriving after `session.delegation.created`, sent the exact combined text through the Phase 7 wrapper, returned only signed server text with `session.commentary.append`, and suppressed a late result after close |
+| Existing fallback browser races after 8.5 | Pass 4/4 | Existing chained panel still blocks late turns/heartbeats/TTS and completes two ordered current playbacks |
+| Phase 8.5 isolated DB | Pass 1/1 through 0032 | Clean reset applied 0001–0032. Owner/RLS, replay, eight-turn and replacement checks remained green; chained sessions reserve `$0.10`, `gpt-live-1` reserves `$0.25` atomically under the existing owner lock |
+| Real GPT-Live transport | Pass for connect/close only | A browser-authenticated, isolated-DB run received `session.started`, then `session.closed`; the local row used model `gpt-live-1`, reserved `$0.25`, and ended through the owner route. Two provider sessions were created while correcting the evidence timing; no Phase 7 delegation or Anthropic call occurred |
+| Phase 8.5 delegated speech / device audio | Not run | No human spoken turn, naturalness judgment, interruption observation, action approval or receipt was executed on Mac/iPhone; Preview was not redeployed in this evidence pass |
 
 Operational seven-day attention observation remains separate from this phase and automatic deadline/stale-work attention remains off.
 
@@ -46,3 +52,6 @@ Operational seven-day attention observation remains separate from this phase and
 - The `medium` delay plus descriptive multilingual work-context prompt improved the partial run to 22/25, but K03/K04/M05 made the 38/40 threshold impossible. The process was stopped immediately; no completed 40-case score or generated-audio duration is claimed. Official documentation says higher delay can improve word error rate but must be benchmarked with representative microphones, so this remains a tuning signal rather than acceptance evidence.
 - These evaluations froze text and scoring before execution, but regenerated TTS audio on every run. They are reproducible synthetic baselines, **not** the spec's fixed recorded-audio holdout or evidence of human microphone accuracy. The required 38/40 fixed-audio gate remains unmet.
 - 24 complete browser conversations, latency percentiles, ten interruption samples and real iPhone/Mac microphone routing remain not run. These are release gates, not inferred from the focused transport checks.
+- GPT-Live 1 is documented at `$0.05` per connected minute, billed per second, with a 15-second WebRTC initialization charge credited against running duration. Two real transport sessions were created in this pass, so `$0.025` is the conservative public-rate estimate if each incurred the 15-second minimum; the provider bill was not read and this is not reported as actual spend.
+- The real Phase 8.5 gate intentionally used silent fake media and performed no client delegation. It proves the current `/v1/live/sessions` SDP contract and graceful lifecycle, not transcript accuracy, conversational naturalness or Phase 7 end-to-end completion.
+- The repository-wide `npm test` command was started after the final change. Its 301 unit tests passed, then G1 stopped in the suite setup because `CRON_SECRET` is absent from this worktree; all seven G1 children were cancelled before executing. No G1 product failure is reclassified as a pass, and the operational CalDAV/AI gate was not forced with production credentials.

@@ -60,3 +60,4 @@
 
 - 잠금·백그라운드 호출어와 네이티브 iPhone/Mac 앱은 Phase 8 전면 PWA 인수 뒤 별도 Phase로 진행한다.
 - 완전 speech-to-speech 모델이 자연스러운 표현을 담당하는 승격은 Phase 7 tool 경계와 동일한 zero-unsafe-action holdout을 통과할 때까지 보류한다.
+- Phase 9 Mac 네이티브 호출은 Phase 8.5의 실제 두 turn·끼어들기·화면 승인·영수증 실기기 흐름이 통과한 뒤 시작한다. PWA가 닫힌 상태의 상시 호출 가능성을 이번 변경으로 주장하지 않는다.

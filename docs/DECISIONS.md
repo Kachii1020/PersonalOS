@@ -477,3 +477,9 @@ AGENTS.md에 인증 담당 에이전트가 없어서 ui-shell 범위로 넣었�
 - **결정**: 한 client controller가 세션 세대·turn·heartbeat·WebRTC·마이크·AudioContext·재생 취소를 소유한다. 비동기 결과는 현재 세대와 turn이 일치할 때만 상태와 오디오를 변경한다. PCM 수신과 재생 시작·완료·중단은 별도 owner-scoped RPC로 기록한다.
 - **이유**: 기존 패널은 독립 ref와 effect가 동일 자원을 변경해 이전 heartbeat·늦은 turn·TTS가 새 세션과 경쟁할 수 있었고, HTTP 200만으로 실제 재생 여부를 알 수 없었다.
 - **버린 대안**: 지연 시간을 늘려 경합을 숨기는 방식, provider TTS 200을 재생 완료로 간주, 원본 오디오나 전사문을 관측 로그에 저장.
+
+## 2026-09-14 — GPT-Live shell과 Phase 7 client delegation
+
+- **결정**: 전면 PWA의 자연 대화는 `gpt-live-1` WebRTC가 맡고, 모든 업무 판단은 client delegation으로 기존 Phase 7에 전달한다. 기존 chained 음성은 fallback으로 유지한다.
+- **이유**: 전이중 대화와 모델 고유 음성을 얻으면서도 업무 ID·revision·승인·실행·영수증 권한을 검증된 서버에 남기기 위해서다.
+- **버린 대안**: GPT-Live에 직접 도구·승인 권한 부여, 기존 TTS 문장만 교체, Phase 8.5와 네이티브 호출어를 한 번에 구현.
