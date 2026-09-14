@@ -27,4 +27,5 @@ export type VoiceUiEvent =
   | { type: "request_permission" } | { type: "permission_granted" } | { type: "connected" }
   | { type: "speech_started" } | { type: "speech_stopped" } | { type: "transcript_final" }
   | { type: "processing_started" } | { type: "speech_started_output" } | { type: "speech_finished" }
+  | { type: "turn_failed" } | { type: "playback_interrupted" }
   | { type: "stop" } | { type: "fail" };

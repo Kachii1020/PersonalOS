@@ -1,6 +1,7 @@
 import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import type { JsonValue } from "./types";
-import type { SpeechPayload, SpeechTicket, VoiceMode, VoiceSessionState, VoiceUiEvent, WorkMutationConfirmation, WorkMutationPayload } from "./voice-types";
+import type { SpeechPayload, SpeechTicket, VoiceMode, WorkMutationConfirmation, WorkMutationPayload } from "./voice-types";
+export { reduceVoiceState } from "./voice-state";
 import type { WorkChatReply, WorkContext, WorkSnapshot } from "./work-types";
 
 export const VOICE_MODEL = "gpt-live-transcribe" as const;
@@ -27,14 +28,6 @@ export function validateVoiceMode(value:unknown):VoiceMode {
 export function voiceTurnDetection(mode:VoiceMode){return mode==="automatic"?{type:"client_vad" as const,rmsThreshold:0.03 as const,silenceDurationMs:700 as const}:null;}
 export function voiceTranscriptionPrompt(){return "A foreground PersonalOS work-assistant conversation, mainly in Korean, sometimes mixing English and Japanese proper names. Exact dates, times, numbers, durations, negations, and corrections are important.";}
 export function voiceTranscriptionKeywords(context?:Pick<WorkContext,"goal"|"nextStep">|null){const values=["JARVIS","Personal OS","GitHub","Waseda","Zoom","CalDAV","TypeScript","Mac","iPhone",context?.goal,context?.nextStep];return[...new Set(values.flatMap(value=>typeof value==="string"?value.split(/[,.·/]/):[]).map(value=>value.trim()).filter(value=>value.length>1&&value.length<=80&&!/[<>\r\n]/.test(value)))].slice(0,20);}
-
-const transitions:Record<VoiceSessionState,VoiceSessionState[]>={idle:["permission"],permission:["connecting","stopped"],connecting:["listening","stopped"],listening:["transcribing","stopped"],transcribing:["processing","listening","stopped"],processing:["speaking","listening","stopped"],speaking:["listening","stopped"],stopped:["permission"]};
-export function reduceVoiceState(state:VoiceSessionState,event:VoiceUiEvent):VoiceSessionState {
-  const next:VoiceSessionState=event.type==="request_permission"?"permission":event.type==="permission_granted"?"connecting":event.type==="connected"?"listening":event.type==="speech_started"?state==="speaking"?"listening":state:event.type==="speech_stopped"?"transcribing":event.type==="transcript_final"?"processing":event.type==="processing_started"?"processing":event.type==="speech_started_output"?"speaking":event.type==="speech_finished"?"listening":"stopped";
-  if(next===state)return state;
-  if(!transitions[state].includes(next))throw new Error(`허용되지 않은 음성 상태 전이: ${state} → ${next}`);
-  return next;
-}
 
 function secret(){const value=process.env.VOICE_SIGNING_SECRET;if(!value||value.length<32)throw new Error("VOICE_SIGNING_SECRET은 32자 이상이어야 합니다.");return value;}
 function signature(payload:unknown){return createHmac("sha256",secret()).update(JSON.stringify(payload)).digest("base64url");}

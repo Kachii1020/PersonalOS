@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { callStructured } from "@/lib/ai/client";
 import { buildWorkPrompt, WORK_SCHEMA, WORK_SYSTEM } from "@/lib/ai/prompts/work-context";
-import { groundWorkIntent, parseDeterministicWorkRequest, usesAutomaticAttention } from "@/lib/jarvis/work-context";
+import { groundWorkIntent, normalizedWorkGoal, parseDeterministicWorkRequest, parseWorkResumeRequest, usesAutomaticAttention } from "@/lib/jarvis/work-context";
 import type { WorkChatInput, WorkChatReply } from "@/lib/jarvis/work-types";
 import type { DialogueDraft } from "@/lib/jarvis/dialogue-types";
 import { answerDialogue, DialogueRequestError, projectWorkBoundEventSources, validateChatMessages } from "./jarvis-dialogue";
@@ -31,10 +31,17 @@ export async function answerWorkChat(input: WorkChatInput, options: { mutationPo
   let snapshot = input.contextId ? await getWorkSnapshot(input.contextId) : null;
   if (input.contextId && !snapshot) throw new DialogueRequestError("선택한 업무가 없거나 이미 잊은 상태입니다. 다른 업무로 자동 전환하지 않습니다.",404);
   const latest = messages.at(-1)!.content;
-  if (!snapshot && /^(?:이어하자|이어하기|업무 이어하기)[.!?\s]*$/.test(latest)) {
+  const resume = !snapshot ? parseWorkResumeRequest(latest) : null;
+  if (!snapshot && resume) {
     const candidates = (await listWorkContexts()).filter(context => context.status === "active" || context.status === "paused");
-    if (candidates.length === 1) snapshot = await getWorkSnapshot(candidates[0].id);
-    return { mode: snapshot ? "answer" : "clarify", message: snapshot ? "저장한 업무를 불러왔습니다. 현재 상태와 다음 행동을 확인해 주세요." : "이어갈 업무를 목록에서 선택해 주세요. 여러 업무 중 하나를 추측하지 않습니다.", work: snapshot, preview: null, proposals: [], requestId: input.requestId };
+    const matches = resume.title ? candidates.filter(context => normalizedWorkGoal(context.goal) === normalizedWorkGoal(resume.title!)) : candidates;
+    if (matches.length === 1) snapshot = await getWorkSnapshot(matches[0].id);
+    const message = snapshot
+      ? `${snapshot.context.goal} 업무를 불러왔습니다. 현재 진행은 ${snapshot.context.progress || "아직 명시되지 않았습니다"}. 다음 행동은 ${snapshot.context.nextStep || "아직 정하지 않았습니다"}.`
+      : resume.title
+        ? `${resume.title}와 정확히 일치하는 진행 업무를 하나로 확인하지 못했습니다. 화면의 업무 목록에서 선택해 주세요.`
+        : "이어갈 업무를 목록에서 선택해 주세요. 여러 업무 중 하나를 추측하지 않습니다.";
+    return { mode: snapshot ? "answer" : "clarify", message, work: snapshot, preview: null, proposals: [], requestId: input.requestId };
   }
   const admin = createAdminClient();
   const mutationPolicy=options.mutationPolicy??"commit";

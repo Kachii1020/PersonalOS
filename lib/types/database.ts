@@ -2058,10 +2058,15 @@ export type Database = {
           id: string
           outcome: string | null
           owner_id: string
+          playback_completed_at: string | null
+          playback_error_code: string | null
+          playback_interrupted_at: string | null
+          playback_started_at: string | null
           provider_item_hash: string
           reply_hash: string | null
           request_id: string
           session_id: string
+          speech_received_at: string | null
           started_at: string
           status: string
           transcript_hash: string
@@ -2075,10 +2080,15 @@ export type Database = {
           id?: string
           outcome?: string | null
           owner_id: string
+          playback_completed_at?: string | null
+          playback_error_code?: string | null
+          playback_interrupted_at?: string | null
+          playback_started_at?: string | null
           provider_item_hash: string
           reply_hash?: string | null
           request_id: string
           session_id: string
+          speech_received_at?: string | null
           started_at?: string
           status?: string
           transcript_hash: string
@@ -2092,10 +2102,15 @@ export type Database = {
           id?: string
           outcome?: string | null
           owner_id?: string
+          playback_completed_at?: string | null
+          playback_error_code?: string | null
+          playback_interrupted_at?: string | null
+          playback_started_at?: string | null
           provider_item_hash?: string
           reply_hash?: string | null
           request_id?: string
           session_id?: string
+          speech_received_at?: string | null
           started_at?: string
           status?: string
           transcript_hash?: string
@@ -2887,6 +2902,16 @@ export type Database = {
       }
       observe_work_delivery: {
         Args: { p_delivery_id: string; p_event: string; p_token: string }
+        Returns: boolean
+      }
+      observe_voice_playback: {
+        Args: {
+          p_error_code?: string
+          p_event: string
+          p_owner_id: string
+          p_session_id: string
+          p_turn_id: string
+        }
         Returns: boolean
       }
       prepare_jarvis_approval: {

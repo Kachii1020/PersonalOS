@@ -63,3 +63,10 @@ export async function synthesizeTicket(ticket:SpeechTicket):Promise<Response>{
 export async function reissueSpeech(ticket:SpeechTicket):Promise<{speech:SpeechTicket}>{
   requireEnabled();const owner=await requireWorkOwner();let payload;try{payload=verifySpeech(ticket);}catch(error){throw new VoiceRequestError(error instanceof Error?error.message:"음성 재생 요청 실패",409);}const row=await ownedTurn(owner.ownerId,payload.sessionId,payload.turnId);if(row.reply_hash!==sha256(payload.text))throw new VoiceRequestError("더 최신 결과가 있어 이전 음성을 다시 재생하지 않습니다.",409);const next=speechTicket(payload.sessionId,row,payload.text);if(!next)throw new VoiceRequestError("이 응답의 음성 재생 횟수를 모두 사용했습니다.",409);return{speech:next};
 }
+export async function observeVoicePlayback(input:Record<string,unknown>){
+  requireEnabled();const owner=await requireWorkOwner();const event=text(input.event,"재생 관측",20);
+  if(!["received","started","completed","interrupted","failed"].includes(event))throw new VoiceRequestError("재생 관측 종류를 확인해 주세요.");
+  const errorCode=input.errorCode==null?null:text(input.errorCode,"재생 오류",80);
+  const observed=await rpc<boolean>("observe_voice_playback",{p_owner_id:owner.ownerId,p_session_id:id(input.sessionId,"음성 세션"),p_turn_id:id(input.turnId,"음성 turn"),p_event:event,p_error_code:errorCode});
+  return{observed};
+}

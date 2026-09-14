@@ -471,3 +471,9 @@ AGENTS.md에 인증 담당 에이전트가 없어서 ui-shell 범위로 넣었�
 - **결정**: Anthropic 호출 오류를 중앙 client에서 정규화하고, 공개 표식이 있는 도메인 예외만 HTTP 문구를 노출한다. 음성 turn 실패는 원문 대신 제한된 예외 코드만 `failed` 상태와 기록한다.
 - **이유**: 실기기 PTT에서 전사는 성공했지만 Anthropic 선불 크레딧 소진 400이 원문 JSON·request ID와 함께 화면에 노출됐고, 예약된 `voice_turns` 행은 `processing`에 남았다.
 - **버린 대안**: 모든 공급자 400을 사용자 입력 오류로 그대로 노출, 실패 turn 삭제, 크레딧 소진을 음성 예산 소진으로 잘못 표시.
+
+## 2026-09-14 — 음성 세션 controller와 재생 증거
+
+- **결정**: 한 client controller가 세션 세대·turn·heartbeat·WebRTC·마이크·AudioContext·재생 취소를 소유한다. 비동기 결과는 현재 세대와 turn이 일치할 때만 상태와 오디오를 변경한다. PCM 수신과 재생 시작·완료·중단은 별도 owner-scoped RPC로 기록한다.
+- **이유**: 기존 패널은 독립 ref와 effect가 동일 자원을 변경해 이전 heartbeat·늦은 turn·TTS가 새 세션과 경쟁할 수 있었고, HTTP 200만으로 실제 재생 여부를 알 수 없었다.
+- **버린 대안**: 지연 시간을 늘려 경합을 숨기는 방식, provider TTS 200을 재생 완료로 간주, 원본 오디오나 전사문을 관측 로그에 저장.

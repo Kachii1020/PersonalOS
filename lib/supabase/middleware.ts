@@ -17,6 +17,7 @@ const PUBLIC_PATHS = ["/login", "/auth/callback", "/api/jobs", "/api/jarvis/"];
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
+  if (process.env.GATE_ISOLATED_DB === "1" && request.nextUrl.pathname === "/voice-test-gate") return response;
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

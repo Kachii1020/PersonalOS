@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { canSendWorkAttention, effectiveAttentionDue, groundWorkIntent, parseDeterministicWorkRequest, reduceWorkContext, usesAutomaticAttention, validateWorkInput, validateWorkIntent, type WorkIntent } from "../lib/jarvis/work-context";
+import { canSendWorkAttention, effectiveAttentionDue, groundWorkIntent, normalizedWorkGoal, parseDeterministicWorkRequest, parseWorkResumeRequest, reduceWorkContext, usesAutomaticAttention, validateWorkInput, validateWorkIntent, type WorkIntent } from "../lib/jarvis/work-context";
 import { buildWorkPrompt } from "../lib/ai/prompts/work-context";
 import { groundDialogueIntent } from "../lib/jarvis/dialogue-grounding";
 import type { WorkContext, WorkInput } from "../lib/jarvis/work-types";
@@ -12,6 +12,16 @@ const context: WorkContext = { ...input, id: "context-1", ownerId: "owner-1", re
 const quote = (text: string, messageIndex = 0): InputQuote => ({ text, messageIndex });
 const intent = (patch: Partial<WorkIntent> = {}): WorkIntent => ({ operation: "preview", goal: null, progress: null, nextStep: null, deadline: null, reminder: null, deadlineReminder: null, resumeReminder: null, status: null, actions: [], ...patch });
 const user = (content: string) => [{ role: "user" as const, content }];
+
+test("named resume requests require an exact normalized work goal",()=>{
+  assert.deepEqual(parseWorkResumeRequest("이력서 준비 이어하자."),{title:"이력서 준비"});
+  assert.deepEqual(parseWorkResumeRequest("“이력서 준비” 이어서"),{title:"이력서 준비"});
+  assert.deepEqual(parseWorkResumeRequest("이어하자"),{title:null});
+  assert.deepEqual(parseWorkResumeRequest("업무 이어하기"),{title:null});
+  assert.equal(parseWorkResumeRequest("이력서를 새로 쓰자"),null);
+  assert.equal(normalizedWorkGoal("이력서 준비"),normalizedWorkGoal("이력서-준비"));
+  assert.notEqual(normalizedWorkGoal("이력서 준비"),normalizedWorkGoal("자소서 준비"));
+});
 
 test("deterministic work grammar handles exact save and simple task but never extra text",()=>{
   const saved=parseDeterministicWorkRequest(user('“여행 준비”를 진행 업무로 저장해. 현재 진행은 “항공편을 골랐다”이고, 다음 행동은 “숙소 비교”야.'),null);

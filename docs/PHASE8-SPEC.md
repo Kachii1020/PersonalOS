@@ -4,7 +4,7 @@ Status: approved for implementation. Phase 7 remains the authority for work iden
 
 ## Release contract
 
-- Foreground PWA only, on iPhone and Mac. Both push-to-talk and automatic server VAD ship behind independent default-off flags.
+- Foreground PWA only, on iPhone and Mac. Push-to-talk and automatic client turn detection ship behind independent default-off flags.
 - OpenAI Realtime performs transcription only (`gpt-live-transcribe`). It receives no tools and cannot answer or execute. Existing deterministic/Anthropic Phase 7 work-chat remains the decision path.
 - Spoken output uses the server-derived, bounded truth from Phase 7 through `gpt-4o-mini-tts-2025-12-15` (`cedar`, 24 kHz PCM). It never asks another model to summarize or embellish a result.
 - Voice cannot approve, forget work, or perform an external action. New work and voice-derived progress/status changes require a visible confirmation. Task/calendar execution continues to require each existing **승인하고 실행** button.
@@ -20,6 +20,7 @@ Session state is `idle → permission → connecting → listening → transcrib
 - Push-to-talk explicitly commits on stop. Automatic mode uses foreground Web Audio RMS detection (`threshold=.03`, `silence_duration_ms=700`) and sends the same explicit commit. The current `gpt-live-transcribe` endpoint rejected server VAD during the live contract probe, so provider VAD is not claimed. Empty, silent and sub-300 ms turns are ignored.
 - Only final transcription events are sent to Phase 7. Deltas are display-only. Events are correlated by provider `item_id`, not arrival order.
 - A new user turn immediately stops local speech. It does not claim that a server request or approved action was cancelled. Late results remain visible and are not auto-spoken.
+- One client controller owns the session generation, turn sequence, heartbeat, microphone, WebRTC and audio resources. Every asynchronous completion must match the current session generation and turn before it can change state or play audio.
 - Multiple work candidates always clarify. A stale revision returns 409 and reloads the exact selected work rather than selecting another work.
 - The screen is authoritative. Dates and times are spoken from validated JST values; uncertain/failed/partial action states are named exactly.
 
@@ -30,9 +31,10 @@ Session state is `idle → permission → connecting → listening → transcrib
 - `POST /api/jarvis/voice/confirm`: consumes a two-minute signed update/status confirmation and uses the existing revisioned mutation RPC. It cannot approve actions or forget work.
 - `POST /api/jarvis/voice/speech`: accepts only a server-signed turn/result text (350 characters maximum), reserves budget once and streams PCM. Arbitrary client text is rejected.
 - `POST /api/jarvis/voice/result-speech`: derives speech only from the current action/receipt state after the existing approval endpoint returns.
+- `POST /api/jarvis/voice/observe`: records only PCM receipt, playback start, completion, interruption or a bounded error code for the owner turn. Provider success is not treated as device playback.
 - `DELETE /api/jarvis/voice/sessions/[id]`: ends the owner session and invalidates future turns/speech.
 
-Migration `0027_voice_sessions.sql` adds owner-RLS `voice_sessions` and `voice_turns`. It enforces one active owner session, request replay, eight turns, expiry and monthly reservation under a transaction lock. Provider IDs and transcript/reply contents are stored only as SHA-256 hashes. Audit receipts remain in their existing tables.
+Migration `0027_voice_sessions.sql` adds owner-RLS `voice_sessions` and `voice_turns`. It enforces one active owner session, request replay, eight turns, expiry and monthly reservation under a transaction lock. Migration `0031_voice_playback_observation.sql` adds monotonic receipt/playback timestamps and a bounded playback error code. Provider IDs and transcript/reply contents are stored only as SHA-256 hashes. Audit receipts remain in their existing tables.
 
 Environment: `JARVIS_VOICE_ENABLED=false`, `JARVIS_VOICE_AUTO_TURN_ENABLED=false`, server-only `OPENAI_API_KEY`, `VOICE_MONTHLY_BUDGET_USD=5`, and a random server-only `VOICE_SIGNING_SECRET`. Existing Anthropic $10 accounting is unchanged. Each session conservatively reserves $0.10 and each TTS attempt $0.02; these reservations are not represented as actual provider charges. Provider-side project spend control remains the final $5 boundary.
 
