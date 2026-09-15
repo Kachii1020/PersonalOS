@@ -5,14 +5,7 @@ import { ChevronDown } from "lucide-react";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/design/cn";
-
-const DOMAIN_LABEL: Record<string, string> = {
-  ib: "투자은행",
-  accounting: "회계",
-  macro: "거시경제",
-  ai_ml: "머신러닝",
-  system_design: "시스템 설계",
-};
+import { domainTitle } from "@/lib/ai/prompts/quiz";
 
 type Props = {
   lesson: {
@@ -33,11 +26,11 @@ export function DomainLessonCard({ lesson, defaultOpen = false }: Props) {
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between gap-2 text-left"
+        className="flex w-full cursor-pointer items-center justify-between gap-2 text-left"
         aria-expanded={open}
       >
         <CardHeader className="flex-1">
-          <CardTitle>{DOMAIN_LABEL[lesson.domain] ?? lesson.domain}</CardTitle>
+          <CardTitle>{domainTitle(lesson.domain)}</CardTitle>
         </CardHeader>
         <ChevronDown
           className={cn(

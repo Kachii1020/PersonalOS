@@ -3,22 +3,12 @@ import { BookOpen, ChevronLeft } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorState } from "@/components/ui/error-state";
+import { buttonClass } from "@/components/ui/button";
 import { WrongAnswerCard } from "@/components/widgets/wrong-answer-card";
 import { wrongAnswersByDomain, type WrongAnswer } from "@/lib/repos/quiz";
-import type { QuizDomain } from "@/lib/ai/prompts/quiz";
+import { domainTitle, type QuizDomain } from "@/lib/ai/prompts/quiz";
 
 export const metadata = { title: "오답노트 · Personal OS" };
-
-const DOMAIN_LABEL: Record<string, string> = {
-  ib: "투자은행",
-  accounting: "회계",
-  macro: "거시경제",
-  ai_ml: "머신러닝",
-  system_design: "시스템 설계",
-  japanese: "일본어",
-  devops: "DevOps",
-  ai_engineering: "AI 엔지니어링",
-};
 
 export default async function ReviewPage() {
   let groups: Partial<Record<QuizDomain, WrongAnswer[]>>;
@@ -45,7 +35,15 @@ export default async function ReviewPage() {
 
       {domains.length === 0 ? (
         <Card>
-          <EmptyState icon={BookOpen} message="틀린 문제가 없습니다. 모든 문제를 맞혔어요!" />
+          <EmptyState
+            icon={BookOpen}
+            message="틀린 문제가 없습니다. 오늘 세트로 돌아가 다음 칸을 푸세요."
+            action={
+              <Link href="/quiz" className={buttonClass({ className: "mt-1" })}>
+                오늘 세트로
+              </Link>
+            }
+          />
         </Card>
       ) : (
         <div className="space-y-6">
@@ -54,7 +52,7 @@ export default async function ReviewPage() {
             return (
               <section key={domain}>
                 <h2 className="mb-3 text-sm font-medium text-text-muted">
-                  {DOMAIN_LABEL[domain] ?? domain}
+                  {domainTitle(domain)}
                   <span className="ml-1 text-xs">({entries.length}문제)</span>
                 </h2>
                 <div className="grid gap-4 lg:grid-cols-2">
@@ -76,7 +74,7 @@ function Header({ count }: { count?: number }) {
     <div className="mb-4 flex items-center gap-3">
       <Link
         href="/quiz"
-        className="flex items-center gap-1 text-sm text-text-muted transition-colors hover:text-text"
+        className="flex cursor-pointer items-center gap-1 text-sm text-text-muted transition-colors hover:text-text"
       >
         <ChevronLeft className="size-4" />
         퀴즈
