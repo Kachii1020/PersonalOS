@@ -14,9 +14,12 @@ import {
 } from "lucide-react";
 import { submitLearnAnswer, submitLabCompletion } from "@/app/(dashboard)/learn/actions";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LearnChecklist } from "@/components/widgets/learn-checklist";
+import { QuizCard } from "@/components/widgets/learn-quiz-card";
 import {
   CURRICULUM,
   RESOURCES,
+  allModules,
   coreLabsForModule,
   practiceLabId,
   practiceOpensExtra,
@@ -24,6 +27,8 @@ import {
   type Module,
   type Quiz,
 } from "@/lib/learn/curriculum";
+import { isLabTrack } from "@/lib/learn/topic";
+import type { LearnTrackTree } from "@/lib/repos/learn";
 
 const FOCUS =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
@@ -41,6 +46,10 @@ export type LearnDashboardProps = {
   existingAttempts?: Record<string, { chosenIndex: number; isCorrect: boolean }>;
   /** 완료된 lab exercise_id 목록 */
   labCompletions?: string[];
+  /** DB 트랙. 실습 모듈과 겹치지 않는 트랙만 체크리스트로 연다. */
+  tracks?: LearnTrackTree[];
+  /** module_slug → DB 퀴즈 */
+  dbQuizzes?: Record<string, Quiz[]>;
 };
 
 type ContentTab = "concepts" | "lab" | "quiz" | "resources";
@@ -108,6 +117,7 @@ function useProgress(
 
   return {
     answers,
+    correct,
     answer,
     getModuleDone,
     getModuleCorrect,
@@ -209,71 +219,26 @@ function ConceptCard({
   );
 }
 
-function QuizCard({
-  ex,
-  answered,
-  selected,
-  onSelect,
-}: {
-  ex: Quiz;
-  answered: boolean;
-  selected: number | undefined;
-  onSelect: (i: number) => void;
-}) {
-  return (
-    <div className="rounded-xl border border-line bg-surface p-5">
-      <p className="mb-4 text-sm font-semibold leading-relaxed text-text">
-        {ex.q}
-      </p>
-      <div className="flex flex-col gap-2">
-        {ex.options.map((opt, i) => {
-          let cls =
-            "rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ";
-          if (!answered) {
-            cls +=
-              `border-line bg-transparent text-text hover:border-accent cursor-pointer ${FOCUS}`;
-          } else if (i === ex.answer) {
-            cls +=
-              "border-positive bg-positive/10 text-positive";
-          } else if (i === selected) {
-            cls +=
-              "border-negative bg-negative/10 text-negative";
-          } else {
-            cls += "border-line text-text-muted opacity-50";
-          }
-          return (
-            <button
-              key={i}
-              onClick={() => !answered && onSelect(i)}
-              disabled={answered}
-              className={cls}
-            >
-              {opt}
-            </button>
-          );
-        })}
-      </div>
-      {answered && (
-        <div className="mt-3 rounded-lg bg-accent-soft p-3 text-xs leading-relaxed text-text-muted">
-          {ex.explain}
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ─── Main Widget ───
 export function LearnDashboard({
   questionIdMap = {},
   existingAttempts = {},
   labCompletions = [],
+  tracks = [],
+  dbQuizzes = {},
 }: LearnDashboardProps) {
   const [activePhase, setActivePhase] = useState(0);
   const [activeModule, setActiveModule] = useState(0);
   const [tab, setTab] = useState<ContentTab>("concepts");
   const [labFocus, setLabFocus] = useState<{ id?: string; extra?: boolean } | null>(null);
   const [completedLabs, setCompletedLabs] = useState(labCompletions);
+  const [trackKey, setTrackKey] = useState("lab");
   const progress = useProgress(questionIdMap, existingAttempts);
+  const labIds = allModules().map((item) => item.id);
+  const extraTracks = tracks.filter(
+    (item) => !isLabTrack(item.phases.flatMap((p) => p.modules.map((m) => m.slug)), labIds),
+  );
+  const extraTrack = extraTracks.find((item) => item.slug === trackKey);
 
   const openLab = (next?: { id?: string; extra?: boolean }) => {
     setLabFocus(next ?? null);
@@ -299,8 +264,51 @@ export function LearnDashboard({
     [mod.id],
   );
 
+  const trackTabs =
+    extraTracks.length > 0 ? (
+      <div className="flex gap-1 overflow-x-auto">
+        <button
+          type="button"
+          onClick={() => setTrackKey("lab")}
+          className={`cursor-pointer whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium ${FOCUS} ${
+            trackKey === "lab" ? "bg-surface text-text border border-line" : "text-text-muted hover:text-text"
+          }`}
+        >
+          Excel for Finance
+        </button>
+        {extraTracks.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => setTrackKey(item.slug)}
+            className={`cursor-pointer whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium ${FOCUS} ${
+              trackKey === item.slug ? "bg-surface text-text border border-line" : "text-text-muted hover:text-text"
+            }`}
+          >
+            {item.title}
+          </button>
+        ))}
+      </div>
+    ) : null;
+
+  if (extraTrack) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-6 p-6">
+        {trackTabs}
+        <LearnChecklist
+          track={extraTrack}
+          dbQuizzes={dbQuizzes}
+          answers={progress.answers}
+          correct={progress.correct}
+          onAnswer={progress.answer}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
+      {trackTabs}
       {/* Header */}
       <div>
         <div className="flex items-center justify-between">

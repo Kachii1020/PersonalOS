@@ -61,7 +61,6 @@ async function syncModuleProgress(
   const { data: questions } = await supabase
     .from("quiz_questions")
     .select("id")
-    .eq("domain", "excel_finance")
     .eq("module_slug", moduleSlug);
 
   const qIds = (questions ?? []).map((q) => q.id);
