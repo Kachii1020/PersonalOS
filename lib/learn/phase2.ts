@@ -340,6 +340,5 @@ export const PHASE2: Phase = {
   title: "재무 분석 실무",
   weeks: "3–4주차",
   desc: "피벗 테이블, 데이터 정리, 재무 함수",
-  practiceFile: { name: "phase2-practice.xlsx", href: "/learn/phase2-practice.xlsx" },
   modules: [pivot, dataClean, finFn],
 };

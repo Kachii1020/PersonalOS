@@ -10,10 +10,10 @@ import {
   ArrowRight,
   RotateCcw,
   ExternalLink,
-  Download,
 } from "lucide-react";
 import { submitLearnAnswer, submitLabCompletion } from "@/app/(dashboard)/learn/actions";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ExcelTasks } from "@/components/widgets/excel-tasks";
 import {
   CURRICULUM,
   RESOURCES,
@@ -24,6 +24,8 @@ import {
   type Module,
   type Quiz,
 } from "@/lib/learn/curriculum";
+import { tasksForModule } from "@/lib/learn/xlsx-tasks";
+import type { WorkbookSubmission } from "@/lib/learn/types";
 
 const FOCUS =
   "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
@@ -41,9 +43,11 @@ export type LearnDashboardProps = {
   existingAttempts?: Record<string, { chosenIndex: number; isCorrect: boolean }>;
   /** 완료된 lab exercise_id 목록 */
   labCompletions?: string[];
+  /** 엑셀 과제 제출 */
+  workbookSubmissions?: WorkbookSubmission[];
 };
 
-type ContentTab = "concepts" | "lab" | "quiz" | "resources";
+type ContentTab = "concepts" | "lab" | "xlsx" | "quiz" | "resources";
 
 // ─── Helpers ───
 function useProgress(
@@ -139,11 +143,13 @@ function ConceptCard({
   index,
   onOpenLab,
   onOpenQuiz,
+  onOpenXlsx,
 }: {
   concept: Concept;
   index: number;
   onOpenLab: () => void;
   onOpenQuiz: () => void;
+  onOpenXlsx?: () => void;
 }) {
   const grid = concept.kind === "grid";
   return (
@@ -196,13 +202,24 @@ function ConceptCard({
           <p className="text-xs text-text-muted">
             엑셀에서 연습한다. 퀴즈로 확인한다.
           </p>
-          <button
-            type="button"
-            onClick={onOpenQuiz}
-            className={`cursor-pointer text-xs font-semibold text-accent ${FOCUS}`}
-          >
-            퀴즈로
-          </button>
+          <div className="flex flex-wrap gap-3">
+            {onOpenXlsx && (
+              <button
+                type="button"
+                onClick={onOpenXlsx}
+                className={`cursor-pointer text-xs font-semibold text-accent ${FOCUS}`}
+              >
+                엑셀 과제
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={onOpenQuiz}
+              className={`cursor-pointer text-xs font-semibold text-accent ${FOCUS}`}
+            >
+              퀴즈로
+            </button>
+          </div>
         </div>
       )}
     </article>
@@ -267,11 +284,13 @@ export function LearnDashboard({
   questionIdMap = {},
   existingAttempts = {},
   labCompletions = [],
+  workbookSubmissions = [],
 }: LearnDashboardProps) {
   const [activePhase, setActivePhase] = useState(0);
   const [activeModule, setActiveModule] = useState(0);
   const [tab, setTab] = useState<ContentTab>("concepts");
   const [labFocus, setLabFocus] = useState<{ id?: string; extra?: boolean } | null>(null);
+  const [xlsxFocus, setXlsxFocus] = useState<string | undefined>();
   const [completedLabs, setCompletedLabs] = useState(labCompletions);
   const progress = useProgress(questionIdMap, existingAttempts);
 
@@ -283,6 +302,11 @@ export function LearnDashboard({
   const openPractice = (concept: Concept) => {
     const id = practiceLabId(concept);
     openLab({ id, extra: practiceOpensExtra(concept) });
+  };
+
+  const openXlsx = (taskId?: string) => {
+    setXlsxFocus(taskId);
+    setTab("xlsx");
   };
 
   const phase = CURRICULUM[activePhase];
@@ -352,6 +376,7 @@ export function LearnDashboard({
                 setActivePhase(i);
                 setActiveModule(0);
                 setLabFocus(null);
+                setXlsxFocus(undefined);
                 setTab("concepts");
               }}
               className={`cursor-pointer rounded-xl border p-3 text-left transition-colors ${FOCUS} ${
@@ -384,6 +409,11 @@ export function LearnDashboard({
           const moduleLabDone = moduleLabs.filter((ex) =>
             completedLabs.includes(ex.id),
           ).length;
+          const packs = tasksForModule(m);
+          const packTotal = packs.length;
+          const packDone = packs.filter((task) =>
+            workbookSubmissions.some((row) => row.taskId === task.id && row.status === "passed"),
+          ).length;
           const active = activeModule === i;
           return (
             <button
@@ -391,6 +421,7 @@ export function LearnDashboard({
               onClick={() => {
                 setActiveModule(i);
                 setLabFocus(null);
+                setXlsxFocus(undefined);
                 setTab("concepts");
               }}
               className={`cursor-pointer whitespace-nowrap rounded-lg px-3 py-2 text-xs font-medium transition-colors ${FOCUS} ${
@@ -400,18 +431,21 @@ export function LearnDashboard({
               }`}
             >
               {m.title}
-              {(done > 0 || moduleLabDone > 0) && (
+              {(done > 0 || moduleLabDone > 0 || packTotal > 0) && (
                 <span
                   className="ml-1.5 tabular-nums font-mono"
                   style={{
                     color:
-                      done === total && moduleLabDone === moduleLabTotal
+                      done === total &&
+                      moduleLabDone === moduleLabTotal &&
+                      (packTotal === 0 || packDone === packTotal)
                         ? "var(--positive)"
                         : "var(--accent)",
                   }}
                 >
                   {done}/{total}
                   {moduleLabTotal > 0 && ` · 실습 ${moduleLabDone}/${moduleLabTotal}`}
+                  {packTotal > 0 && ` · 과제 ${packDone}/${packTotal}`}
                 </span>
               )}
             </button>
@@ -425,6 +459,7 @@ export function LearnDashboard({
           [
             ["concepts", "개념"],
             ["lab", "실습"],
+            ["xlsx", "엑셀"],
             ["quiz", "퀴즈"],
             ["resources", "리소스"],
           ] as const
@@ -433,6 +468,7 @@ export function LearnDashboard({
             key={key}
             onClick={() => {
               if (key === "lab") setLabFocus(null);
+              if (key === "xlsx") setXlsxFocus(undefined);
               setTab(key);
             }}
             className={`cursor-pointer border-b-2 px-4 py-2.5 text-xs font-semibold transition-colors ${FOCUS} ${
@@ -454,16 +490,6 @@ export function LearnDashboard({
               {mod.title}
             </h2>
             <p className="mt-1 text-xs text-text-muted">{phase.desc}</p>
-            {phase.practiceFile && (
-              <a
-                href={phase.practiceFile.href}
-                download
-                className={`mt-4 flex items-center gap-2 rounded-lg border border-line px-3 py-2 text-xs text-text-muted hover:text-accent transition-colors ${FOCUS}`}
-              >
-                <Download size={12} />
-                {phase.practiceFile.name}
-              </a>
-            )}
           </div>
           {mod.concepts.map((c, i) => (
             <ConceptCard
@@ -472,6 +498,7 @@ export function LearnDashboard({
               index={i}
               onOpenLab={() => openPractice(c)}
               onOpenQuiz={() => setTab("quiz")}
+              onOpenXlsx={c.xlsxTaskId ? () => openXlsx(c.xlsxTaskId) : undefined}
             />
           ))}
           <button
@@ -494,6 +521,14 @@ export function LearnDashboard({
           startInExtra={labFocus?.extra}
           onCompleted={handleLabCompleted}
           onGoToQuiz={() => setTab("quiz")}
+        />
+      )}
+
+      {tab === "xlsx" && (
+        <ExcelTasks
+          submissions={workbookSubmissions}
+          focusTaskId={xlsxFocus}
+          onOpenLab={() => openLab()}
         />
       )}
 
