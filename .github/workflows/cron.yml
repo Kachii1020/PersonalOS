@@ -7,17 +7,7 @@ name: cron
 # 지금은 /settings 수동 업로드가 정식 경로다. URL이 확인되면 스케줄을 추가한다.
 
 on:
-  schedule:
-    # UTC 기준. Asia/Tokyo = UTC+9.
-    - cron: "0 * * * *" # 매시 정각 — 캘린더 동기화
-    - cron: "20 21 * * *" # 06:20 JST — 뉴스 수집
-    - cron: "40 21 * * *" # 06:40 JST — 브리핑 생성 (뉴스 수집 20분 뒤)
-    - cron: "0 22 * * *" # 07:00 JST — 퀴즈 생성
-    - cron: "30 22 * * *" # 07:30 JST — 시세 + 환율
-    - cron: "45 22 * * *" # 07:45 JST — GitHub 수집
-    - cron: "50 22 * * 1" # 07:50 JST 월요일 — 매크로 지표 (주 1회, BIS 포함)
-    - cron: "0 23 1 * *"  # 08:00 JST 매월 1일 — SEC EDGAR 실적
-    - cron: "0 12 * * 0" # 21:00 JST 일요일 — 주간 리뷰
+  # 2026-11-22 운영 종료: 스케줄을 제거했다. 수동 실행(workflow_dispatch)만 남긴다.
   workflow_dispatch:
     inputs:
       job:
