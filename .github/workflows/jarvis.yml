@@ -1,8 +1,7 @@
 name: JARVIS
 
 on:
-  schedule:
-    - cron: "*/5 * * * *"
+  # 2026-11-22 운영 종료: 5분 주기 스케줄을 제거했다. 수동 실행만 남긴다.
   workflow_dispatch:
     inputs:
       job:
